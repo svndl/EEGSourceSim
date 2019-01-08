@@ -1,0 +1,56 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of dcel2str</title>
+  <meta name="keywords" content="dcel2str">
+  <meta name="description" content="DCEL2STR  Convert DCEL format into data structure">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="images/m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html . -->
+<h1>dcel2str
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>DCEL2STR  Convert DCEL format into data structure</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>function str = dcel2str(dcel2) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="fragment"><pre class="comment">DCEL2STR  Convert DCEL format into data structure
+  STRUCT = DCEL2STR(DCEL2), returns STRUCT with all the fields
+            .CorrectObs          .Number of observations in each X=1 bin
+            .IncorrectObs        .Number of observations in each X=0 bin
+            .CorrectEdges        .Edges of X=1 time bins (in sec)
+            .IncorrectEdges      .Edges of X=0 time bins (in sec)
+            .Lower               .Minimal RT (optional)
+            .Upper               .Maximal RT (optional)
+
+  See also <a href="str2dcel.html" class="code" title="function [dcel dcel2] = str2dcel(str)">STR2DCEL</a>, <a href="quantest.html" class="code" title="function output=quantest(varargin)">QUANTEST</a>.
+
+   Author: Joachim Vandekerckhove (joachim.vandekerckhove@psy.kuleuven.be)
+   Part of the DMA Toolbox. Please read the End User License Agreement,
+   contained in 'dmateula.txt' or by invoking the <a href="dmatlicense.html" class="code" title="function varargout = dmatlicense">DMATLICENSE</a> command.
+   See also http://ppw.kuleuven.be/okp/dmatoolbox.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<hr><address>Generated on Wed 11-Apr-2007 14:33:13 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

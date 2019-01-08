@@ -1,0 +1,62 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of plotparreg</title>
+  <meta name="keywords" content="plotparreg">
+  <meta name="description" content="PLOTPARREG  Plot deviance function around one or two given parameters">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="images/m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html . -->
+<h1>plotparreg
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>PLOTPARREG  Plot deviance function around one or two given parameters</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>function varargout=plotparreg(output,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="fragment"><pre class="comment">PLOTPARREG  Plot deviance function around one or two given parameters
+   PLOTPARREG(OUTPUT,P), where P is a scalar indexing the free parameters
+   in the model used in OUTPUT, shows a 2D plot of the deviance function
+   around the minimum.
+
+   PLOTPARREG(OUTPUT,P1,P2), where P1 and P2 are both indexing scalars,
+   shows a 3D (surface) plot.
+
+   F = PLOTPARREG(...) returns a vector or matrix of the parameter space
+   to plot.
+
+   The scalar indexing arguments can also be strings containing an index,
+   or can be strings describing the parameters, like 'a(1)' for the first
+   element of the design matrix for a.
+
+   See also <a href="fitlast.html" class="code" title="function varargout = fitlast(par,output)">FITLAST</a>, <a href="namepars.html" class="code" title="function varargout = namepars(varargin)">NAMEPARS</a>.
+
+   Author: Joachim Vandekerckhove (joachim.vandekerckhove@psy.kuleuven.be)
+   Part of the DMA Toolbox. Please read the End User License Agreement,
+   contained in 'dmateula.txt' or by invoking the <a href="dmatlicense.html" class="code" title="function varargout = dmatlicense">DMATLICENSE</a> command.
+   See also http://ppw.kuleuven.be/okp/dmatoolbox.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+<li><a href="namepars.html" class="code" title="function varargout = namepars(varargin)">namepars</a>	NAMEPARS  Shows and names free parameters</li></ul>
+This function is called by:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<hr><address>Generated on Wed 11-Apr-2007 14:33:13 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

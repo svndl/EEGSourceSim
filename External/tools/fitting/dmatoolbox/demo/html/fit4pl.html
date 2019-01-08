@@ -1,0 +1,343 @@
+<html xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+      <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      -->
+      <title>FIT4PL  Fit a nonlinear model to a parameter (demo script)</title>
+      <meta name="generator" content="MATLAB 7.2">
+      <meta name="date" content="2006-08-31">
+      <meta name="m-file" content="fit4pl"><style>
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows.  On Gecko-based browsers, the shrink-to-fit doesn't work. */ 
+p,h1,h2,div.content div {
+  /* for MATLAB's browser */
+  width: 600px;
+  /* for Mozilla, but the "width" tag overrides it anyway */
+  max-width: 600px;
+  /* for IE */
+  width:expression(document.body.clientWidth > 620 ? "600px": "auto" );
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head>
+   <body>
+      <div class="content">
+         <h1>FIT4PL  Fit a nonlinear model to a parameter (demo script)</h1>
+         <introduction>
+            <p>By default, DMAT only allows users to fit linear models (because it uses design matrices to apply simple models. However,
+               this is only a practical restriction, and not a theoretical one. A simple feature (the <tt>'NoFitting'</tt> option of <tt>multiestv4</tt>) of DMAT can help more experienced users to fit models of higher complexity.
+            </p>
+         </introduction>
+         <h2>Contents</h2>
+         <div>
+            <ul>
+               <li><a href="#1">Generate some data with nonlinear drifts</a></li>
+               <li><a href="#7">Build an OPTIONS structure as you usually would</a></li>
+               <li><a href="#8">Use MULTIESTV4 to prepare the objective function</a></li>
+               <li><a href="#9">Adapt the objective to your needs</a></li>
+               <li><a href="#10">Estimate parameters of the new model</a></li>
+               <li><a href="#13">Process the output carefully</a></li>
+               <li><a href="#14">Plot drift rates from the nonlinear model</a></li>
+               <li><a href="#15">Estimate a free model</a></li>
+               <li><a href="#16">Plot drift rates from the free model</a></li>
+            </ul>
+         </div>
+         <h2>Generate some data with nonlinear drifts<a name="1"></a></h2>
+         <p>We're generating data where all parameters are constant, except for the drift rate, which varies nonlinearly with a covariate
+            <tt>X</tt>. The nonlinear link function is the four-parameter logistic function:
+         </p>
+         <p><img vspace="5" hspace="5" src="fit4pl_eq36032.png"> </p>
+         <p>The parameters are:</p>
+         <div>
+            <ul>
+               <li>Upper asymptote <i>h</i> = 0.30;
+               </li>
+               <li>Lower asymptote <i>l</i> = -0.15;
+               </li>
+               <li>Location <i>b</i> = 0.50;
+               </li>
+               <li>Slope <i>a</i> = 1.50;
+               </li>
+            </ul>
+         </div><pre class="codeinput">clear <span class="string">all</span>
+close <span class="string">all</span>
+x = linspace(-5,4,10);
+logistic = @(p,x) p(2)+(p(1)-p(2))./(1+exp(-p(4).*x-p(3)));
+p = [0.3 -0.15 0.5 1.5]; <span class="comment">% [h l b a]</span>
+drifts = logistic(p,x);
+param = repmat(standardparset(0,0),5,1);
+param(:,7) = drifts
+</pre><pre class="codeoutput">param =
+    0.0800    0.3000    0.0800    0.0400    0.0200    0.0200   -0.1496
+    0.0800    0.3000    0.0800    0.0400    0.0200    0.0200   -0.1482
+    0.0800    0.3000    0.0800    0.0400    0.0200    0.0200   -0.1419
+    0.0800    0.3000    0.0800    0.0400    0.0200    0.0200   -0.1159
+    0.0800    0.3000    0.0800    0.0400    0.0200    0.0200   -0.0290
+    0.0800    0.3000    0.0800    0.0400    0.0200    0.0200    0.1301
+    0.0800    0.3000    0.0800    0.0400    0.0200    0.0200    0.2464
+    0.0800    0.3000    0.0800    0.0400    0.0200    0.0200    0.2868
+    0.0800    0.3000    0.0800    0.0400    0.0200    0.0200    0.2970
+    0.0800    0.3000    0.0800    0.0400    0.0200    0.0200    0.2993
+</pre><p>This is what the drifts look like:</p><pre class="codeinput">plot(x,drifts,<span class="string">'k:'</span>)
+axis <span class="string">square</span>
+box <span class="string">off</span>
+hold <span class="string">on</span>
+</pre><img vspace="5" hspace="5" src="fit4pl_01.png"> <pre class="codeinput">data = multisimul(param,10000,1);
+</pre><h2>Build an OPTIONS structure as you usually would<a name="7"></a></h2>
+         <p>But add the field 'NoFitting' and assign it a true value (any integer except <tt>0</tt>, or just <tt>true</tt>).
+         </p><pre class="codeinput">desmat = [{<span class="string">'1'</span>},{<span class="string">'1'</span>},{<span class="string">'1'</span>},{<span class="string">'1'</span>},{<span class="string">'1'</span>},{<span class="string">'1'</span>},{[]}];
+wd = 6; <span class="comment">% number of free variables without drift, keeps code flexible</span>
+options = struct(<span class="string">'DesignMatrix'</span>,{desmat},<span class="keyword">...</span>
+    <span class="string">'Name'</span>,<span class="string">'Nonlinear Demo I'</span>,<span class="keyword">...</span>
+    <span class="string">'ShortSimplexRuns'</span>,5,<span class="keyword">...</span>
+    <span class="string">'MaxIter'</span>,10000,<span class="keyword">...</span>
+    <span class="string">'ObjectiveDecimals'</span>,4,<span class="keyword">...</span>
+    <span class="string">'NoFitting'</span>,true);
+</pre><h2>Use MULTIESTV4 to prepare the objective function<a name="8"></a></h2>
+         <p>Calling <tt>multiestv4</tt> with this options structure will not initiate parameter estimation, but will merely prepare the objective function and add
+            it to the options structure:
+         </p><pre class="codeinput">options = multiestv4(data,options)
+</pre><pre class="codeoutput">options = 
+              DesignMatrix: {1x7 cell}
+                   Display: 'off'
+                      EWMA: [1x1 struct]
+    EstimationMethodScalar: 5
+             FixedBinEdges: []
+               FixedValues: [10x7 double]
+                     Guess: [10x7 double]
+         GuessMethodScalar: 1
+           LongSimplexRuns: 1
+                   MaxIter: 10000
+                      Name: 'Nonlinear Demo I'
+                 NoFitting: 1
+    NonparametricBootstrap: 0
+         ObjectiveDecimals: 4
+                OutlierMax: []
+                OutlierMin: []
+          OutlierTreatment: 'None'
+         ParameterDecimals: 7
+       ParametricBootstrap: 0
+               Percentiles: []
+          ShortSimplexRuns: 5
+              SpecificBias: [10x1 double]
+                     nsets: 10
+                    method: 1
+               InBootstrap: 0
+                  controls: [1x1 struct]
+                      npar: 7
+                  objecfun: @(x) (multifitv4(x,dcel2,options.controls,options.method))
+</pre><h2>Adapt the objective to your needs<a name="9"></a></h2>
+         <p>Now, starting from this objective function, we can construct a new, higher-order objective function that reduces the number
+            of parameters even more. For example:
+         </p><pre class="codeinput">newobj = @(y) options.objecfun([reshape(y(1:wd),1,wd),<span class="keyword">...</span>
+    logistic(y(wd+(1:4)),x)]);
+</pre><h2>Estimate parameters of the new model<a name="10"></a></h2>
+         <p>Now, rearrange the fields a bit, inserting the new objective:</p><pre class="codeinput">options.oldobj = options.objecfun;
+options.objecfun = newobj;
+options.NoFitting = false;
+</pre><p>Also insert a new initial guess (make sure you've got enough parameters!):</p><pre class="codeinput">guess = [.5 -.1 0 1];
+options.controls.small = [options.controls.small(1:wd)' guess];
+options.controls.small([5 6])=[.03 .1]; <span class="comment">% far away from the edge</span>
+</pre><p>And run the generative algorithm:</p><pre class="codeinput">[output options]=genalg(options);
+</pre><pre class="codeoutput">
+      Guess     :  392179.84817     (31-Aug-2006 16:12:02)
+      Simplex  1:  375940.76184     (31-Aug-2006 16:12:24)
+      Simplex  2:  375619.26158     (31-Aug-2006 16:12:46)
+      Simplex  3:  375602.11273     (31-Aug-2006 16:13:06)
+      Simplex  4:  375597.53287     (31-Aug-2006 16:13:27)
+      Simplex  5:  375595.71205     (31-Aug-2006 16:13:48)
+      Simplex  6:  375405.11482     (31-Aug-2006 16:16:29)
+      Final X2  :  375380.09008     (31-Aug-2006 16:18:02)
+
+</pre><h2>Process the output carefully<a name="13"></a></h2>
+         <p>The output as <tt>genalg</tt> returns it, is based on a linear model and thus not completely correct. You need to extract the design vector of the level
+            2 model and restore the level 1 design vector from that.
+         </p><pre class="codeinput">designvec_l2 = options.controls.small;
+designvec_l1 = [designvec_l2(1:wd) logistic(designvec_l2(wd+(1:4)),x)];
+options.controls.small = designvec_l1;
+options.controls = bigger(options.controls);
+minimum = options.controls.large;
+</pre><h2>Plot drift rates from the nonlinear model<a name="14"></a></h2><pre class="codeinput">plot(x,minimum(:,7),<span class="string">'rx-'</span>)
+</pre><img vspace="5" hspace="5" src="fit4pl_02.png"> <h2>Estimate a free model<a name="15"></a></h2><pre class="codeinput">output2 = multiestv4(data,<span class="string">'DesignMatrix'</span>,desmat,<span class="keyword">...</span>
+    <span class="string">'Name'</span>,<span class="string">'Nonlinear Demo II'</span>,<span class="keyword">...</span>
+    <span class="string">'ShortSimplexRuns'</span>,5,<span class="keyword">...</span>
+    <span class="string">'MaxIter'</span>,10000,<span class="keyword">...</span>
+    <span class="string">'ObjectiveDecimals'</span>,4,<span class="keyword">...</span>
+    <span class="string">'Guess'</span>,minimum);
+</pre><pre class="codeoutput">
+      Guess     :  375380.09008     (31-Aug-2006 16:18:03)
+      Simplex  1:  375239.48834     (31-Aug-2006 16:18:20)
+      Simplex  2:  375239.16946     (31-Aug-2006 16:18:38)
+      Simplex  3:  375239.16285     (31-Aug-2006 16:18:59)
+      Simplex  4:  375239.16277     (31-Aug-2006 16:19:19)
+      Simplex  5:  375239.16277     (31-Aug-2006 16:19:38)
+      Simplex  6:  375239.16273     (31-Aug-2006 16:20:14)
+      Final X2  :  375239.16273     (31-Aug-2006 16:20:33)
+
+      The recovered sZ parameters are suspect.
+      The recovered st parameters are suspect.
+      Trying again.
+
+      Guess     :  387911.21778     (31-Aug-2006 16:20:33)
+      Simplex  1:  377611.17161     (31-Aug-2006 16:20:52)
+      Simplex  2:  375964.11369     (31-Aug-2006 16:21:12)
+      Simplex  3:  375306.52541     (31-Aug-2006 16:21:32)
+      Simplex  4:  375262.88397     (31-Aug-2006 16:21:52)
+      Simplex  5:  375238.76899     (31-Aug-2006 16:22:11)
+      Simplex  6:  375228.75482     (31-Aug-2006 16:25:02)
+      Final X2  :  375228.75482     (31-Aug-2006 16:25:25)
+
+</pre><h2>Plot drift rates from the free model<a name="16"></a></h2><pre class="codeinput">plot(x,output2.Minimum(:,7),<span class="string">'bo'</span>)
+</pre><img vspace="5" hspace="5" src="fit4pl_03.png"> <p class="footer"><br>
+            Published with MATLAB&reg; 7.2<br></p>
+      </div>
+      <!--
+##### SOURCE BEGIN #####
+%% FIT4PL  Fit a nonlinear model to a parameter (demo script)
+% By default, DMAT only allows users to fit linear models (because it uses
+% design matrices to apply simple models. However, this is only a practical
+% restriction, and not a theoretical one. A simple feature (the
+% |'NoFitting'| option of |multiestv4|) of DMAT can help more experienced
+% users to fit models of higher complexity.
+
+%% Generate some data with nonlinear drifts
+% We're generating data where all parameters are constant, except for the
+% drift rate, which varies nonlinearly with a covariate |X|. The nonlinear
+% link function is the four-parameter logistic function:
+%%
+%
+% $$v = l + (h-l) \frac{e^{aX+b}}{1+e^{aX+b}}$$
+%
+%%
+% The parameters are:
+%%
+% * Upper asymptote _h_ = 0.30;
+% * Lower asymptote _l_ = -0.15;
+% * Location _b_ = 0.50;
+% * Slope _a_ = 1.50;
+clear all
+close all
+x = linspace(-5,4,10);
+logistic = @(p,x) p(2)+(p(1)-p(2))./(1+exp(-p(4).*x-p(3)));
+p = [0.3 -0.15 0.5 1.5]; % [h l b a]
+drifts = logistic(p,x);
+param = repmat(standardparset(0,0),5,1);
+param(:,7) = drifts
+%% 
+% This is what the drifts look like:
+plot(x,drifts,'k:')
+axis square
+box off
+hold on
+%%
+data = multisimul(param,10000,1);
+%% Build an OPTIONS structure as you usually would
+% But add the field 'NoFitting' and assign it a true value (any integer
+% except |0|, or just |true|).
+desmat = [{'1'},{'1'},{'1'},{'1'},{'1'},{'1'},{[]}];
+wd = 6; % number of free variables without drift, keeps code flexible
+options = struct('DesignMatrix',{desmat},...
+    'Name','Nonlinear Demo I',...
+    'ShortSimplexRuns',5,...
+    'MaxIter',10000,...
+    'ObjectiveDecimals',4,...
+    'NoFitting',true);
+%% Use MULTIESTV4 to prepare the objective function
+% Calling |multiestv4| with this options structure will not initiate
+% parameter estimation, but will merely prepare the objective function and
+% add it to the options structure:
+options = multiestv4(data,options)
+%% Adapt the objective to your needs
+% Now, starting from this objective function, we can construct a new,
+% higher-order objective function that reduces the number of parameters
+% even more. For example:
+newobj = @(y) options.objecfun([reshape(y(1:wd),1,wd),...
+    logistic(y(wd+(1:4)),x)]);
+%% Estimate parameters of the new model
+% Now, rearrange the fields a bit, inserting the new objective:
+options.oldobj = options.objecfun;
+options.objecfun = newobj;
+options.NoFitting = false;
+%%
+% Also insert a new initial guess (make sure you've got enough
+% parameters!):
+guess = [.5 -.1 0 1];
+options.controls.small = [options.controls.small(1:wd)' guess];
+options.controls.small([5 6])=[.03 .1]; % far away from the edge
+%%
+% And run the generative algorithm:
+[output options]=genalg(options);
+
+%% Process the output carefully
+% The output as |genalg| returns it, is based on a linear model and thus
+% not completely correct. You need to extract the design vector of the
+% level 2 model and restore the level 1 design vector from that.
+designvec_l2 = options.controls.small;
+designvec_l1 = [designvec_l2(1:wd) logistic(designvec_l2(wd+(1:4)),x)];
+options.controls.small = designvec_l1;
+options.controls = bigger(options.controls);
+minimum = options.controls.large;
+%% Plot drift rates from the nonlinear model
+plot(x,minimum(:,7),'rx-')
+%% Estimate a free model
+output2 = multiestv4(data,'DesignMatrix',desmat,...
+    'Name','Nonlinear Demo II',...
+    'ShortSimplexRuns',5,...
+    'MaxIter',10000,...
+    'ObjectiveDecimals',4,...
+    'Guess',minimum);
+%% Plot drift rates from the free model
+plot(x,output2.Minimum(:,7),'bo')
+##### SOURCE END #####
+-->
+   </body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of str2dcel</title>
+  <meta name="keywords" content="str2dcel">
+  <meta name="description" content="STR2DCEL  Convert data structure into DCEL format">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="images/m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html . -->
+<h1>str2dcel
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>STR2DCEL  Convert data structure into DCEL format</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>function [dcel dcel2] = str2dcel(str) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="fragment"><pre class="comment">STR2DCEL  Convert data structure into DCEL format
+  [DCEL DCEL2] = STR2DCEL(STRUCT), where STRUCT has all the fields
+            .CorrectObs          .Number of observations in each X=1 bin
+            .IncorrectObs        .Number of observations in each X=0 bin
+            .CorrectEdges        .Edges of X=1 time bins (in sec)
+            .IncorrectEdges      .Edges of X=0 time bins (in sec)
+            .Lower               .Minimal RT (optional)
+            .Upper               .Maximal RT (optional)
+  returns DCEL and DCEL2.
+
+  See also <a href="dcel2str.html" class="code" title="function str = dcel2str(dcel2)">DCEL2STR</a>, <a href="quantest.html" class="code" title="function output=quantest(varargin)">QUANTEST</a>.
+
+   Author: Joachim Vandekerckhove (joachim.vandekerckhove@psy.kuleuven.be)
+   Part of the DMA Toolbox. Please read the End User License Agreement,
+   contained in 'dmateula.txt' or by invoking the <a href="dmatlicense.html" class="code" title="function varargout = dmatlicense">DMATLICENSE</a> command.
+   See also http://ppw.kuleuven.be/okp/dmatoolbox.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+<li><a href="quantest.html" class="code" title="function output=quantest(varargin)">quantest</a>	QUANTEST  Fits the diffusion model to a data represented by quantiles only</li></ul>
+<!-- crossreference -->
+
+
+
+<hr><address>Generated on Wed 11-Apr-2007 14:33:13 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

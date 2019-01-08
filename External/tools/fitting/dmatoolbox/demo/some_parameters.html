@@ -1,0 +1,227 @@
+<html xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+      <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      -->
+      <title>SOME_PARAMETERS  Define some variables for use in DMAT (demo script)</title>
+      <meta name="generator" content="MATLAB 7.2">
+      <meta name="date" content="2006-08-31">
+      <meta name="m-file" content="some_parameters"><style>
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows.  On Gecko-based browsers, the shrink-to-fit doesn't work. */ 
+p,h1,h2,div.content div {
+  /* for MATLAB's browser */
+  width: 600px;
+  /* for Mozilla, but the "width" tag overrides it anyway */
+  max-width: 600px;
+  /* for IE */
+  width:expression(document.body.clientWidth > 620 ? "600px": "auto" );
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head>
+   <body>
+      <div class="content">
+         <h1>SOME_PARAMETERS  Define some variables for use in DMAT (demo script)</h1>
+         <introduction></introduction>
+         <h2>Contents</h2>
+         <div>
+            <ul>
+               <li><a href="#1">First, define a parameter set from the STANDARDPARSET function</a></li>
+               <li><a href="#2">Now, get its dimensions</a></li>
+               <li><a href="#3">Make a matrix of fixed values</a></li>
+               <li><a href="#4">Make a vector of bias values</a></li>
+               <li><a href="#5">Now, create a design matrix</a></li>
+               <li><a href="#7">The CONTROLS structure contains all the most important information</a></li>
+               <li><a href="#9">Quick clean-up</a></li>
+               <li><a href="#10">And build an OPTIONS structure, ready for DMAT</a></li>
+            </ul>
+         </div>
+         <h2>First, define a parameter set from the STANDARDPARSET function<a name="1"></a></h2><pre class="codeinput">param = standardparset(1);
+disp(param)
+</pre><pre class="codeoutput">    0.0800    0.3000    0.0800    0.0400    0.0200    0.0200    0.4000
+    0.0800    0.3000    0.0800    0.0400    0.0200    0.0200    0.2500
+    0.0800    0.3000    0.0800    0.0400    0.0200    0.0200    0.1000
+    0.0800    0.3000    0.0800    0.0400    0.0200    0.0200         0
+</pre><h2>Now, get its dimensions<a name="2"></a></h2><pre class="codeinput">[nsets npar] = size(param);
+</pre><h2>Make a matrix of fixed values<a name="3"></a></h2>
+         <p>If we don't want to fix any parameters to certain values, keep all elements of this matrix NaN. Suppose we want to fix the
+            first and second conditions' drift rates to zero.
+         </p><pre class="codeinput">fixvals = nan(nsets,npar);
+fixvals(1:2,7)=0;
+disp(fixvals)
+</pre><pre class="codeoutput">   NaN   NaN   NaN   NaN   NaN   NaN     0
+   NaN   NaN   NaN   NaN   NaN   NaN     0
+   NaN   NaN   NaN   NaN   NaN   NaN   NaN
+   NaN   NaN   NaN   NaN   NaN   NaN   NaN
+</pre><h2>Make a vector of bias values<a name="4"></a></h2>
+         <p>We don't want any biases.</p><pre class="codeinput">bias = nan(nsets,1);
+</pre><h2>Now, create a design matrix<a name="5"></a></h2>
+         <p>The design matrix is contained in a cell matrix, wherein each cell is the design matrix for a certain parameter.</p><pre class="codeinput">designmat = {orthpoly(nsets,0);  <span class="comment">% boundary separation</span>
+    orthpoly(nsets,0);           <span class="comment">% mean nondecision time</span>
+    orthpoly(nsets,0);           <span class="comment">% trial to trial stdev of drift rate</span>
+    orthpoly(nsets,0);           <span class="comment">% mean starting point</span>
+    orthpoly(nsets,0);           <span class="comment">% trial to trial range of starting point</span>
+    orthpoly(nsets,0);           <span class="comment">% trial to trial range of nondecision time</span>
+    orthpoly(nsets,0:1)};        <span class="comment">% drift rate</span>
+</pre><p>Notice the <tt>orthpoly</tt> function, which builds matrices of orthogonal polygons, for a given number of conditions (nsets) and a given number of degrees
+            (here, the 0th and 1st degree). Also notice that this introduces a possible conflict between the fixed values matrix and the
+            design matrix (both are imposing restrictions).
+         </p>
+         <h2>The CONTROLS structure contains all the most important information<a name="7"></a></h2>
+         <p>When building a structure, don't forget to put the curly braces around cells (look at how <tt>designmat</tt> is included). Otherwise a structure array will be created.
+         </p><pre class="codeinput">controls = struct(<span class="string">'large'</span>,param,<span class="keyword">...</span>
+    <span class="string">'fixvals'</span>,fixvals,<span class="keyword">...</span>
+    <span class="string">'bias'</span>,bias,<span class="keyword">...</span>
+    <span class="string">'designmat'</span>,{designmat});
+controls = smaller(controls);
+disp(controls)
+</pre><pre class="codeoutput">        large: [4x7 double]
+      fixvals: [4x7 double]
+         bias: [4x1 double]
+    designmat: {7x1 cell}
+      keepers: [4x7 logical]
+        small: [8x1 double]
+</pre><p>Notice here how the conflict between fixed values and the design was resolved by the <tt>smaller</tt> function (it overwrote the <tt>fixvals</tt> field).
+         </p><pre class="codeinput">disp(controls.fixvals)
+</pre><pre class="codeoutput">   NaN   NaN   NaN   NaN   NaN   NaN   NaN
+   NaN   NaN   NaN   NaN   NaN   NaN   NaN
+   NaN   NaN   NaN   NaN   NaN   NaN   NaN
+   NaN   NaN   NaN   NaN   NaN   NaN   NaN
+</pre><h2>Quick clean-up<a name="9"></a></h2>
+         <p>Just to see that the variables introduced to the workspace are consistent (this is not strictly necessary, just clean and
+            to avoid confusion):
+         </p><pre class="codeinput">fixvals(:) = NaN;
+</pre><h2>And build an OPTIONS structure, ready for DMAT<a name="10"></a></h2><pre class="codeinput">options = struct(<span class="keyword">...</span>
+    <span class="string">'DesignMatrix'</span>,{designmat},<span class="keyword">...</span>
+    <span class="string">'FixedValues'</span>,fixvals,<span class="keyword">...</span>
+    <span class="string">'SpecificBias'</span>,bias,<span class="keyword">...</span>
+    <span class="string">'Name'</span>,<span class="string">'Linear effect on drift rate'</span>);
+disp(options)
+</pre><pre class="codeoutput">    DesignMatrix: {7x1 cell}
+     FixedValues: [4x7 double]
+    SpecificBias: [4x1 double]
+            Name: 'Linear effect on drift rate'
+</pre><p class="footer"><br>
+            Published with MATLAB&reg; 7.2<br></p>
+      </div>
+      <!--
+##### SOURCE BEGIN #####
+%% SOME_PARAMETERS  Define some variables for use in DMAT (demo script)
+
+%% First, define a parameter set from the STANDARDPARSET function
+param = standardparset(1);
+disp(param)
+
+%% Now, get its dimensions
+[nsets npar] = size(param);
+
+%% Make a matrix of fixed values
+% If we don't want to fix any parameters to certain values, keep all
+% elements of this matrix NaN. Suppose we want to fix the first and second
+% conditions' drift rates to zero.
+fixvals = nan(nsets,npar);
+fixvals(1:2,7)=0;
+disp(fixvals)
+
+%% Make a vector of bias values
+% We don't want any biases.
+bias = nan(nsets,1);
+
+%% Now, create a design matrix
+% The design matrix is contained in a cell matrix, wherein each cell is the
+% design matrix for a certain parameter.
+designmat = {orthpoly(nsets,0);  % boundary separation
+    orthpoly(nsets,0);           % mean nondecision time
+    orthpoly(nsets,0);           % trial to trial stdev of drift rate
+    orthpoly(nsets,0);           % mean starting point
+    orthpoly(nsets,0);           % trial to trial range of starting point
+    orthpoly(nsets,0);           % trial to trial range of nondecision time
+    orthpoly(nsets,0:1)};        % drift rate
+%%
+% Notice the |orthpoly| function, which builds matrices of orthogonal
+% polygons, for a given number of conditions (nsets) and a given number of
+% degrees (here, the 0th and 1st degree). Also notice that this introduces
+% a possible conflict between the fixed values matrix and the design matrix
+% (both are imposing restrictions).
+
+%% The CONTROLS structure contains all the most important information
+% When building a structure, don't forget to put the curly braces around
+% cells (look at how |designmat| is included). Otherwise a structure
+% array will be created.
+controls = struct('large',param,...
+    'fixvals',fixvals,...
+    'bias',bias,...
+    'designmat',{designmat});
+controls = smaller(controls);
+disp(controls)
+%%
+% Notice here how the conflict between fixed values and the design was
+% resolved by the |smaller| function (it overwrote the |fixvals| field).
+disp(controls.fixvals)
+
+%% Quick clean-up
+% Just to see that the variables introduced to the workspace are consistent
+% (this is not strictly necessary, just clean and to avoid confusion):
+fixvals(:) = NaN;
+
+%% And build an OPTIONS structure, ready for DMAT
+options = struct(...
+    'DesignMatrix',{designmat},...
+    'FixedValues',fixvals,...
+    'SpecificBias',bias,...
+    'Name','Linear effect on drift rate');
+disp(options)
+##### SOURCE END #####
+-->
+   </body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of parsetoline</title>
+  <meta name="keywords" content="parsetoline">
+  <meta name="description" content="PARSETOLINE  Parses a string so it fits on a screen">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="images/m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html . -->
+<h1>parsetoline
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>PARSETOLINE  Parses a string so it fits on a screen</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>function ml=parsetoline(sl,maxlen,fl) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="fragment"><pre class="comment">PARSETOLINE  Parses a string so it fits on a screen
+   MULTILINE = PARSETOLINE(SINGLELINE,MAXLENGTH), where SINGLELINE is a
+   text string and MAXLEN is an integer indicating the maximum horizontal
+   lenght of a string, returns MULTILINE, a string that is parsed to fit
+   on such a line. Parsing takes place only at spaces.
+
+   MULTILINE = PARSETOLINE(SINGLELINE,MAXLENGTH,FILL), pads the string
+   with spaces so that each line contains exactly MAXLENGTH characters.
+   (If you do not want to provide MAXLENGTH, use [] as a placeholder.)
+
+   MULTILINE = PARSETOLINE(SINGLELINE) parses to fit to the current
+   command window size.
+
+   Author: Joachim Vandekerckhove (joachim.vandekerckhove@psy.kuleuven.be)
+   Part of the DMA Toolbox. Please read the End User License Agreement,
+   contained in 'dmateula.txt' or by invoking the DMATLICENSE command. 
+   See also http://ppw.kuleuven.be/okp/dmatoolbox.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+<li><a href="parsetoline.html" class="code" title="function ml=parsetoline(sl,maxlen,fl)">parsetoline</a>	PARSETOLINE  Parses a string so it fits on a screen</li></ul>
+This function is called by:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+<li><a href="dmatlicense.html" class="code" title="function varargout = dmatlicense">dmatlicense</a>	DMATLICENSE  License information for DMAT</li><li><a href="dmatref.html" class="code" title="function varargout = dmatref(num)">dmatref</a>	DMATREF  Returns the proper references to the DMA Toolbox</li><li><a href="dmatremove.html" class="code" title="function varargout = dmatremove(varargin)">dmatremove</a>	DMATREMOVE  Removes the DMA Toolbox</li><li><a href="installer.html" class="code" title="function varargout = installer">installer</a>	INSTALLER  Adds DMAT folders to your MATLAB path</li><li><a href="modelfittable.html" class="code" title="function varargout = modelfittable(output,fn,nums)">modelfittable</a>	MODELFITTABLE  Table with model properties</li><li><a href="parsetoline.html" class="code" title="function ml=parsetoline(sl,maxlen,fl)">parsetoline</a>	PARSETOLINE  Parses a string so it fits on a screen</li></ul>
+<!-- crossreference -->
+
+
+
+<hr><address>Generated on Wed 11-Apr-2007 14:33:13 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

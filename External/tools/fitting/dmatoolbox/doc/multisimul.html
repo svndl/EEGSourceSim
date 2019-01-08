@@ -1,0 +1,65 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of multisimul</title>
+  <meta name="keywords" content="multisimul">
+  <meta name="description" content="MULTISIMUL  Generates data for multiple conditions from a diffusion model">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="images/m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html . -->
+<h1>multisimul
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>MULTISIMUL  Generates data for multiple conditions from a diffusion model</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>function data = multisimul(par,N,seed) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="fragment"><pre class="comment">MULTISIMUL  Generates data for multiple conditions from a diffusion model
+   DATA = MULTISIMUL(PARAM,N), where PARAM is a valid parameter set, N is
+   a vector carrying the number of data points in each condition (or a
+   scalar, in which case all conditions will have the same number of data
+   points), returns DATA, an N-by-3 data matrix with condition in the
+   first column, binary responses in the second and reaction times (in
+   seconds) in the third column.
+
+   DATA = MULTISIMUL(PARAM,N,SEED), uses SEED to start the random
+   generator.
+
+   DATA = MULTISIMUL(PARAM), uses all N = 250.
+
+   DATA = MULTISIMUL, uses the standard parameter set 1, as contained in
+   STANDARDPARSET.
+
+   The volatility parameter s is fixed to .1.
+
+   See also <a href="simuldiff.html" class="code" title="function [T,XX] = simuldiff(par,N)">SIMULDIFF</a>, <a href="standardparset.html" class="code" title="function param=standardparset(parset,v)">STANDARDPARSET</a>.
+
+   Author: Joachim Vandekerckhove (joachim.vandekerckhove@psy.kuleuven.be)
+   Part of the DMA Toolbox. Please read the End User License Agreement,
+   contained in 'dmateula.txt' or by invoking the <a href="dmatlicense.html" class="code" title="function varargout = dmatlicense">DMATLICENSE</a> command.
+   See also http://ppw.kuleuven.be/okp/dmatoolbox.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+<li><a href="simuldiff.html" class="code" title="function [T,XX] = simuldiff(par,N)">simuldiff</a>	SIMULDIFF  Generates data according to a diffusion model</li><li><a href="standardparset.html" class="code" title="function param=standardparset(parset,v)">standardparset</a>	STANDARDPARSET  Standard diffusion model parameter sets</li></ul>
+This function is called by:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+<li><a href="bootstrap.html" class="code" title="function [op,minimum] = bootstrap(data,output,iter,parametric)">bootstrap</a>	BOOTSTRAP  Parametric or nonparametric bootstrap of DMAT results</li><li><a href="dmatgui.html" class="code" title="function dmatgui(varargin)">dmatgui</a>	DMATGUI  Graphical interface for the Diffusion Model Analysis Toolbox</li></ul>
+<!-- crossreference -->
+
+
+
+<hr><address>Generated on Wed 11-Apr-2007 14:33:13 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

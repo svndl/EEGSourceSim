@@ -1,0 +1,52 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of generateguess</title>
+  <meta name="keywords" content="generateguess">
+  <meta name="description" content="GENERATEGUESS  Generates an initial guess for the optimization algorithm">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="images/m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html . -->
+<h1>generateguess
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>GENERATEGUESS  Generates an initial guess for the optimization algorithm</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>function options = generateguess(options,dcel) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="fragment"><pre class="comment">GENERATEGUESS  Generates an initial guess for the optimization algorithm
+   OPTIONS = GENERATEGUESS(OPTIONS,DCEL), where OPTIONS is a valid options
+   structure for DMAT, and DCEL is a split data set as returned by
+   SPLITDATA, returns OPTIONS, with the .GUESS field updated.
+
+   See also <a href="ezdiff.html" class="code" title="function [v,a,Ter] = ezdiff(Pc,VRT,MRT)">EZDIFF</a> and <a href="perturb.html" class="code" title="function p = perturb(par,perc)">PERTURB</a>.
+
+   Author: Joachim Vandekerckhove (joachim.vandekerckhove@psy.kuleuven.be)
+   Part of the DMA Toolbox. Please read the End User License Agreement,
+   contained in 'dmateula.txt' or by invoking the <a href="dmatlicense.html" class="code" title="function varargout = dmatlicense">DMATLICENSE</a> command.
+   See also http://ppw.kuleuven.be/okp/dmatoolbox.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+<li><a href="ezdiff.html" class="code" title="function [v,a,Ter] = ezdiff(Pc,VRT,MRT)">ezdiff</a>	EZDIFF  Solves the EZDIFF system of equations</li><li><a href="isgood.html" class="code" title="function [a bad] = isgood(par)">isgood</a>	ISGOOD  Check if parameter set is inside the general parameter space</li><li><a href="linreg.html" class="code" title="function b = linreg(y,x)">linreg</a>	LINREG  Linear regression of X on Y</li><li><a href="perturb.html" class="code" title="function p = perturb(par,perc)">perturb</a>	PERTURB  Picks a parameter set close to another parameter set</li></ul>
+This function is called by:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+<li><a href="multiestv4.html" class="code" title="function output=multiestv4(varargin)">multiestv4</a>	MULTIESTV4  Fits the diffusion model to a data set</li><li><a href="quantest.html" class="code" title="function output=quantest(varargin)">quantest</a>	QUANTEST  Fits the diffusion model to a data represented by quantiles only</li></ul>
+<!-- crossreference -->
+
+
+
+<hr><address>Generated on Wed 11-Apr-2007 14:33:13 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

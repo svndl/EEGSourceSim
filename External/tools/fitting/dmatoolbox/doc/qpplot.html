@@ -1,0 +1,66 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of qpplot</title>
+  <meta name="keywords" content="qpplot">
+  <meta name="description" content="QPPLOT  Quantile probability plots">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="images/m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html . -->
+<h1>qpplot
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>QPPLOT  Quantile probability plots</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>function varargout=qpplot(data,perc,param,handle) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="fragment"><pre class="comment">QPPLOT  Quantile probability plots
+   QPPLOT(DATA,PERC,PARAM,HANDLE), displays a quantile probability plot,
+   for the N-by-3 data in DATA, using bins based on percentiles in PERC,
+   overlaying theoretical values from parameter set PARAM, in the axes
+   indicated by HANDLE. Note that PERC are percentiles from 0 to 100.
+
+   QPPLOT(DATA,PERC,PARAM), makes a new figure.
+
+   QPPLOT(DATA,PERC,[]) or QPP(DATA,PERC,[],HANDLE) do not plot the model
+   fit lines (but note that you have to provide a third argument
+   regardless).
+
+   H = QPPLOT(...), returns a handle to the axes.
+
+   QPPLOT(OUTPUT) is a quick-access version that only plots model
+   predictions in a new figure, with PERC = [10 30 50 70 90]; This version
+   assumes that conditions are sorted by difficulty, with the easiest
+   coming first.
+
+   See also <a href="edfcdf.html" class="code" title="function varargout = edfcdf(data,N,rep,param,quantiles,handle)">EDFCDF</a>.
+
+   Author: Joachim Vandekerckhove (joachim.vandekerckhove@psy.kuleuven.be)
+   Part of the DMA Toolbox. Please read the End User License Agreement,
+   contained in 'dmateula.txt' or by invoking the <a href="dmatlicense.html" class="code" title="function varargout = dmatlicense">DMATLICENSE</a> command.
+   See also http://ppw.kuleuven.be/okp/dmatoolbox.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+<li><a href="invcdfdif.html" class="code" title="function rts = invcdfdif(perc,rep,output,precision)">invcdfdif</a>	INVCDFDIF  Inverse of the diffusion defective cumulative density function</li><li><a href="isvaliddataset.html" class="code" title="function [b mssg] = isvaliddataset(data,cols)">isvaliddataset</a>	ISVALIDDATASET  Check if input is a valid data set for DMAT</li><li><a href="pctile.html" class="code" title="function o = pctile(d,p)">pctile</a>	PCTILE  Compute percentiles of a vector</li></ul>
+This function is called by:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+<li><a href="dmatgui.html" class="code" title="function dmatgui(varargin)">dmatgui</a>	DMATGUI  Graphical interface for the Diffusion Model Analysis Toolbox</li></ul>
+<!-- crossreference -->
+
+
+
+<hr><address>Generated on Wed 11-Apr-2007 14:33:13 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of splitdata</title>
+  <meta name="keywords" content="splitdata">
+  <meta name="description" content="SPLITDATA  Splits a dataset by putting each condition into a cell">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="images/m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html . -->
+<h1>splitdata
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>SPLITDATA  Splits a dataset by putting each condition into a cell</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>function dcell = splitdata(data,splitreply) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="fragment"><pre class="comment">SPLITDATA  Splits a dataset by putting each condition into a cell
+   DATACELL = SPLITDATA(DATA), where DATA is a regular N-by-3 data matrix
+   [condition response seconds], returns DATACELL, a cell matrix with one
+   cell for each condition, and a [response seconds] data set in each.
+
+   See also <a href="processdata.html" class="code" title="function dcel = processdata(data,perc,edges)">PROCESSDATA</a>.
+
+   Author: Joachim Vandekerckhove (joachim.vandekerckhove@psy.kuleuven.be)
+   Part of the DMA Toolbox. Please read the End User License Agreement,
+   contained in 'dmateula.txt' or by invoking the <a href="dmatlicense.html" class="code" title="function varargout = dmatlicense">DMATLICENSE</a> command.
+   See also http://ppw.kuleuven.be/okp/dmatoolbox.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+<li><a href="isvaliddataset.html" class="code" title="function [b mssg] = isvaliddataset(data,cols)">isvaliddataset</a>	ISVALIDDATASET  Check if input is a valid data set for DMAT</li></ul>
+This function is called by:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+<li><a href="bootstrap.html" class="code" title="function [op,minimum] = bootstrap(data,output,iter,parametric)">bootstrap</a>	BOOTSTRAP  Parametric or nonparametric bootstrap of DMAT results</li><li><a href="dmatgui.html" class="code" title="function dmatgui(varargin)">dmatgui</a>	DMATGUI  Graphical interface for the Diffusion Model Analysis Toolbox</li><li><a href="multiestv4.html" class="code" title="function output=multiestv4(varargin)">multiestv4</a>	MULTIESTV4  Fits the diffusion model to a data set</li></ul>
+<!-- crossreference -->
+
+
+
+<hr><address>Generated on Wed 11-Apr-2007 14:33:13 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

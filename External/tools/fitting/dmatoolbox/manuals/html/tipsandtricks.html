@@ -1,0 +1,96 @@
+<html><head><title>DMAT tips and tricks</title><style>body{background-color: white;margin:10px;}h1 {color: #990000; font-size: x-large;}h2 {color: #990000;font-size: medium;}</style></head>
+   <body>
+      <div class="content">
+         <h1>DMAT: Tips and tricks</h1>
+         <introduction>
+            <p>This is a list of running tips and cunning tricks that might help you get the most out of our software. Use them wisely, and
+               they may serve you well.
+            </p>
+         </introduction>
+         <h2>Contents</h2>
+         <div>
+            <ul>
+               <li><a href="#1">Try to define models such that all parameters have similar ranges</a></li>
+               <li><a href="#8">Try different starting points</a></li>
+               <li><a href="#9">Author of this file</a></li>
+            </ul>
+         </div>
+         <h2>Try to define models such that all parameters have similar ranges<a name="1"></a></h2>
+         <p>MATLAB's optimizers use the same step size and sensitivity for each parameter. That means that they are most effective if
+            all parameters are on the same scale. In DMAT, the standard parameters have a range somewhere between 0 and 1. So, if you
+            define designs, try to make sure that reasonable parameter estimates are also in that range.
+         </p>
+         <p>For example, if you define a design matrix on the basis of a covariate, like this:</p><pre>&gt;&gt; E = 0:20:100</pre><pre class="codeoutput">E =
+     0    20    40    60    80   100
+</pre><pre>&gt;&gt; designmatrix = [ones(length(E),1) E']</pre><pre class="codeoutput">designmatrix =
+     1     0
+     1    20
+     1    40
+     1    60
+     1    80
+     1   100
+</pre><p>You should rescale it, such that most of the values are in the range 0-1, or maybe even lower (like 0-.5):</p><pre>&gt;&gt; E = E./max(E(:))</pre><pre class="codeoutput">E =
+         0    0.2000    0.4000    0.6000    0.8000    1.0000
+</pre><pre>&gt;&gt; designmatrix = [ones(length(E),1) E']</pre><pre class="codeoutput">designmatrix =
+    1.0000         0
+    1.0000    0.2000
+    1.0000    0.4000
+    1.0000    0.6000
+    1.0000    0.8000
+    1.0000    1.0000
+</pre><h2>Try different starting points<a name="8"></a></h2>
+         <p>In particular if you have more complicated designs, the EZDIFF starting point may not be ideal (though it usually is very
+            good). Restarting the optimization procedure with a different initial guess might yield better results.
+         </p>
+         <h2>Author of this file<a name="9"></a></h2>
+         <p>Joachim Vandekerckhove (<a href="mailto:joachim.vandekerckhove@psy.kuleuven.be">joachim.vandekerckhove@psy.kuleuven.be</a>) Part of the DMA Toolbox. Please read the End User License Agreement, contained in 'dmateula.txt' or by invoking the DMATLICENSE
+            command. See also <a href="http://ppw.kuleuven.be/okp/dmatoolbox">http://ppw.kuleuven.be/okp/dmatoolbox</a>.
+         </p>
+
+            <br><p align="right"><font size=1><i>Published with MATLAB&reg; 7.2, M2HTML, and the DMA Toolbox</i></font></p>
+      </div>
+      <!--
+##### SOURCE BEGIN #####
+%% DMAT: Tips and tricks
+% This is a list of running tips and cunning tricks that might help you get
+% the most out of our software. Use them wisely, and they may serve you
+% well.
+%% Try to define models such that all parameters have similar ranges
+% MATLAB's optimizers use the same step size and sensitivity for each
+% parameter. That means that they are most effective if all parameters are
+% on the same scale. In DMAT, the standard parameters have a range
+% somewhere between 0 and 1. So, if you define designs, try to make sure
+% that reasonable parameter estimates are also in that range.
+%%
+% For example, if you define a design matrix on the basis of a covariate,
+% like this:
+%%
+%  >> E = 0:20:100
+E = 0:20:100
+%%
+%  >> designmatrix = [ones(length(E),1) E']
+designmatrix = [ones(length(E),1) E']
+%%
+% You should rescale it, such that most of the values are in the range 0-1,
+% or maybe even lower (like 0-.5):
+%%
+%  >> E = E./max(E(:))
+E = E./max(E(:))
+%%
+%  >> designmatrix = [ones(length(E),1) E']
+designmatrix = [ones(length(E),1) E']
+%% Try different starting points
+% In particular if you have more complicated designs, the EZDIFF starting
+% point may not be ideal (though it usually is very good). Restarting the
+% optimization procedure with a different initial guess might yield better
+% results.
+
+%% Author of this file
+% Joachim Vandekerckhove (joachim.vandekerckhove@psy.kuleuven.be)
+% Part of the DMA Toolbox. Please read the End User License Agreement,
+% contained in 'dmateula.txt' or by invoking the DMATLICENSE command. 
+% See also http://ppw.kuleuven.be/okp/dmatoolbox.
+##### SOURCE END #####
+-->
+   </body>
+</html>

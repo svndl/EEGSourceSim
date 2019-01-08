@@ -1,0 +1,102 @@
+% Diffusion Model Analysis Toolbox
+% Version 0.5 (R2010a) 05-Aug-2010
+%
+% Documentation
+%   dmatdoc               - Opens HTML function reference list and manuals
+% 
+% Demos and manuals (html)
+%   diffusionintroduction - A general introduction to diffusion models
+%   dmatmanual            - The manual for this toolbox
+%   dmatmanualgui         - The manual for the GUI tool
+%   est4pl                - Fit a nonlinear model to a parameter (demo script)
+%   fit4pl                - Fit a nonlinear model to a parameter (demo script)
+%   tipsandtricks         - Tips and tricks for using this toolbox (under construction)
+%
+% Tools
+%   bootstrap             - Parametric or nonparametric bootstrap of DMAT results
+%   dmatgui               - Graphical interface for the Diffusion Model Analysis Toolbox
+%   dmatrescue            - Rescue tool for recovering DMAT back-ups 
+%   ewmav2                - Determine RT cut-off with the EWMA method
+%   ezdiff                - Solves the EZDIFF system of equations
+%   getnodes              - Tells you how many nodes are currently used by CDFDIF
+%   multiestv4            - Fits the diffusion model to a data set
+%   multisimul            - Generates data for multiple conditions from a diffusion model
+%   multisimulwo          - Sample multiple conditions w/ outliers from diffusion model
+%   quantest              - Fits the diffusion model to a data represented by quantiles only
+%   runqueue              - Runs a queue of DMA models
+%   runqueue_q            - Runs a queue of DMA models with quantile input
+%   setnodes              - Set the number of quadrature nodes used by DMAT
+%   simuldiff             - Generates data according to a diffusion model
+%   simuldiffwo           - Generates data according to a diffusion model, with outliers
+%   vincentise            - Performs vincentisation of reaction time data
+%
+% Functions for large calculations
+%   cdfdif                - Calculates the conditional CDF of the Ratcliff diffusion model
+%   invcdfdif             - Inverse of the diffusion defective cumulative density function
+%      
+% Display and output
+%   absfit                - Calculates model fit measures
+%   edfcdf                - Plot cumulative distributions of reaction time
+%   descriptives          - Compute descriptive statistics for two-choice RT data
+%   emstable              - Display table with values for EstimationMethodScalar option
+%   fitlast               - Calculate the fit of any given parameter set to the last model
+%   modelfittable         - Table with model properties
+%   outputtoxls           - Export DMAT output to structured Excel spreadsheet
+%   paramplot             - Plot parameters over conditions
+%   plotewma              - Shows an EWMA control chart for reaction time and accuracy
+%   plotparreg            - Plot deviance function around one or two given parameters
+%   qpplot                - Quantile probability plots
+%   qtable                - Shows concise summary of an output queue
+%   waldtable             - Produces a table with parameter estimates and Wald tests
+%       
+% DMAT-specific files
+%   dmatlicense           - Gives license information for DMAT
+%   dmatref               - Returns the proper references to the DMA Toolbox
+%   dmatremove            - Removes the DMA Toolbox
+%   dmatsite              - The DMA Toolbox website: http://ppw.kuleuven.be/okp/dmatoolbox/
+%   installer             - Adds DMAT folders to your MATLAB path
+%
+% Small helper files
+%   chi2test              - Calculate the probability under a chi-square distribution
+%   dcel2str              - Convert DCEL format into data structure
+%   eachcell              - Performs a function on each cell of a cell matrix
+%   isconsistent          - Check if model restrictions do not overlap
+%   iseye                 - Check if input is an identity matrix
+%   isgood                - Check if parameter set is inside the general parameter space
+%   isnested              - Check if A is nested in B
+%   isposdef              - Check if input matrix is positive definite
+%   isvaliddataset        - Check if input is a valid data set for DMAT
+%   linreg                - Linear regression of X on Y
+%   loaddmatdata          - Load a data file for DMAT
+%   namepars              - Shows and names free parameters
+%   orthpoly              - Table of coefficients of orthogonal polynomials
+%   pairs2struct          - Turns field-value pairs into a structure
+%   parsetoline           - Parses a string so it fits on a screen
+%   pctile                - Compute percentiles of a vector
+%   perturb               - Picks a parameter set close to another parameter set
+%   standardparset        - Standard diffusion model parameter sets
+%   str2dcel              - Convert data structure into DCEL format
+%   var2str               - Print variable contents to a MATLAB string
+%
+% Helper files for optimization (internal)
+%   bigger                - Rebuilds complete parameter set from free parameters
+%   fitdiffv13            - Calculate deviance for one condition
+%   genalg                - Generative algorithm for minimization
+%   generateguess         - Generates an initial guess for the optimization algorithm
+%   inpcheck              - Check if the input structure is valid
+%   multifitv4            - Compute deviance for all conditions
+%   outliertreatment      - Treats outliers, mostly with preprocessing
+%   processdata           - Calculates statistics on each condition
+%   processhessian        - Process the Hessian matrix to get standard errors
+%   smaller               - Extracts free parameters from complete parameter set
+%   splitdata             - Splits a dataset by putting each condition into a cell
+%      
+% GUI helper files (internal)
+%   dmat_textmode         - Temporarily leave graphical interface while in DMATGUI
+%   m2q                   - Read an M-file produced by DMATGUI and extract OPTIONS
+%   q2m                   - Produces an M-file to prepare and execute a DMAT queue
+%
+%   Author: Joachim Vandekerckhove (joachim.vandekerckhove@psy.kuleuven.be)
+%   Part of the DMA Toolbox. Please read the End User License Agreement,
+%   contained in 'dmateula.txt' or by invoking the DMATLICENSE command. 
+%   See also http://ppw.kuleuven.be/okp/dmatoolbox.

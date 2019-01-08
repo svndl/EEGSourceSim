@@ -1,0 +1,64 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of quantest</title>
+  <meta name="keywords" content="quantest">
+  <meta name="description" content="QUANTEST  Fits the diffusion model to a data represented by quantiles only">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="images/m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html . -->
+<h1>quantest
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>QUANTEST  Fits the diffusion model to a data represented by quantiles only</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>function output=quantest(varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="fragment"><pre class="comment">QUANTEST  Fits the diffusion model to a data represented by quantiles only
+   OUTPUT = QUANTEST(DSTR,OPTIONS), where DSTR is a structure with all the
+   fields:
+            .CorrectObs          .Number of observations in each X=1 bin
+            .IncorrectObs        .Number of observations in each X=0 bin
+            .CorrectEdges        .Edges of X=1 time bins (in sec)
+            .IncorrectEdges      .Edges of X=0 time bins (in sec)
+            .Lower               .Minimal RT (optional)
+            .Upper               .Maximal RT (optional)
+   works just like MULTIESTV4, with the exception of outlier analyses.
+   Mixture model outlier analysis requires that you provide the .Lower and
+   .Upper fields. EWMA is not possible.
+   QUANTEST cannot make automatic use of the EZDIFF algorithm, if you can
+   provide EZDIFF results as starting points for the parameter estimation,
+   you should do so explicitly by providing the .Guess field in the
+   OPTIONS structure.
+
+   See also <a href="multiestv4.html" class="code" title="function output=multiestv4(varargin)">MULTIESTV4</a>, <a href="runqueue_q.html" class="code" title="function output = runqueue_q(data,queue,guessorder)">RUNQUEUE_Q</a>.
+
+   Author: Joachim Vandekerckhove (joachim.vandekerckhove@psy.kuleuven.be)
+   Part of the DMA Toolbox. Please read the End User License Agreement,
+   contained in 'dmateula.txt' or by invoking the <a href="dmatlicense.html" class="code" title="function varargout = dmatlicense">DMATLICENSE</a> command.
+   See also http://ppw.kuleuven.be/okp/dmatoolbox.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+<li><a href="absfit.html" class="code" title="function fstr = absfit(param,data,k)">absfit</a>	ABSFIT  Calculates model fit measures</li><li><a href="bigger.html" class="code" title="function controls = bigger(controls)">bigger</a>	BIGGER  Rebuilds complete parameter set from free parameters</li><li><a href="bootstrap.html" class="code" title="function [op,minimum] = bootstrap(data,output,iter,parametric)">bootstrap</a>	BOOTSTRAP  Parametric or nonparametric bootstrap of DMAT results</li><li><a href="fitdiffv13.html" class="code" title="function D = fitdiffv13(param,data,method)">fitdiffv13</a>	FITDIFFV13  Calculate deviance for one condition</li><li><a href="genalg.html" class="code" title="function [output,options]=genalg(options)">genalg</a>	GENALG  Generative algorithm for minimization</li><li><a href="generateguess.html" class="code" title="function options = generateguess(options,dcel)">generateguess</a>	GENERATEGUESS  Generates an initial guess for the optimization algorithm</li><li><a href="inpcheck.html" class="code" title="function options = inpcheck(options)">inpcheck</a>	INPCHECK  Check if the input structure is valid</li><li><a href="multifitv4.html" class="code" title="function L = multifitv4(small,data,controls,method)">multifitv4</a>	MULTIFITV4  Compute deviance for all conditions</li><li><a href="pairs2struct.html" class="code" title="function s = pairs2struct(varargin)">pairs2struct</a>	PAIRS2STRUCT  Turns field-value pairs into a structure</li><li><a href="processhessian.html" class="code" title="function [stderr warn]= processhessian(hessian,options)">processhessian</a>	PROCESSHESSIAN  Process the Hessian matrix to get standard errors</li><li><a href="runqueue_q.html" class="code" title="function output = runqueue_q(data,queue,guessorder)">runqueue_q</a>	RUNQUEUE_Q  Runs a queue of DMA models with quantile input</li><li><a href="smaller.html" class="code" title="function controls = smaller(controls)">smaller</a>	SMALLER  Extracts free parameters from complete parameter set</li><li><a href="str2dcel.html" class="code" title="function [dcel dcel2] = str2dcel(str)">str2dcel</a>	STR2DCEL  Convert data structure into DCEL format</li></ul>
+This function is called by:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+<li><a href="runqueue_q.html" class="code" title="function output = runqueue_q(data,queue,guessorder)">runqueue_q</a>	RUNQUEUE_Q  Runs a queue of DMA models with quantile input</li></ul>
+<!-- crossreference -->
+
+
+
+<hr><address>Generated on Wed 11-Apr-2007 14:33:13 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

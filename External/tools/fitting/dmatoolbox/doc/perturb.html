@@ -1,0 +1,54 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of perturb</title>
+  <meta name="keywords" content="perturb">
+  <meta name="description" content="PERTURB  Picks a parameter set close to another parameter set">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="images/m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html . -->
+<h1>perturb
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>PERTURB  Picks a parameter set close to another parameter set</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>function p = perturb(par,perc) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="fragment"><pre class="comment">PERTURB  Picks a parameter set close to another parameter set
+   NEWPAR = PERTURB(OLDPAR), returns NEWPAR, whose elements are between
+   80% and 120% of OLDPAR.
+
+   NEWPAR = PERTURB(OLDPAR,RANGE), returns NEWPAR, whose elements are
+   between OLDPAR*(1-RANGE/2) and OLDPAR*(1+RANGE/2).
+
+   See also <a href="generateguess.html" class="code" title="function options = generateguess(options,dcel)">GENERATEGUESS</a>, <a href="ezdiff.html" class="code" title="function [v,a,Ter] = ezdiff(Pc,VRT,MRT)">EZDIFF</a>.
+
+   Author: Joachim Vandekerckhove (joachim.vandekerckhove@psy.kuleuven.be)
+   Part of the DMA Toolbox. Please read the End User License Agreement,
+   contained in 'dmateula.txt' or by invoking the <a href="dmatlicense.html" class="code" title="function varargout = dmatlicense">DMATLICENSE</a> command.
+   See also http://ppw.kuleuven.be/okp/dmatoolbox.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+<li><a href="isgood.html" class="code" title="function [a bad] = isgood(par)">isgood</a>	ISGOOD  Check if parameter set is inside the general parameter space</li></ul>
+This function is called by:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+<li><a href="generateguess.html" class="code" title="function options = generateguess(options,dcel)">generateguess</a>	GENERATEGUESS  Generates an initial guess for the optimization algorithm</li></ul>
+<!-- crossreference -->
+
+
+
+<hr><address>Generated on Wed 11-Apr-2007 14:33:13 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

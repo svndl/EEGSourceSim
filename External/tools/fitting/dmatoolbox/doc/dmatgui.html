@@ -1,0 +1,70 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of dmatgui</title>
+  <meta name="keywords" content="dmatgui">
+  <meta name="description" content="DMATGUI  Graphical interface for the Diffusion Model Analysis Toolbox">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="images/m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html . -->
+<h1>dmatgui
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>DMATGUI  Graphical interface for the Diffusion Model Analysis Toolbox</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>function dmatgui(varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="fragment"><pre class="comment">DMATGUI  Graphical interface for the Diffusion Model Analysis Toolbox
+   DMATGUI opens a graphical user interface that helps you build an array
+   of OPTIONS structures for use in DMAT. The structures are fed into the
+   MULTIESTV4 function along with a dataset you choose, and results are
+   presented in the GUI.
+
+   The function also contains some extra features, such as a graphical
+   interface to simulating data, and a tool for descriptive statistical
+   analysis.
+
+   DMATGUI makes use of the undocumented (and thus unsupported) function
+   UITABLE, for which some functionality may change with newer versions of
+   MATLAB. DMATGUI was written and tested on:
+      MATLAB Version 7.2.0.232 (R2006a)
+      Operating System: Microsoft Windows XP Version 5.1 (Build 2600:
+      Service Pack 2)
+      Java VM Version: Java 1.5.0 with Sun Microsystems Inc. Java
+      HotSpot(TM) Client VM mixed mode
+
+   If you have a more recent version of MATLAB and DMATGUI (in particular,
+   the tables and spreadsheets) exhibits unexpected behavior, check the
+   website for updates.
+
+   See also <a href="multiestv4.html" class="code" title="function output=multiestv4(varargin)">MULTIESTV4</a>.
+
+   Author: Joachim Vandekerckhove (joachim.vandekerckhove@psy.kuleuven.be)
+   Part of the DMA Toolbox. Please read the End User License Agreement,
+   contained in 'dmateula.txt' or by invoking the <a href="dmatlicense.html" class="code" title="function varargout = dmatlicense">DMATLICENSE</a> command.
+   See also http://ppw.kuleuven.be/okp/dmatoolbox.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+<li><a href="dmat_textmode.html" class="code" title="function DMAT = dmat_textmode(DMAT)">dmat_textmode</a>	DMAT_TEXTMODE  Temporarily leave graphical interface while in DMATGUI</li><li><a href="dmatgui.html" class="code" title="function dmatgui(varargin)">dmatgui</a>	DMATGUI  Graphical interface for the Diffusion Model Analysis Toolbox</li><li><a href="dmatref.html" class="code" title="function varargout = dmatref(num)">dmatref</a>	DMATREF  Returns the proper references to the DMA Toolbox</li><li><a href="dmatrescue.html" class="code" title="function dmatrescue(varargin)">dmatrescue</a>	DMATRESCUE  Rescue tool for recovering DMAT back-ups</li><li><a href="dmatsite.html" class="code" title="function varargout = dmatsite">dmatsite</a>	DMATSITE  The DMA Toolbox website: http://ppw.kuleuven.be/okp/dmatoolbox/</li><li><a href="eachcell.html" class="code" title="function out = eachcell(fcn,in,unwise)">eachcell</a>	EACHCELL  Performs a function on each cell of a cell matrix.</li><li><a href="edfcdf.html" class="code" title="function varargout = edfcdf(data,N,rep,param,quantiles,handle)">edfcdf</a>	EDFCDF Plot cumulative distributions of reaction time</li><li><a href="ezdiff.html" class="code" title="function [v,a,Ter] = ezdiff(Pc,VRT,MRT)">ezdiff</a>	EZDIFF  Solves the EZDIFF system of equations</li><li><a href="isgood.html" class="code" title="function [a bad] = isgood(par)">isgood</a>	ISGOOD  Check if parameter set is inside the general parameter space</li><li><a href="loaddmatdata.html" class="code" title="function varargout=loaddmatdata(fn)">loaddmatdata</a>	LOADDMATDATA  Load a data file for DMAT</li><li><a href="m2q.html" class="code" title="function output=m2q(fname,silent_flag)">m2q</a>	M2Q  Read an M-file produced by DMATGUI and extract OPTIONS</li><li><a href="modelfittable.html" class="code" title="function varargout = modelfittable(output,fn,nums)">modelfittable</a>	MODELFITTABLE  Table with model properties</li><li><a href="multiestv4.html" class="code" title="function output=multiestv4(varargin)">multiestv4</a>	MULTIESTV4  Fits the diffusion model to a data set</li><li><a href="multisimul.html" class="code" title="function data = multisimul(par,N,seed)">multisimul</a>	MULTISIMUL  Generates data for multiple conditions from a diffusion model</li><li><a href="namepars.html" class="code" title="function varargout = namepars(varargin)">namepars</a>	NAMEPARS  Shows and names free parameters</li><li><a href="outputtoxls.html" class="code" title="function outputtoxls(data,output,fn)">outputtoxls</a>	OUTPUTTOXLS  Export DMAT output to structured Excel spreadsheet</li><li><a href="paramplot.html" class="code" title="function varargout = paramplot(param,errbar,handle)">paramplot</a>	PARAMPLOT  Plot parameters over conditions</li><li><a href="plotewma.html" class="code" title="function varargout=plotewma(ewmaplot,axhan)">plotewma</a>	PLOTEWMA  Shows an EWMA control chart for reaction time and accuracy</li><li><a href="q2m.html" class="code" title="function msg = q2m(queue,mfpath,mfname,datafile)">q2m</a>	Q2M  Produces an M-file to prepare and execute a DMAT queue</li><li><a href="qpplot.html" class="code" title="function varargout=qpplot(data,perc,param,handle)">qpplot</a>	QPPLOT  Quantile probability plots</li><li><a href="splitdata.html" class="code" title="function dcell = splitdata(data,splitreply)">splitdata</a>	SPLITDATA  Splits a dataset by putting each condition into a cell</li><li><a href="standardparset.html" class="code" title="function param=standardparset(parset,v)">standardparset</a>	STANDARDPARSET  Standard diffusion model parameter sets</li></ul>
+This function is called by:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+<li><a href="dmatgui.html" class="code" title="function dmatgui(varargin)">dmatgui</a>	DMATGUI  Graphical interface for the Diffusion Model Analysis Toolbox</li></ul>
+<!-- crossreference -->
+
+
+
+<hr><address>Generated on Wed 11-Apr-2007 14:33:13 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

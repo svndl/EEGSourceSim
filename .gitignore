@@ -1,0 +1,6 @@
+*.DS_Store
+*~
+Examples/ResultData/*
+Examples/Figures/*
+Examples/ExampleData*
+*.asv

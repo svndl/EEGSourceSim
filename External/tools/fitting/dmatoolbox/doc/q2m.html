@@ -1,0 +1,60 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of q2m</title>
+  <meta name="keywords" content="q2m">
+  <meta name="description" content="Q2M  Produces an M-file to prepare and execute a DMAT queue">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="images/m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html . -->
+<h1>q2m
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>Q2M  Produces an M-file to prepare and execute a DMAT queue</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>function msg = q2m(queue,mfpath,mfname,datafile) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="fragment"><pre class="comment">Q2M  Produces an M-file to prepare and execute a DMAT queue
+   MSG = Q2M(QUEUE,MFPATH,MFNAME,DATAFILE), where QUEUE is an array of
+   OPTIONS structures for DMAT, MFPATH and MFNAME are the desired path and
+   name for the M-file, and DATAFILE is the file containing the data,
+   produces an M-file which can be executed in order to rebuild the
+   OPTIONS structure and run DMAT. The returned value MSG is empty if the
+   file was succesfully written, and contains a system-dependent error
+   message otherwise.
+
+   Warning: For very large design matrices, part of the options statements
+   in the generated M-file may not work unless the line of code is split
+   over several lines.
+
+   See also <a href="multiestv4.html" class="code" title="function output=multiestv4(varargin)">MULTIESTV4</a>, <a href="m2q.html" class="code" title="function output=m2q(fname,silent_flag)">M2Q</a>.
+
+   Author: Joachim Vandekerckhove (joachim.vandekerckhove@psy.kuleuven.be)
+   Part of the DMA Toolbox. Please read the End User License Agreement,
+   contained in 'dmateula.txt' or by invoking the <a href="dmatlicense.html" class="code" title="function varargout = dmatlicense">DMATLICENSE</a> command.
+   See also http://ppw.kuleuven.be/okp/dmatoolbox.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+<li><a href="dmatsite.html" class="code" title="function varargout = dmatsite">dmatsite</a>	DMATSITE  The DMA Toolbox website: http://ppw.kuleuven.be/okp/dmatoolbox/</li><li><a href="iseye.html" class="code" title="function b = iseye(a)">iseye</a>	ISEYE  Check if input is an identity matrix</li><li><a href="var2str.html" class="code" title="function str = var2str(var)">var2str</a>	VAR2STR  Print variable contents to a MATLAB string</li></ul>
+This function is called by:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+<li><a href="dmatgui.html" class="code" title="function dmatgui(varargin)">dmatgui</a>	DMATGUI  Graphical interface for the Diffusion Model Analysis Toolbox</li></ul>
+<!-- crossreference -->
+
+
+
+<hr><address>Generated on Wed 11-Apr-2007 14:33:13 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

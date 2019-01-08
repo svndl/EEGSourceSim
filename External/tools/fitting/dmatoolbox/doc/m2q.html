@@ -1,0 +1,67 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of m2q</title>
+  <meta name="keywords" content="m2q">
+  <meta name="description" content="M2Q  Read an M-file produced by DMATGUI and extract OPTIONS">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="images/m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html . -->
+<h1>m2q
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>M2Q  Read an M-file produced by DMATGUI and extract OPTIONS</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>function output=m2q(fname,silent_flag) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="fragment"><pre class="comment"> M2Q  Read an M-file produced by DMATGUI and extract OPTIONS
+   OPTIONS = M2Q(FILENAME), where filename is the full path to an M-file
+   which was produced by the 'save to M-file' function in DMATGUI,
+   extracts the OPTIONS array (the queue) from that M-file.
+   The reading and interpreting of an M-file is a bit tricky, so errors
+   might occur. In general, if the input file is an *unedited* M-file from
+   DMATGUI, it should work. If the M-file has been significantly altered,
+   recovering the OPTIONS structure might not work.
+
+   In practice, this function reads and executes the script until the
+   function 'runqueue' is encountered (then it stops), and then tries to
+   find a structure that is called 'options' or has the field 'Name' in
+   it. Errors will occur if no structures are found, more than one is
+   found but none are called 'options' or have a 'Name' field. If more
+   than one with that field is found, the first one encountered will be
+   chosen.
+
+   The function will not work if there are lines of code (except comments)
+   in the M-file that do not end with ';', ',', or '...'.
+
+   See also <a href="dmatgui.html" class="code" title="function dmatgui(varargin)">DMATGUI</a>.
+
+   Author: Joachim Vandekerckhove (joachim.vandekerckhove@psy.kuleuven.be)
+   Part of the DMA Toolbox. Please read the End User License Agreement,
+   contained in 'dmateula.txt' or by invoking the <a href="dmatlicense.html" class="code" title="function varargout = dmatlicense">DMATLICENSE</a> command.
+   See also http://ppw.kuleuven.be/okp/dmatoolbox.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+<li><a href="eachcell.html" class="code" title="function out = eachcell(fcn,in,unwise)">eachcell</a>	EACHCELL  Performs a function on each cell of a cell matrix.</li></ul>
+This function is called by:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+<li><a href="dmatgui.html" class="code" title="function dmatgui(varargin)">dmatgui</a>	DMATGUI  Graphical interface for the Diffusion Model Analysis Toolbox</li></ul>
+<!-- crossreference -->
+
+
+
+<hr><address>Generated on Wed 11-Apr-2007 14:33:13 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

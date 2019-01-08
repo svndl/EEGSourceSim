@@ -1,0 +1,78 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of absfit</title>
+  <meta name="keywords" content="absfit">
+  <meta name="description" content="ABSFIT  Calculates model fit measures">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="images/m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html . -->
+<h1>absfit
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>ABSFIT  Calculates model fit measures</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>function fstr = absfit(param,data,k) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="fragment"><pre class="comment">ABSFIT  Calculates model fit measures
+   FSTRUCT = ABSFIT(PARAM,DATA,DF), where PARAM is a full parameter set
+   (usually the estimated parameter set), DATA is a cell matrix where
+   each cell represents a condition, and each cell is formatted as
+   explained in the help for FITDIFFV13, and DF is the number of degrees
+   of freedom in the model, returns FSTRUCT, a structure with the
+   following fields:
+      .IgnoredConditions         Logical index to any conditions that have
+                                 been ignored during the fitting (due to
+                                 too few data points). Column 1 is for X=0
+                                 responses and Column 2 for X=1.
+      .ObservedFrequencies       The observed response frequencies, split
+                                 by condition, bin, and response.
+                                 Odd-numbered rows are for X=0 responses,
+                                 even-numbered for X=1. Rows 1 and 2 are
+                                 for condition 1, 3 and 4 for condition 2
+                                 etc. Columns are for bins.
+      .ObservedProportions       The observed response proportions.
+      .PredictedFrequencies      The predicted response frequencies.
+      .PredictedProportions      The predicted response frequencies.
+      .LogLikelihoodModel        -2*log-likelihood of the data, given the
+                                 model.
+      .LogLikelihoodData         -2*log-likelihood of the data, given the
+                                 saturated model.
+      .LogLikelihoodRatio        The log-likelihood ratio statistic G2.
+      .ChiSquare                 The Chi-Square statistic X2.
+      .AIC                       The Akaike Information Criterion.
+      .AICc                      The Small-Sample Akaike Information
+                                 Criterion.
+      .BIC                       The Bayesian Information Criterion.
+
+   See also <a href="modelfittable.html" class="code" title="function varargout = modelfittable(output,fn,nums)">MODELFITTABLE</a> and <a href="multiestv4.html" class="code" title="function output=multiestv4(varargin)">MULTIESTV4</a>.
+
+   Author: Joachim Vandekerckhove (joachim.vandekerckhove@psy.kuleuven.be)
+   Part of the DMA Toolbox. Please read the End User License Agreement,
+   contained in 'dmateula.txt' or by invoking the <a href="dmatlicense.html" class="code" title="function varargout = dmatlicense">DMATLICENSE</a> command.
+   See also http://ppw.kuleuven.be/okp/dmatoolbox.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+<li><a href="cdfdif.html" class="code" title="function cdfdif(varargin)">cdfdif</a>	CDFDIF  Calculates the conditional CDF of the Ratcliff diffusion model.</li><li><a href="invcdfdif.html" class="code" title="function rts = invcdfdif(perc,rep,output,precision)">invcdfdif</a>	INVCDFDIF  Inverse of the diffusion defective cumulative density function</li></ul>
+This function is called by:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+<li><a href="multiestv4.html" class="code" title="function output=multiestv4(varargin)">multiestv4</a>	MULTIESTV4  Fits the diffusion model to a data set</li><li><a href="quantest.html" class="code" title="function output=quantest(varargin)">quantest</a>	QUANTEST  Fits the diffusion model to a data represented by quantiles only</li></ul>
+<!-- crossreference -->
+
+
+
+<hr><address>Generated on Wed 11-Apr-2007 14:33:13 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

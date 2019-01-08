@@ -1,0 +1,56 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of isvaliddataset</title>
+  <meta name="keywords" content="isvaliddataset">
+  <meta name="description" content="ISVALIDDATASET  Check if input is a valid data set for DMAT">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="images/m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html . -->
+<h1>isvaliddataset
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>ISVALIDDATASET  Check if input is a valid data set for DMAT</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>function [b mssg] = isvaliddataset(data,cols) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="fragment"><pre class="comment"> ISVALIDDATASET  Check if input is a valid data set for DMAT
+   B = ISVALIDDATASET(DATA,COLS), where DATA is the matrix to be checked,
+   and COLS is 1, 2, or 3, depending on the number of columns expected.
+      If COLS is 3, the structure should be [condition response seconds].
+      If COLS is 2, the structure should be [response seconds].
+      If COLS is 1, the structure should be [seconds].
+   B indicates if this is true.
+
+   [B,TEXT] = ISVALIDDATASET(DATA,COLS) also returns a text string
+   explaining what was wrong with the data matrix.
+
+   Author: Joachim Vandekerckhove (joachim.vandekerckhove@psy.kuleuven.be)
+   Part of the DMA Toolbox. Please read the End User License Agreement,
+   contained in 'dmateula.txt' or by invoking the DMATLICENSE command. 
+   See also http://ppw.kuleuven.be/okp/dmatoolbox.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+<li><a href="descriptives.html" class="code" title="function varargout = descriptives(fulldata,fn)">descriptives</a>	DESCRIPTIVES  Compute descriptive statistics for two-choice RT data</li><li><a href="ewmav2.html" class="code" title="function [cutoff,dmatewmaplot]=ewmav2(data,L,l,s)">ewmav2</a>	EWMAV2  Determine RT cut-off with the EWMA method</li><li><a href="loaddmatdata.html" class="code" title="function varargout=loaddmatdata(fn)">loaddmatdata</a>	LOADDMATDATA  Load a data file for DMAT</li><li><a href="multiestv4.html" class="code" title="function output=multiestv4(varargin)">multiestv4</a>	MULTIESTV4  Fits the diffusion model to a data set</li><li><a href="qpplot.html" class="code" title="function varargout=qpplot(data,perc,param,handle)">qpplot</a>	QPPLOT  Quantile probability plots</li><li><a href="runqueue.html" class="code" title="function output = runqueue(data,queue,guessorder)">runqueue</a>	RUNQUEUE  Runs a queue of DMA models</li><li><a href="splitdata.html" class="code" title="function dcell = splitdata(data,splitreply)">splitdata</a>	SPLITDATA  Splits a dataset by putting each condition into a cell</li></ul>
+<!-- crossreference -->
+
+
+
+<hr><address>Generated on Wed 11-Apr-2007 14:33:13 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

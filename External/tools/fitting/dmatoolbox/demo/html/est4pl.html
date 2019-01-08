@@ -1,0 +1,345 @@
+<html xmlns:mwsh="http://www.mathworks.com/namespace/mcode/v1/syntaxhighlight.dtd">
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   
+      <!--
+This HTML is auto-generated from an M-file.
+To make changes, update the M-file and republish this document.
+      -->
+      <title>FIT4PL  Fit a nonlinear model to a parameter (demo script)</title>
+      <meta name="generator" content="MATLAB 7.2">
+      <meta name="date" content="2006-08-31">
+      <meta name="m-file" content="est4pl"><style>
+
+body {
+  background-color: white;
+  margin:10px;
+}
+
+h1 {
+  color: #990000; 
+  font-size: x-large;
+}
+
+h2 {
+  color: #990000;
+  font-size: medium;
+}
+
+/* Make the text shrink to fit narrow windows, but not stretch too far in 
+wide windows.  On Gecko-based browsers, the shrink-to-fit doesn't work. */ 
+p,h1,h2,div.content div {
+  /* for MATLAB's browser */
+  width: 600px;
+  /* for Mozilla, but the "width" tag overrides it anyway */
+  max-width: 600px;
+  /* for IE */
+  width:expression(document.body.clientWidth > 620 ? "600px": "auto" );
+}
+
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
+@media print {
+  pre.codeinput {word-wrap:break-word; width:100%;}
+} 
+
+span.keyword {color: #0000FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+
+pre.codeoutput {
+  color: #666666;
+  padding: 10px;
+}
+
+pre.error {
+  color: red;
+}
+
+p.footer {
+  text-align: right;
+  font-size: xx-small;
+  font-weight: lighter;
+  font-style: italic;
+  color: gray;
+}
+
+  </style></head>
+   <body>
+      <div class="content">
+         <h1>FIT4PL  Fit a nonlinear model to a parameter (demo script)</h1>
+         <introduction>
+            <p>By default, DMAT only allows users to fit linear models (because it uses design matrices to apply simple models. However,
+               this is only a practical restriction, and not a theoretical one. With more advanced use of DMAT, models of higher complexity
+               can be implemented. To do this, you need to bypass the <tt>multiestv4</tt> function as demonstrated in this script.
+            </p>
+         </introduction>
+         <h2>Contents</h2>
+         <div>
+            <ul>
+               <li><a href="#1">Generate some data with nonlinear drifts</a></li>
+               <li><a href="#12">First fit the free model</a></li>
+               <li><a href="#15">Obtaining the link parameters</a></li>
+               <li><a href="#16">Estimate parameters of the new model</a></li>
+               <li><a href="#21">Process the output carefully</a></li>
+            </ul>
+         </div>
+         <h2>Generate some data with nonlinear drifts<a name="1"></a></h2>
+         <p>We're generating data where all parameters are constant, except for the drift rate, which varies nonlinearly with a covariate
+            <tt>X</tt>. The nonlinear link function we use is the four-parameter logistic function:
+         </p>
+         <p><img vspace="5" hspace="5" src="est4pl_eq36036.png"> </p>
+         <p>The parameters are:</p>
+         <div>
+            <ul>
+               <li>Upper asymptote <i>h</i> = 0.30;
+               </li>
+               <li>Lower asymptote <i>l</i> = -0.15;
+               </li>
+               <li>Location <i>c</i> = 0.50;
+               </li>
+               <li>Slope <i>b</i> = 1.50;
+               </li>
+            </ul>
+         </div>
+         <p>First, clean up the workspace</p><pre class="codeinput">clear <span class="string">all</span>
+close <span class="string">all</span>
+</pre><p>Generate the covariate <tt>X</tt>:
+         </p><pre class="codeinput">x = linspace(-5,4,10);
+</pre><p>Prepare the four-parameter logistic link:</p><pre class="codeinput">logistic = @(p,x) p(2)+(p(1)-p(2))./(1+exp(-p(4).*x-p(3)));
+p = [0.30 -0.15 0.50 1.50]; <span class="comment">% [h l c b]</span>
+</pre><p>Drift rates are a logistic function of the covariate:</p><pre class="codeinput">drifts = logistic(p,x);
+</pre><p>So the parameter set is this:</p><pre class="codeinput">param = repmat(standardparset(0,0),5,1);
+param(:,7) = drifts
+</pre><pre class="codeoutput">param =
+    0.0800    0.3000    0.0800    0.0400    0.0200    0.0200   -0.1496
+    0.0800    0.3000    0.0800    0.0400    0.0200    0.0200   -0.1482
+    0.0800    0.3000    0.0800    0.0400    0.0200    0.0200   -0.1419
+    0.0800    0.3000    0.0800    0.0400    0.0200    0.0200   -0.1159
+    0.0800    0.3000    0.0800    0.0400    0.0200    0.0200   -0.0290
+    0.0800    0.3000    0.0800    0.0400    0.0200    0.0200    0.1301
+    0.0800    0.3000    0.0800    0.0400    0.0200    0.0200    0.2464
+    0.0800    0.3000    0.0800    0.0400    0.0200    0.0200    0.2868
+    0.0800    0.3000    0.0800    0.0400    0.0200    0.0200    0.2970
+    0.0800    0.3000    0.0800    0.0400    0.0200    0.0200    0.2993
+</pre><p>This is what the drifts look like:</p><pre class="codeinput">plot(x,drifts,<span class="string">'k:'</span>)
+axis <span class="string">square</span>
+box <span class="string">off</span>
+hold <span class="string">on</span>
+</pre><img vspace="5" hspace="5" src="est4pl_01.png"> <p>Now generate data from these parameters:</p><pre class="codeinput">data = multisimul(param,10000,1);
+</pre><h2>First fit the free model<a name="12"></a></h2>
+         <p>There are two ways to implement nonlinear designs. The easy way, described in this demo, involves fitting the free model (i.e.,
+            no restrictions on drift rate across conditions) first, and then using the point estimates of the drift rates to get a good
+            initial guess of the logistic parameters. But, there may be several reasons for which you might not want to fit this free
+            model first, and then you should apply the method demonstrated in <tt>fit4pl_hard</tt>.
+         </p>
+         <p>In this demo, we start by fitting the free model in the usual way:</p><pre class="codeinput">desmat = [{<span class="string">'1'</span>},{<span class="string">'1'</span>},{<span class="string">'1'</span>},{<span class="string">'1'</span>},{<span class="string">'1'</span>},{<span class="string">'1'</span>},{[]}];
+output.Minimum = param;
+output = multiestv4(data,<span class="string">'DesignMatrix'</span>,desmat,<span class="keyword">...</span>
+    <span class="string">'Name'</span>,<span class="string">'Free model'</span>);
+</pre><pre class="codeoutput">
+      Guess     :  409570.65142700     (31-Aug-2006 15:37:58)
+      Simplex  1:  375943.64050236     (31-Aug-2006 15:38:16)
+      Simplex  2:  375310.51779322     (31-Aug-2006 15:38:35)
+      Simplex  3:  375249.47657239     (31-Aug-2006 15:38:54)
+      Simplex  4:  375228.75482478     (31-Aug-2006 15:41:18)
+      Final X2  :  375228.75482478     (31-Aug-2006 15:41:45)
+
+</pre><p>Overlay the previous plot with recovered drift rates:</p><pre class="codeinput">plot(x,output.Minimum(:,7),<span class="string">'bo'</span>)
+</pre><img vspace="5" hspace="5" src="est4pl_02.png"> <h2>Obtaining the link parameters<a name="15"></a></h2>
+         <p>Obtaining the four parameters of the link function is an optimization problem in itself. Fortunately, fitting a nonlinear
+            regression line through the drift rates isn't very difficult. Here, we use the Statistics Toolbox function <tt>nlinfit</tt>. If you don't have it... Well, nonlinear regression isn't <i>that</i> hard.
+         </p><pre class="codeinput">logpars = nlinfit(x,output.Minimum(:,7)',logistic,p)
+</pre><pre class="codeoutput">logpars =
+    0.2937   -0.1481    0.5071    1.5142
+</pre><h2>Estimate parameters of the new model<a name="16"></a></h2>
+         <p>The previous execution of <tt>multiestv4</tt> has provided us with an objective function that is almost the one we need (in the field output.Options.objecfun), and with
+            a design vector that minimizes this objective (in output.Options.controls.small). Starting from this objective function, we
+            can construct a new, higher-order objective function that reduces the number of parameters even further. This second-level
+            objective needs to accept ten parameters: one for each of the other diffusion model parameters, and four for the link function
+            with which it will construct drift rates for all conditions.
+         </p>
+         <p>We can formulate the objective like this, taking only one input vector, and transforming that into a vector that the old objective
+            will like:
+         </p><pre class="codeinput">wd=6; <span class="comment">% number of free parameters excluding drift, for reusability gcp</span>
+newobj = @(y) output.Options.objecfun([reshape(y(1:wd),1,wd),<span class="keyword">...</span>
+    logistic(y(wd+(1:4)),x)]);
+</pre><p>Now we insert the new objective where the old one was, and store the old objective somewhere safe:</p><pre class="codeinput">output.Options.oldobj = output.Options.objecfun;
+output.Options.objecfun = newobj;
+</pre><p>We obtained an initial guess for the link parameters and the other diffusion parameters from the free model. We put that initial
+            guess into the output.Options.controls.small field:
+         </p><pre class="codeinput">guess = logpars(:);
+output.Options.controls.small = [output.Options.controls.small(1:wd);guess];
+</pre><p>And run the generative algorithm:</p><pre class="codeinput">[ign options]=genalg(output.Options);
+</pre><pre class="codeoutput">
+      Guess     :  375232.05518228     (31-Aug-2006 15:41:46)
+      Simplex  1:  375231.71310713     (31-Aug-2006 15:42:16)
+      Simplex  2:  375231.70783922     (31-Aug-2006 15:42:50)
+      Simplex  3:  375231.70783410     (31-Aug-2006 15:43:27)
+      Simplex  4:  375231.70783226     (31-Aug-2006 15:44:26)
+      Final X2  :  375231.70783226     (31-Aug-2006 15:44:42)
+
+</pre><h2>Process the output carefully<a name="21"></a></h2>
+         <p>The output as <tt>genalg</tt> returns it, is based on a linear model and thus not completely correct. We need to extract the design vector of the level
+            2 model and restore the level 1 design vector from that.
+         </p>
+         <p>These are the link parameters (the seventh through tenth elements of the design vector):</p><pre class="codeinput">linkpar = options.controls.small(wd+(1:4));
+</pre><p>And this is how we recover the drift rates from the parameters:</p><pre class="codeinput">designvec_l2 = options.controls.small;
+designvec_l1 = [designvec_l2(1:wd);logistic(designvec_l2(wd+(1:4)),x)'];
+options.controls.small = designvec_l1;
+options.controls = bigger(options.controls);
+minimum = options.controls.large
+</pre><pre class="codeoutput">minimum =
+    0.0799    0.2990    0.0786    0.0399    0.0166    0.0193   -0.1477
+    0.0799    0.2990    0.0786    0.0399    0.0166    0.0193   -0.1464
+    0.0799    0.2990    0.0786    0.0399    0.0166    0.0193   -0.1404
+    0.0799    0.2990    0.0786    0.0399    0.0166    0.0193   -0.1152
+    0.0799    0.2990    0.0786    0.0399    0.0166    0.0193   -0.0298
+    0.0799    0.2990    0.0786    0.0399    0.0166    0.0193    0.1277
+    0.0799    0.2990    0.0786    0.0399    0.0166    0.0193    0.2420
+    0.0799    0.2990    0.0786    0.0399    0.0166    0.0193    0.2812
+    0.0799    0.2990    0.0786    0.0399    0.0166    0.0193    0.2909
+    0.0799    0.2990    0.0786    0.0399    0.0166    0.0193    0.2931
+</pre><p>And overlay the recovered drifts in the plot again:</p><pre class="codeinput">plot(x,minimum(:,7),<span class="string">'rx-'</span>)
+hold <span class="string">off</span>
+</pre><img vspace="5" hspace="5" src="est4pl_03.png"> <p class="footer"><br>
+            Published with MATLAB&reg; 7.2<br></p>
+      </div>
+      <!--
+##### SOURCE BEGIN #####
+%% FIT4PL  Fit a nonlinear model to a parameter (demo script)
+% By default, DMAT only allows users to fit linear models (because it uses
+% design matrices to apply simple models. However, this is only a practical
+% restriction, and not a theoretical one. With more advanced use of DMAT,
+% models of higher complexity can be implemented. To do this, you need to
+% bypass the |multiestv4| function as demonstrated in this script.
+
+%% Generate some data with nonlinear drifts
+% We're generating data where all parameters are constant, except for the
+% drift rate, which varies nonlinearly with a covariate |X|. The nonlinear
+% link function we use is the four-parameter logistic function:
+%%
+%
+% $$v = l + (h-l) \frac{e^{bX+c}}{1+e^{bX+c}}$$
+%
+%%
+% The parameters are:
+%%
+% * Upper asymptote _h_ = 0.30;
+% * Lower asymptote _l_ = -0.15;
+% * Location _c_ = 0.50;
+% * Slope _b_ = 1.50;
+%%
+% First, clean up the workspace
+clear all
+close all
+%%
+% Generate the covariate |X|:
+x = linspace(-5,4,10);
+%%
+% Prepare the four-parameter logistic link:
+logistic = @(p,x) p(2)+(p(1)-p(2))./(1+exp(-p(4).*x-p(3)));
+p = [0.30 -0.15 0.50 1.50]; % [h l c b]
+%%
+% Drift rates are a logistic function of the covariate:
+drifts = logistic(p,x);
+%%
+% So the parameter set is this:
+param = repmat(standardparset(0,0),5,1);
+param(:,7) = drifts
+%% 
+% This is what the drifts look like:
+plot(x,drifts,'k:')
+axis square
+box off
+hold on
+%%
+% Now generate data from these parameters:
+data = multisimul(param,10000,1);
+
+%% First fit the free model
+% There are two ways to implement nonlinear designs. The easy way,
+% described in this demo, involves fitting the free model (i.e., no
+% restrictions on drift rate across conditions) first, and then using the
+% point estimates of the drift rates to get a good initial guess of the
+% logistic parameters. But, there may be several reasons for which you
+% might not want to fit this free model first, and then you should apply
+% the method demonstrated in |fit4pl_hard|.
+%%
+% In this demo, we start by fitting the free model in the usual way:
+desmat = [{'1'},{'1'},{'1'},{'1'},{'1'},{'1'},{[]}];
+output.Minimum = param;
+output = multiestv4(data,'DesignMatrix',desmat,...
+    'Name','Free model');
+
+%%
+% Overlay the previous plot with recovered drift rates:
+plot(x,output.Minimum(:,7),'bo')
+
+%% Obtaining the link parameters
+% Obtaining the four parameters of the link function is an optimization
+% problem in itself. Fortunately, fitting a nonlinear regression line
+% through the drift rates isn't very difficult. Here, we use the Statistics
+% Toolbox function |nlinfit|. If you don't have it... Well, nonlinear
+% regression isn't _that_ hard.
+logpars = nlinfit(x,output.Minimum(:,7)',logistic,p)
+
+%% Estimate parameters of the new model
+% The previous execution of |multiestv4| has provided us with an objective
+% function that is almost the one we need (in the field
+% output.Options.objecfun), and with a design vector that minimizes this
+% objective (in output.Options.controls.small). Starting from this
+% objective function, we can construct a new, higher-order objective
+% function that reduces the number of parameters even further. This
+% second-level objective needs to accept ten parameters: one for each of
+% the other diffusion model parameters, and four for the link function with
+% which it will construct drift rates for all conditions.
+%%
+% We can formulate the objective like this, taking only one input vector,
+% and transforming that into a vector that the old objective will like:
+wd=6; % number of free parameters excluding drift, for reusability gcp
+newobj = @(y) output.Options.objecfun([reshape(y(1:wd),1,wd),...
+    logistic(y(wd+(1:4)),x)]);
+%%
+% Now we insert the new objective where the old one was, and store the old
+% objective somewhere safe:
+output.Options.oldobj = output.Options.objecfun;
+output.Options.objecfun = newobj;
+%%
+% We obtained an initial guess for the link parameters and the other
+% diffusion parameters from the free model. We put that initial guess into
+% the output.Options.controls.small field:
+guess = logpars(:);
+output.Options.controls.small = [output.Options.controls.small(1:wd);guess];
+%%
+% And run the generative algorithm:
+[ign options]=genalg(output.Options);
+
+%% Process the output carefully
+% The output as |genalg| returns it, is based on a linear model and thus
+% not completely correct. We need to extract the design vector of the
+% level 2 model and restore the level 1 design vector from that.
+%%
+% These are the link parameters (the seventh through tenth elements of the
+% design vector):
+linkpar = options.controls.small(wd+(1:4));
+%%
+% And this is how we recover the drift rates from the parameters:
+designvec_l2 = options.controls.small;
+designvec_l1 = [designvec_l2(1:wd);logistic(designvec_l2(wd+(1:4)),x)'];
+options.controls.small = designvec_l1;
+options.controls = bigger(options.controls);
+minimum = options.controls.large
+%%
+% And overlay the recovered drifts in the plot again:
+plot(x,minimum(:,7),'rx-')
+hold off
+
+##### SOURCE END #####
+-->
+   </body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of invcdfdif</title>
+  <meta name="keywords" content="invcdfdif">
+  <meta name="description" content="INVCDFDIF  Inverse of the diffusion defective cumulative density function">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="images/m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html . -->
+<h1>invcdfdif
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>INVCDFDIF  Inverse of the diffusion defective cumulative density function</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>function rts = invcdfdif(perc,rep,output,precision) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="fragment"><pre class="comment">INVCDFDIF  Inverse of the diffusion defective cumulative density function
+  X = INVCDFDIF(PERC,REP,OUTPUT,PRECISION), for output structure OUTPUT
+  and response REP, returns the response times associated with the
+  percentiles in PERC (for each condition), to a precision of PRECISION.
+  The values in PERC should be for the defective CDF (that is, between 0
+  and 1).
+
+  X = INVCDFDIF(PERC,REP,OUTPUT), uses a precision of 1e-4.
+
+  X = INVCDFDIF(PERC,REP,PARAM), for parameter vector PARAM and response
+  REP, returns the response times associated with the percentiles in PERC.
+
+  See also <a href="cdfdif.html" class="code" title="function cdfdif(varargin)">CDFDIF</a>.
+
+   Author: Joachim Vandekerckhove (joachim.vandekerckhove@psy.kuleuven.be)
+   Part of the DMA Toolbox. Please read the End User License Agreement,
+   contained in 'dmateula.txt' or by invoking the <a href="dmatlicense.html" class="code" title="function varargout = dmatlicense">DMATLICENSE</a> command.
+   See also http://ppw.kuleuven.be/okp/dmatoolbox.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+<li><a href="cdfdif.html" class="code" title="function cdfdif(varargin)">cdfdif</a>	CDFDIF  Calculates the conditional CDF of the Ratcliff diffusion model.</li><li><a href="isgood.html" class="code" title="function [a bad] = isgood(par)">isgood</a>	ISGOOD  Check if parameter set is inside the general parameter space</li></ul>
+This function is called by:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+<li><a href="absfit.html" class="code" title="function fstr = absfit(param,data,k)">absfit</a>	ABSFIT  Calculates model fit measures</li><li><a href="qpplot.html" class="code" title="function varargout=qpplot(data,perc,param,handle)">qpplot</a>	QPPLOT  Quantile probability plots</li></ul>
+<!-- crossreference -->
+
+
+
+<hr><address>Generated on Wed 11-Apr-2007 14:33:13 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

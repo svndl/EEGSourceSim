@@ -1,0 +1,78 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of setnodes</title>
+  <meta name="keywords" content="setnodes">
+  <meta name="description" content="SETNODES  Set the number of quadrature nodes used by DMAT">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="images/m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html . -->
+<h1>setnodes
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>SETNODES  Set the number of quadrature nodes used by DMAT</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>function setnodes(nr_nu,nr_z) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="fragment"><pre class="comment">SETNODES  Set the number of quadrature nodes used by DMAT
+   SETNODES(NR_NU,NR_Z) sets the number of quadrature nodes for the drift
+   rate integral (Gauss-Hermite nodes) to NR_NU, and the number of nodes
+   for the starting point integral (Gauss-Legendre nodes) to NR_Z. A .C
+   file (CDFDIF.C) is created and compiled to a binary file, with the
+   quadrature points hard-coded into the function.
+   If no input arguments are given, the default values 10 and 10 are used,
+   if only one input argument is given, NR_NU = NR_Z.
+
+   The maximum number of Gauss-Legendre nodes (NR_Z) is 40.
+
+   The number of Gauss-Hermite nodes (NR_NU) must an be even number.
+
+   For small datasets, the number of quadrature points may not have a
+   significant effect. Using low numbers (e.g., 6 for both) will then
+   yield faster convergence.
+
+   SETNODES requires use of a MEX-compiler (so it will execute 'mex
+   -setup' if necessary). This functionality has only been tested on a
+   Windows XP platform with the LCC C compiler.
+
+   SETNODES is more efficient if the Symbolic Toolbox is available.
+
+   Note that the compiled files that are included in the installation
+   package (containing 10 nodes for each integral) are generated with the
+   Symbolic Math Toolbox installed. If you do not have this Toolbox and
+   overwrite the compiled file, the computation of the CDF will be less
+   precise. However, uncompiled back-up files for 10 nodes or 30 nodes for
+   each integral are also included in the installation package (CDFDIF10.C
+   and CDFDIF30.C).
+
+   See also <a href="cdfdif.html" class="code" title="function cdfdif(varargin)">CDFDIF</a>.
+
+   Author: Joachim Vandekerckhove (joachim.vandekerckhove@psy.kuleuven.be)
+   Part of the DMA Toolbox. Please read the End User License Agreement,
+   contained in 'dmateula.txt' or by invoking the <a href="dmatlicense.html" class="code" title="function varargout = dmatlicense">DMATLICENSE</a> command.
+   See also http://ppw.kuleuven.be/okp/dmatoolbox.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+<li><a href="installer.html" class="code" title="function varargout = installer">installer</a>	INSTALLER  Adds DMAT folders to your MATLAB path</li></ul>
+<!-- crossreference -->
+
+
+
+<hr><address>Generated on Wed 11-Apr-2007 14:33:13 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

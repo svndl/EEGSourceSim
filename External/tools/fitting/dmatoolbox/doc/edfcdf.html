@@ -1,0 +1,65 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of edfcdf</title>
+  <meta name="keywords" content="edfcdf">
+  <meta name="description" content="EDFCDF Plot cumulative distributions of reaction time">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="images/m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<!-- menu.html . -->
+<h1>edfcdf
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>EDFCDF Plot cumulative distributions of reaction time</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="box"><strong>function varargout = edfcdf(data,N,rep,param,quantiles,handle) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+<div class="fragment"><pre class="comment">EDFCDF Plot cumulative distributions of reaction time
+   EDFCDF(RTS,CONDN,REP,PARAM,BINEDGES,HANDLE), plots an empirical and
+   theoretical cumulative distribution of reaction time, for the reaction
+   times in the vector RTS, for reply REP, overlaying a theoretical
+   cumulative distribution with parameters PARAM, adding reference lines
+   located at the values in BINEDGES, in the axes indicated by HANDLE.
+   RTS should contain only the reaction times for the specific reply,
+   while N should contain the number of data points in this condition
+   i.e., both replies).
+
+   EDFCDF(RTS,CONDN,REP,PARAM,BINEDGES), makes a new figure.
+
+   H = EDFCDF(...), returns a handle to the axes.
+
+   If the fourth and/or fifth argument are the empty matrix, theoretical
+   distributions and/or reference lines are omitted (but note that you
+   have to provide both arguments regardless).
+
+   See also <a href="qpplot.html" class="code" title="function varargout=qpplot(data,perc,param,handle)">QPPLOT</a>.
+
+   Author: Joachim Vandekerckhove (joachim.vandekerckhove@psy.kuleuven.be)
+   Part of the DMA Toolbox. Please read the End User License Agreement,
+   contained in 'dmateula.txt' or by invoking the <a href="dmatlicense.html" class="code" title="function varargout = dmatlicense">DMATLICENSE</a> command.
+   See also http://ppw.kuleuven.be/okp/dmatoolbox.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="images/up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+<li><a href="cdfdif.html" class="code" title="function cdfdif(varargin)">cdfdif</a>	CDFDIF  Calculates the conditional CDF of the Ratcliff diffusion model.</li></ul>
+This function is called by:
+<ul style="list-style-image:url(images/matlabicon.gif)">
+<li><a href="dmatgui.html" class="code" title="function dmatgui(varargin)">dmatgui</a>	DMATGUI  Graphical interface for the Diffusion Model Analysis Toolbox</li></ul>
+<!-- crossreference -->
+
+
+
+<hr><address>Generated on Wed 11-Apr-2007 14:33:13 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>
