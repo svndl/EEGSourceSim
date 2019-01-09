@@ -119,7 +119,7 @@ if ~isempty(roiChunk)
     signalM = max(mean(Fsig(FInds,:)));% max of signal
 
     % fft of noise
-    if size(sourceTemp,2)==size(noise,2)
+    if size(noise,2)==size(fwdMatrix,1)
         noi = noise;
     else
         noi = noise*fwdMatrix'+noiseSensor;
@@ -128,24 +128,24 @@ if ~isempty(roiChunk)
     noiM = mean(mean(Fnoi(FInds,:)));% % mean of noise
 
     SRatio = noiM/signalM;
-    sourceTemp(:,roiChunk(:,r)>0) = sourceTemp(:,roiChunk(:,r)>0).*SRatio;
+    sourceTemp = sourceTemp.*SRatio;
 end
 
 %% Adds noise to source signal
 if size(sourceTemp,2)==size(noise,2)
-    pow = 1;
+    pow = 1/2;
     sourceData = ((lambda/(lambda+1))^pow)*sourceTemp + ((1/(lambda+1))^pow) *noise;
     % TODO: reasonable addition of signal and noise
     if ndims(sourceData) == 3
         EEGData = zeros(size(sourceData,1),size(fwdMatrix,1),size(sourceData,3)) ;
         for trial_idx = 1:size(sourceData,3)
-            % sourceData(:,:,trial_idx) = sourceData(:,:,trial_idx)/norm(sourceData(:,:,trial_idx),'fro') ;% signal and noise are correlated randomly (not on average!). dirty workaround: normalize sum
+            %sourceData(:,:,trial_idx) = sourceData(:,:,trial_idx)/norm(sourceData(:,:,trial_idx),'fro') ;% signal and noise are correlated randomly (not on average!). dirty workaround: normalize sum
             % Generate EEG data by multiplication to forward matrix
             EEGData(:,:,trial_idx) = sourceData(:,:,trial_idx)*fwdMatrix'+noiseSensor(:,:,trial_idx);
 
         end
     else
-        sourceData = sourceData/norm(sourceData,'fro');% signal and noise are correlated randomly (not on average!). dirty hack: normalize sum
+        %sourceData = sourceData/norm(sourceData,'fro');
         % Generate EEG data by multiplication to forward matrix
         EEGData = sourceData*fwdMatrix'+noiseSensor;
     end
@@ -153,7 +153,7 @@ end
 % else: we add up in channel space
 EEGData_signal = sourceTemp*fwdMatrix';
 if size(EEGData_signal,2)==size(noise,2) % add up signal and noise in channel space
-    EEGData_signal = EEGData_signal/norm(EEGData_signal,'fro') ;
+    % EEGData_signal = EEGData_signal/norm(EEGData_signal,'fro') ;%%%%????????????????????????????
     EEGData = sqrt(lambda/(lambda+1)) *(EEGData_signal) + sqrt(1/(lambda+1)) *noise;
     sourceData = []; % data in source space is not available
 end

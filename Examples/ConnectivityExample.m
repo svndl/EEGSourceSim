@@ -67,7 +67,7 @@ if simulateEEG
                     disp(['Generating EEG: Epoch #' num2str(ep)]);
                     [EEGData_noise,~,EEGData_signal,~,~,masterList,subIDs] = mrC.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,...
                         'signalArray',TS_all(:,(ep-1)*eplength+1:ep*eplength)','signalsf',SF,'NoiseParams',Noise,'rois',All_RoiList,...
-                        'Save',true,'cndNum',1,'doSource' ,true,'signalSNRFreqBand',repmat([5 15],[size(TS_all,1) 1]),'doFwdProjectNoise',false);
+                        'Save',true,'cndNum',1,'doSource' ,true,'signalSNRFreqBand',[5 15],'doFwdProjectNoise',false);
                     OrigROIData{ep} = cellfun(@(x,y) x*y./repmat(sum(y), [size(x,1) 1]), SourceData, Wang_Chunks,'uni',false);% sum? or average?
                     ReconsROIData{ep} = cellfun(@(x,y,z) x*y*z./repmat(sum(z), [size(x,1) 1]), EEGData1,Inverse , Wang_Chunks,'uni',false);% sum? or average?
                     EEG{ep} = EEGData1;

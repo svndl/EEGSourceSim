@@ -120,10 +120,10 @@ function [noise, pink_noise, alpha_noise,sensor_noise] = GenerateNoise(f_samplin
     else
         error('%s is not implemented as spatial normalization method', spatial_normalization_type)
     end
-    
 
     sensor_noise = randn(n_samples, size(fwdMatrix,1)) ;
     sensor_noise = sensor_noise/norm(sensor_noise,'fro'); 
+    
 %% --------------------combine different types of noise--------------------
 if doFwdProjection
     norm_factor = sqrt(NoiseParams.mu.pink^2+NoiseParams.mu.alpha^2+NoiseParams.mu.sensor^2) ;
@@ -134,6 +134,7 @@ else
     noise = NoiseParams.mu.pink/norm_factor*pink_noise + NoiseParams.mu.alpha/norm_factor*alpha_noise ;
     noise = noise/norm(noise,'fro') ;
 end
+
 %% ---------------------------show resulting noise-------------------------
     if false % just to take a look at the noise components, averaged over all channels for power spectrum
         f = [-0.5:1/n_samples:0.5-1/n_samples]*f_sampling; % frequncy range
