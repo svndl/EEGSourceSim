@@ -146,6 +146,7 @@ function [EEGData,EEGAxx,EEGData_signal,EEGAxx_signal,sourceDataOrigin,masterLis
  
 %--------------------------set up default values---------------------------
 opt	= ParseArgs(varargin,...
+    'subSelect'        ,[],...
     'inverse'		, [], ...
     'rois'          , [], ...
     'roiType'       , 'wang',...
@@ -236,12 +237,21 @@ end
 
 %% ===========================GENERATE EEG signal==========================
 projectPathfold = projectPath;
+subIDs = subfolders(projectPathfold,0);
 projectPath = subfolders(projectPath,1); % find subjects in the main folder
+
+if isempty(opt.subSelect)
+    opt.subSelect = subIDs;
+end
+
+Inds = ismember(subIDs,opt.subSelect);
+subIDs = subIDs(Inds);
+projectPath = cellfun(@(x) fullfile(projectPathfold,x),subIDs,'uni',false);
+
 allFwdMatrices = {} ;
 for s = 1:length(projectPath)
     %--------------------------READ FORWARD SOLUTION---------------------------  
     % Read forward
-    [~,subIDs{s}] = fileparts(projectPath{s});
     disp (['Simulating EEG for subject ' subIDs{s}]);
     
     fwdPath = fullfile(projectPath{s},'_MNE_',[subIDs{s}]);
