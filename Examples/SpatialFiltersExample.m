@@ -23,10 +23,10 @@ else
 end
 
 %% Prepare the results folders
-FigPath = 'Figures';
-ResultPath = 'ResultData';
-if ~exist(fullfile(pwd,FigPath),'dir'),mkdir(FigPath);end
-if ~exist(fullfile(pwd,ResultPath),'dir'),mkdir(ResultPath);end
+FigPath = fullfile(SimFolder,'Examples','Figures');
+ResultPath = fullfile(SimFolder,'Examples','ResultData');
+if ~exist(fullfile(FigPath),'dir'),mkdir(FigPath);end
+if ~exist(fullfile(ResultPath),'dir'),mkdir(ResultPath);end
 
 %%
 % Pre-select ROIs
@@ -129,7 +129,7 @@ for nLambda_idx = 1:numel(Lambda_list)
         source_pattern = Source_pattern(:,:,subj_idx );
 
         decomp_methods = {'pca','ssd','csp','rca'} ;
-        considered_harms=[1,2] ;
+        considered_harms = snr_harmonics ;
 
         for nTrial_idx = 1:length(numTrials_list)
             nUsedTrials = numTrials_list(nTrial_idx);
@@ -158,7 +158,8 @@ for nLambda_idx = 1:numel(Lambda_list)
                     T = T.MergeTrials(thisNoiseAxx{sub});
                 end
                 thisNoiseAxx = T;
-
+                snrs_orig{s}(:,nLambda_idx,draw_idx)=mean(mean(thisAxx.Amp(signal_freq_idxs,:,:).^2)./mean(thisAxx.Amp(noise_freq_idxs,:,:).^2),3);
+                    
                 for decomp_method_idx = 1:length(decomp_methods)
                     this_decomp_method = decomp_methods{decomp_method_idx};
 
@@ -195,7 +196,7 @@ for nLambda_idx = 1:numel(Lambda_list)
                     % calculate error angles
                     freqs = [0:thisDecompAxx.nFr]*thisDecompAxx.dFHz;
                     signal_freq_idxs = find(ismember(freqs,thisFundFreq*considered_harms));
-                    noise_freq_idxs = [signal_freq_idxs-1,signal_freq_idxs+1] ;
+                    noise_freq_idxs = reshape([signal_freq_idxs-1;signal_freq_idxs+1],1,[]) ;
 
                     %err_angles.(this_decomp_method)(comp_idx,nTrial_idx,draw_idx) = 180/pi* acos(abs(source_pattern(:,1)'*thisA(:,comp_idx))/sqrt(sum(source_pattern(:,1).^2)*sum(thisA(:,comp_idx).^2))) ;
                     err_angles.(this_decomp_method){s}(:,1:size(thisA,2),nLambda_idx,draw_idx) = 180/pi* acos(abs(source_pattern'*thisA)./sqrt(repmat(sum(source_pattern.^2)',[1 size(thisA,2)]).*repmat(sum(thisA.^2),[size(source_pattern,2) 1]))) ;
@@ -208,21 +209,19 @@ for nLambda_idx = 1:numel(Lambda_list)
 
                     %calculate snrs assuming ssveps, mean over all trials
                     snrs.(this_decomp_method){s}(1:size(thisA,2),nLambda_idx,draw_idx)=mean(mean(thisDecompAxx.Amp(signal_freq_idxs,:,:).^2)./mean(thisDecompAxx.Amp(noise_freq_idxs,:,:).^2),3);
+                    
+                    % residual (mse over sampmles averaged and trials)
                     % calculate residuals as mse over samples and trials
-                    % TODO: needs some sort of normalization!!
-                    est_signal = squeeze(thisDecompAxx.Wave );               
-                    ref_signal = outSignal(1:100,:);%squeeze(repmat(EEGAxx_signal{1}.Wave(:,1,:),1,1,size(thisDecompAxx.Wave,3))) ;
-                    % normalize to equal power before calculating residual
-                    est_signal = est_signal./sqrt(mean(est_signal.^2,1));
-                    est_signal = repmat(mean(est_signal,3),[1 1 size(ref_signal,2)]);
+                    est_signal = thisDecompAxx.Wave ;               
+                    ref_signal = outSignal(1:100,:);
 
-                    ref_signal = ref_signal./sqrt(mean(ref_signal.^2,1));
-                    ref_signal = permute(repmat(ref_signal,[1 1 size(est_signal,2)]),[1 3 2]);
-
-                    residuals.(this_decomp_method){s}(:,1:size(thisA,2),nLambda_idx,draw_idx) =...
-                        squeeze(min(...
-                        mean((ref_signal-est_signal).^2),...
-                        mean((ref_signal+est_signal).^2)))';
+                    for tr = 1:thisDecompAxx.nTrl
+                        tR = corr(est_signal(:,:,tr),ref_signal);
+                        trial_R2(:,:,tr) = tR.^2;
+                    end             
+                    
+                    residuals.(this_decomp_method){s}(:,1:size(thisA,2),nLambda_idx,draw_idx) = squeeze(mean(trial_R2,3))'; % average residual over trials
+                    clear trial_R2;
                 end
             end
         end
@@ -298,6 +297,10 @@ export_fig(FigH,fullfile(FigPath,'SpatialFilters_topographies_SNR_average'),'-pd
 %close;
 
  %%  plots angular error of topographies
+snrs_orig = cellfun(@(x) x(1:10,:,:),snrs_orig,'uni',false);
+snrs_all = squeeze(mean(cat(4,snrs_orig{:}),3)); 
+snrs_inp = 10*log10(squeeze(mean(mean(snrs_all(:,:,:),1),3)));
+ 
  FS = 14;
 FIG2 = figure;
 subplot(1,3,1)
@@ -308,18 +311,19 @@ for decomp_method_idx=1:2%length(decomp_methods)
     this_decomp_method = decomp_methods{decomp_method_idx};
     err_angles.(this_decomp_method) = cellfun(@(x) x(:,1:10,:,:),err_angles.(this_decomp_method),'uni',false);
     errAng_all = squeeze(mean(cat(5,err_angles.(this_decomp_method){:}),4));
-    plot(10*log10(Lambda_list),squeeze(mean(errAng_all(comp_idx,comp_idx,:,:),4)),markers{comp_idx},'LineWidth',2,'MarkerSize',10,'color',colors(decomp_method_idx,:));
+    plot(snrs_inp,squeeze(mean(errAng_all(comp_idx,comp_idx,:,:),4)),markers{comp_idx},'LineWidth',2,'MarkerSize',10,'color',colors(decomp_method_idx,:));
 
     hold on
 end
 end
-[~, hobj, ~, ~] = legend(decomp_methods(1:2));
+%[~, hobj, ~, ~] = legend(decomp_methods(1:2));
 hl = findobj(hobj,'type','line');
 set(hl,'LineWidth',1.5);
 ht = findobj(hobj,'type','text');
 set(ht,'FontSize',12);
-set(gca,'xtick',10*log10(Lambda_list),'xticklabel',arrayfun(@num2str,round(log10(Lambda_list)*10),'uni',false));
-xlim(10*log10([min(Lambda_list),max(Lambda_list)]));
+%set(gca,'xtick',10*log10(Lambda_list),'xticklabel',arrayfun(@num2str,round(log10(Lambda_list)*10),'uni',false));
+%xlim(10*log10([min(Lambda_list),max(Lambda_list)]));
+xlim([1 8])
 xlabel('SNR (dB)')
 ylabel('Error Angle')
 
@@ -328,12 +332,13 @@ set(gca,'fontsize',FS)
 % plot snrs
 subplot(1,3,2)
 comp_idx =1;
+
 for comp_idx = 1:2
     for decomp_method_idx=1:2%length(decomp_methods)
     this_decomp_method = decomp_methods{decomp_method_idx};
     snrs.(this_decomp_method) = cellfun(@(x) x(1:10,:,:),snrs.(this_decomp_method),'uni',false);
     snrs_all = squeeze(mean(cat(4,snrs.(this_decomp_method){:}),3));
-    plot(10*log10(Lambda_list),10*log10(squeeze(mean(snrs_all(comp_idx,:,:),3))),markers{comp_idx},'LineWidth',2,'MarkerSize',10,'color',colors(decomp_method_idx,:));
+    plot(snrs_inp,10*log10(squeeze(mean(snrs_all(comp_idx,:,:),3))),markers{comp_idx},'LineWidth',2,'MarkerSize',10,'color',colors(decomp_method_idx,:));
     hold on
     end
 end
@@ -344,8 +349,9 @@ ht = findobj(hobj,'type','text');
 set(ht,'FontSize',12);
 xlabel('SNR (dB)')
 ylabel('Output SNR (dB)')
-set(gca,'xtick',10*log10(Lambda_list),'xticklabel',arrayfun(@num2str,round(log10(Lambda_list)*10),'uni',false));
-xlim(10*log10([min(Lambda_list),max(Lambda_list)]));
+%set(gca,'xtick',10*log10(Lambda_list),'xticklabel',arrayfun(@num2str,round(log10(Lambda_list)*10),'uni',false));
+%xlim(10*log10([min(Lambda_list),max(Lambda_list)]));
+xlim([1 8])
 set(gca,'fontsize',FS)
 
 % plot residual
@@ -355,22 +361,23 @@ for comp_idx = 1:2
         this_decomp_method = decomp_methods{decomp_method_idx};
         residuals.(this_decomp_method) = cellfun(@(x) x(:,1:10,:,:),residuals.(this_decomp_method),'uni',false);
         residuals_all = squeeze(mean(cat(5,residuals.(this_decomp_method){:}),4));
-        plot(10*log10(Lambda_list),squeeze(mean(residuals_all(comp_idx,comp_idx,:,:),4)),markers{comp_idx},'LineWidth',2,'MarkerSize',10,'color',colors(decomp_method_idx,:));
+        plot(snrs_inp,squeeze(mean(residuals_all(comp_idx,comp_idx,:,:),4)),markers{comp_idx},'LineWidth',2,'MarkerSize',10,'color',colors(decomp_method_idx,:));
         hold on
     end
 end
 %[~, hobj, ~, ~] = legend(decomp_methods(1:2));
-[~, hobj, ~, ~] = legend('pca - comp1','ssd - comp1','pca - comp2','ssd - comp2');
+[~, hobj, ~, ~] = legend({'pca - comp1','ssd - comp1','pca - comp2','ssd - comp2'},'Location','southeast');
+legend('boxoff')
 hl = findobj(hobj,'type','line');
 set(hl,'LineWidth',1.5);
 ht = findobj(hobj,'type','text');
 set(ht,'FontSize',11);
 xlabel('SNR (dB)')
-ylabel('Residuals')
+ylabel('R2')
 set(gca,'fontsize',FS)
-set(gca,'xtick',10*log10(Lambda_list),'xticklabel',arrayfun(@num2str,round(log10(Lambda_list)*10),'uni',false));
-xlim(10*log10([min(Lambda_list),max(Lambda_list)]));
-
+%set(gca,'xtick',10*log10(Lambda_list),'xticklabel',arrayfun(@num2str,round(log10(Lambda_list)*10),'uni',false));
+%xlim(10*log10([min(Lambda_list),max(Lambda_list)]));
+xlim([1 8])
 set(FIG2,'Unit','Inch','position',[5, 5, 18, 5],'color','w');
 export_fig(FIG2,fullfile(FigPath,'SpatialFilters_ErrorPlots_Averaged'),'-pdf');
 

@@ -49,7 +49,7 @@ if ~exist('RoiSize','var'), RoiSize = [];end
 if ~exist('funcType','var'), funcType = [];end
 
 
-if isempty(rois),% if roi is empty ofr this subject
+if isempty(rois)% if roi is empty ofr this subject
     EEGData=[];sourceData=[];roiSet=[];
     warning('No ROI found, no simulated EEG is generated');
     return
