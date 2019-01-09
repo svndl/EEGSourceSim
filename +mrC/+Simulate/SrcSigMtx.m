@@ -1,4 +1,4 @@
-function [EEGData,EEGData_signal, sourceData,roiSet] = SrcSigMtx(rois,fwdMatrix,surfData,signalArray,noise,lambda,spatial_normalization_type,RoiSize,funcType)% ROIsig %NoiseParams
+function [EEGData,EEGData_signal, sourceData,roiSet] = SrcSigMtx(rois,fwdMatrix,surfData,opt,noise,noiseSensor,lambda,spatial_normalization_type)% ROIsig %NoiseParams
 
     % Description:	Generate Seed Signal within specified ROIs
     %
@@ -38,7 +38,12 @@ function [EEGData,EEGData_signal, sourceData,roiSet] = SrcSigMtx(rois,fwdMatrix,
     
   % Updated EB, 6.5.2018
   % Modified SB, 8/2/2018
-%%
+%% Organize the inputs
+signalArray = opt.signalArray;
+RoiSize = opt.roiSize;
+funcType = opt.roiSpatfunc;
+signalsf = opt.signalsf;
+SNRFreqBand = opt.signalSNRFreqBand;
 
 if ~exist('RoiSize','var'), RoiSize = [];end
 if ~exist('funcType','var'), funcType = [];end
@@ -65,9 +70,9 @@ if size(roiChunk,2)~= size(signalArray,2)
         % error('Number of ROIs is not equal to number of source signals');
 end
 
-%
+%%
 if ~isempty(roiChunk)
-    %% seed ROIs
+    % seed ROIs
     % Note: I consider here that the ROI labels in shortList are unique (L or R are considered separetly)
     % Adjust Roi size, prepare spatial function (weights) and plot ROIs
 
@@ -98,7 +103,35 @@ else
     sourceTemp = zeros(size(noise));
 end
 
-% Adds noise to source signal
+%% Adjust sensor level SNR according to the frequency band of interest, for each ROI(active sources)
+
+if ~isempty(roiChunk)
+    F = 0:signalsf/size(sourceTemp,1):(signalsf/2-signalsf/size(sourceTemp,1));
+    if ~exist('SNRFreqBand','var') || isempty(SNRFreqBand)
+        % do the brod band
+        SNRFreqBand = [min(F) max(F)];
+    end
+    FInds = (F>=SNRFreqBand(1)) & (F<=SNRFreqBand(2));
+       
+     % fft of signal
+    sig = sourceTemp*fwdMatrix';
+    Fsig = abs(fft(sig)).^2;
+    signalM = max(mean(Fsig(FInds,:)));% max of signal
+
+    % fft of noise
+    if size(sourceTemp,2)==size(noise,2)
+        noi = noise;
+    else
+        noi = noise*fwdMatrix'+noiseSensor;
+    end
+    Fnoi = abs(fft(noi)).^2;
+    noiM = mean(mean(Fnoi(FInds,:)));% % mean of noise
+
+    SRatio = noiM/signalM;
+    sourceTemp(:,roiChunk(:,r)>0) = sourceTemp(:,roiChunk(:,r)>0).*SRatio;
+end
+
+%% Adds noise to source signal
 if size(sourceTemp,2)==size(noise,2)
     pow = 1;
     sourceData = ((lambda/(lambda+1))^pow)*sourceTemp + ((1/(lambda+1))^pow) *noise;
@@ -106,15 +139,15 @@ if size(sourceTemp,2)==size(noise,2)
     if ndims(sourceData) == 3
         EEGData = zeros(size(sourceData,1),size(fwdMatrix,1),size(sourceData,3)) ;
         for trial_idx = 1:size(sourceData,3)
-            sourceData(:,:,trial_idx) = sourceData(:,:,trial_idx)/norm(sourceData(:,:,trial_idx),'fro') ;% signal and noise are correlated randomly (not on average!). dirty workaround: normalize sum
+            % sourceData(:,:,trial_idx) = sourceData(:,:,trial_idx)/norm(sourceData(:,:,trial_idx),'fro') ;% signal and noise are correlated randomly (not on average!). dirty workaround: normalize sum
             % Generate EEG data by multiplication to forward matrix
-            EEGData(:,:,trial_idx) = sourceData(:,:,trial_idx)*fwdMatrix';
+            EEGData(:,:,trial_idx) = sourceData(:,:,trial_idx)*fwdMatrix'+noiseSensor(:,:,trial_idx);
 
         end
     else
         sourceData = sourceData/norm(sourceData,'fro');% signal and noise are correlated randomly (not on average!). dirty hack: normalize sum
         % Generate EEG data by multiplication to forward matrix
-        EEGData = sourceData*fwdMatrix';
+        EEGData = sourceData*fwdMatrix'+noiseSensor;
     end
 end
 % else: we add up in channel space

@@ -47,7 +47,7 @@ RoisI = cellfun(@(x,y) x.mergROIs(y),Rois1,Rois2,'UniformOutput',false);
 do_new_data_generation = false;
 % generate or read from disk
 if ~exist('data_for_spatial_filter_test_2source.mat','file') || do_new_data_generation
-    n_trials = 1000;
+    n_trials = 5;
     Noise.lambda = 0 ; % noise only
     [outSignal, FundFreq, SF]= mrC.Simulate.ModelSeedSignal('signalType','SSVEP','signalFreq',[2 2],'signalHarmonic',{[2,0,1.5,0],[1.5,0, 2,0]},'signalPhase',{[.1,0,.1,0],[pi/2+.1,0,pi/2+.1,0]});
     [EEGData_noise,EEGAxx_noise,EEGData_signal,EEGAxx_signal,~,masterList,subIDs,allSubjFwdMatrices,allSubjRois] = mrC.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,'signalArray',outSignal,'signalFF',FundFreq,'signalsf',SF,'NoiseParams',Noise,'rois',RoisI,'Save',false,'cndNum',1,'nTrials',n_trials);
@@ -207,7 +207,7 @@ for nLambda_idx = 1:numel(Lambda_list)
 %                     end
 
                     %calculate snrs assuming ssveps, mean over all trials
-                    snrs.(this_decomp_method){s}(1:size(thisA,2),nLambda_idx,draw_idx)=mean(2*mean(thisDecompAxx.Amp(signal_freq_idxs,:,:).^2)./mean(thisDecompAxx.Amp(noise_freq_idxs,:,:).^2),3);
+                    snrs.(this_decomp_method){s}(1:size(thisA,2),nLambda_idx,draw_idx)=mean(mean(thisDecompAxx.Amp(signal_freq_idxs,:,:).^2)./mean(thisDecompAxx.Amp(noise_freq_idxs,:,:).^2),3);
                     % calculate residuals as mse over samples and trials
                     % TODO: needs some sort of normalization!!
                     est_signal = squeeze(thisDecompAxx.Wave );               

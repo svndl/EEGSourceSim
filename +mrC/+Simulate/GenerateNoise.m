@@ -1,4 +1,4 @@
-function [noise, pink_noise, alpha_noise,sensor_noise] = GenerateNoise(f_sampling, n_samples, n_nodes, NoiseParams, noise_mixing_data, spatial_normalization_type,fwdMatrix)
+function [noise, pink_noise, alpha_noise,sensor_noise] = GenerateNoise(f_sampling, n_samples, n_nodes, NoiseParams, noise_mixing_data, spatial_normalization_type,fwdMatrix,doFwdProjection)
 % Syntax: [noise, pink_noise, pink_noise_uncoh, alpha_noise] = GenerateNoise(f_sampling, n_samples, n_nodes, mu, alpha_nodes, noise_mixing_data, spatial_normalization_type,fwdMatrix)
 % Desciption: GENERATE_NOISE Returns noise of unit variance as a combination of alpha
 %               activity (bandpass filtered white noise) and spatially coherent pink
@@ -29,10 +29,8 @@ function [noise, pink_noise, alpha_noise,sensor_noise] = GenerateNoise(f_samplin
 
 %% ---------------------------- generate alpha noise------------------------
     %  
-    if ~exist('fwdMatrix','var')|| isempty(fwdMatrix)
-        doFwdProjection = false;
-    else
-        doFwdProjection = true ;
+    if ~exist('doFwdProjection','var')|| isempty(doFwdProjection)
+        doFwdProjection = true;
     end
     
     alpha_noise = zeros(n_samples,n_nodes);
@@ -123,12 +121,19 @@ function [noise, pink_noise, alpha_noise,sensor_noise] = GenerateNoise(f_samplin
         error('%s is not implemented as spatial normalization method', spatial_normalization_type)
     end
     
+
     sensor_noise = randn(n_samples, size(fwdMatrix,1)) ;
     sensor_noise = sensor_noise/norm(sensor_noise,'fro'); 
 %% --------------------combine different types of noise--------------------
+if doFwdProjection
     norm_factor = sqrt(NoiseParams.mu.pink^2+NoiseParams.mu.alpha^2+NoiseParams.mu.sensor^2) ;
     noise = NoiseParams.mu.pink/norm_factor*pink_noise + NoiseParams.mu.alpha/norm_factor*alpha_noise + NoiseParams.mu.sensor/norm_factor*sensor_noise ;
     noise = noise/norm(noise,'fro') ;
+else
+    norm_factor = sqrt(NoiseParams.mu.pink^2+NoiseParams.mu.alpha^2) ;
+    noise = NoiseParams.mu.pink/norm_factor*pink_noise + NoiseParams.mu.alpha/norm_factor*alpha_noise ;
+    noise = noise/norm(noise,'fro') ;
+end
 %% ---------------------------show resulting noise-------------------------
     if false % just to take a look at the noise components, averaged over all channels for power spectrum
         f = [-0.5:1/n_samples:0.5-1/n_samples]*f_sampling; % frequncy range

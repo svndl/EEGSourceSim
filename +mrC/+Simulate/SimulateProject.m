@@ -141,8 +141,7 @@ function [EEGData,EEGAxx,EEGData_signal,EEGAxx_signal,sourceDataOrigin,masterLis
  % The function was originally written by Peter Kohler, ...
  % Latest modification: Elham Barzegaran, 03.26.2018
  % Modifications: Sebastian Bosse 8/2/2018
- % NOTE: This function is a part of mrC toolboxs
-
+ 
 %% =====================Prepare input variables============================
  
 %--------------------------set up default values---------------------------
@@ -156,6 +155,7 @@ opt	= ParseArgs(varargin,...
     'signalsf'      , 100 ,... 
     'signalType'    , 'SSVEP',...
     'signalFF'      , [],...
+    'signalSNRFreqBand' ,[],...
     'NoiseParams'   , struct,...
     'sensorFig'     , true,...
     'doSource'      , false,...
@@ -165,7 +165,8 @@ opt	= ParseArgs(varargin,...
     'Save'          ,true,...
     'cndNum'        ,1, ...
     'nTrials'       ,1, ...
-    'originsource'  ,false...
+    'originsource'  ,false, ...
+    'doFwdProjectNoise' ,true ...
     );
 
 % Roi Type, the names should be according to folders in (svdnl/anatomy/...)
@@ -263,9 +264,9 @@ for s = 1:length(projectPath)
     
     
     % To avoid repeatition for subjects with several sessions
-    if s>1, 
+    if s>1
         SUBEXIST = strcmpi(subIDs,subIDs{s});
-        if sum(SUBEXIST(1:end-1))==1,
+        if sum(SUBEXIST(1:end-1))==1
             disp('EEG simulation for this subject has been run before');
             continue
         end
@@ -371,11 +372,12 @@ for s = 1:length(projectPath)
         noise_mixing_data.matrices_chanSpace{band_idx} = C_chan;    
     end
     
-    noise = zeros(NS, size(fwdMatrix,1), opt.nTrials) ;
+    %noise = zeros(NS, size(fwdMatrix,1), opt.nTrials) ;
     for trial_id =1:opt.nTrials 
         disp(['Trial # ' num2str(trial_id)])
-        [thisNoise,thisPinkNoise,thisAlphaNoise,thisSensorNoise] = mrC.Simulate.GenerateNoise(opt.signalsf, NS, nSources, Noise, noise_mixing_data,Noise.spatial_normalization_type,fwdMatrix);   
-        noise(:,:,trial_id) = thisNoise ;
+        [thisNoise,thisPinkNoise,thisAlphaNoise,thisSensorNoise] = mrC.Simulate.GenerateNoise(opt.signalsf, NS, nSources, Noise, noise_mixing_data,Noise.spatial_normalization_type,fwdMatrix,opt.doFwdProjectNoise);   
+        noise(:,:,trial_id) = thisNoise ;% noises in source or sensor space
+        noiseSensor(:,:,trial_id) = thisSensorNoise;% measurement noise
     end
 
 
@@ -385,7 +387,7 @@ for s = 1:length(projectPath)
  
     subInd = strcmp(cellfun(@(x) x.subID,opt.rois,'UniformOutput',false),subIDs{s});
     allSubjRois{s} = opt.rois{find(subInd)} ;
-    [EEGData{s},EEGData_signal{s},sourceData] = mrC.Simulate.SrcSigMtx(opt.rois{find(subInd)},fwdMatrix,surfData,opt.signalArray,noise,Noise.lambda,'active_nodes',opt.roiSize,opt.roiSpatfunc);%Noise.spatial_normalization_type);% ROIsig % NoiseParams
+    [EEGData{s},EEGData_signal{s},sourceData] = mrC.Simulate.SrcSigMtx(opt.rois{find(subInd)},fwdMatrix,surfData,opt,noise,noiseSensor,Noise.lambda,'active_nodes');%Noise.spatial_normalization_type);% ROIsig % NoiseParams
        
     if (opt.nTrials==1) || (opt.originsource) % this is to avoid memory problem
         sourceDataOrigin{s} = sourceData;
