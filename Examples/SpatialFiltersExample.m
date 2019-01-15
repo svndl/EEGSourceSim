@@ -9,13 +9,13 @@ SimFolder = fileparts(pwd);
 addpath(genpath(SimFolder));
 
 %% To be modified later
-if false % SBs setup
-    addpath('../tools/BrewerMap/')
+if true % SBs setup
+    addpath('../External/tools/BrewerMap/')
     %
     DataPath = '/export/data/';
     DestPath = fullfile(DataPath,'eeg_simulation');
     AnatomyPath = fullfile(DestPath,'anatomy');
-    ProjectPath = fullfile(DestPath,'FwdProject2');
+    ProjectPath = fullfile(DestPath,'FwdProject');
 else
     DestPath = fullfile(SimFolder,'Examples','ExampleData_Inverse');
     AnatomyPath = fullfile(DestPath,'anatomy');
@@ -44,18 +44,19 @@ Noise.mu.sensor=2;
 Rois1 = cellfun(@(x) x.searchROIs('V2d','wang','R'),RoiList,'UniformOutput',false);% % wang ROI
 Rois2 = cellfun(@(x) x.searchROIs('LO1','wang','L'),RoiList,'UniformOutput',false);
 RoisI = cellfun(@(x,y) x.mergROIs(y),Rois1,Rois2,'UniformOutput',false);
-do_new_data_generation = false;
+do_new_data_generation = true;
 % generate or read from disk
-if ~exist('data_for_spatial_filter_test_2source.mat','file') || do_new_data_generation
-    n_trials = 5;
+generated_date_filename = 'data_for_spatial_filter_test2_2source_allSubj.mat';
+%generated_date_filename = 'data_for_spatial_filter_test_2source_all_subjects.mat';
+%if ~exist('data_for_spatial_filter_test_2source.mat','file') || do_new_data_generation
+if ~exist(generated_date_filename,'file') || do_new_data_generation
+    n_trials = 2;
     Noise.lambda = 0 ; % noise only
     [outSignal, FundFreq, SF]= mrC.Simulate.ModelSeedSignal('signalType','SSVEP','signalFreq',[2 2],'signalHarmonic',{[2,0,1.5,0],[1.5,0, 2,0]},'signalPhase',{[.1,0,.1,0],[pi/2+.1,0,pi/2+.1,0]});
     [EEGData_noise,EEGAxx_noise,EEGData_signal,EEGAxx_signal,~,masterList,subIDs,allSubjFwdMatrices,allSubjRois] = mrC.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,'signalArray',outSignal,'signalFF',FundFreq,'signalsf',SF,'NoiseParams',Noise,'rois',RoisI,'Save',false,'cndNum',1,'nTrials',n_trials);
-    save(fullfile(ResultPath,'data_for_spatial_filter_test2_2source.mat'));
-    save(fullfile(ResultPath,'data_for_spatial_filter_test_2source.mat'),'EEGAxx_noise','EEGData_noise','-v7.3');
+    save(fullfile(ResultPath,generated_date_filename));
 else
-    load(fullfile(ResultPath,'data_for_spatial_filter_test2_2source.mat'))
-    load(fullfile(ResultPath,'data_for_spatial_filter_test_2source.mat'))
+    load(fullfile(ResultPath,generated_date_filename))
 end
 
 %%
