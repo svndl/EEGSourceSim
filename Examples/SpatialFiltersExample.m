@@ -58,6 +58,14 @@ if ~exist(generated_date_filename,'file') || do_new_data_generation
 else
     load(fullfile(ResultPath,generated_date_filename))
 end
+%%
+% clean empty EEG data
+idxs_empty = cellfun(@isempty,EEGAxx_noise) ;
+EEGData_noise(idxs_empty) = [] ;
+EEGData_signal(idxs_empty) = [] ;
+EEGAxx_noise(idxs_empty) = [] ;
+EEGAxx_signal(idxs_empty) = [] ;
+subIDs(idxs_empty) = [] ;
 
 %%
 % mix signal and nose according to SNR and  convert to Axx
@@ -80,14 +88,16 @@ nDraws = 20 ;
 n_comps = 3 ;
 thisFundFreq = FundFreq(fund_freq_idx) ;
 
-subs = num2cell(1:min(length(subIDs),10)) ; %%%%%% SUBJECTS TO SELECT
-subNames = cellfun(@num2str,subs(1:min(length(subIDs),10)),'uni',false);
+subs = num2cell(1:min(sum(not(idxs_empty)),10)) ; %%%%%% SUBJECTS TO SELECT
+subNames = cellfun(@num2str,subs,'uni',false);
 
-EEGData_noise = cellfun(@(x) x(:,:,1:200),EEGData_noise,'uni',false); % reduce data size
-EEGAxx_noise = cellfun(@(x) x.SelectTrials(1:200),EEGAxx_noise,'uni',false);
+%EEGData_noise = cellfun(@(x) x(:,:,1:200),EEGData_noise,'uni',false); % reduce data size
+%EEGAxx_noise = cellfun(@(x) x.SelectTrials(1:200),EEGAxx_noise,'uni',false);
 
-rois = allSubjRois(cell2mat(subs)) ;
-fwdMatrix = allSubjFwdMatrices(cell2mat(subs)) ;
+rois = allSubjRois(not(idxs_empty)) ;
+rois = rois(cell2mat(subs)) ;
+fwdMatrix = allSubjFwdMatrices(not(idxs_empty)) ;
+fwdMatrix = fwdMatrix(cell2mat(subs)) ;
 Source_pattern = zeros(size(fwdMatrix{1},1),rois{1}.ROINum,numel(subs)) ;
 for sub = 1:numel(subs)
     for roi_idx = 1:rois{1}.ROINum
