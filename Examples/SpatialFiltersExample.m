@@ -9,13 +9,13 @@ SimFolder = fileparts(pwd);
 addpath(genpath(SimFolder));
 
 %% To be modified later
-if false % SBs setup
-    addpath('../tools/BrewerMap/')
+if true % SBs setup
+    addpath('../External/tools/BrewerMap/')
     %
     DataPath = '/export/data/';
     DestPath = fullfile(DataPath,'eeg_simulation');
     AnatomyPath = fullfile(DestPath,'anatomy');
-    ProjectPath = fullfile(DestPath,'FwdProject2');
+    ProjectPath = fullfile(DestPath,'FwdProject');
 else
     DestPath = fullfile(SimFolder,'Examples','ExampleData_Inverse');
     AnatomyPath = fullfile(DestPath,'anatomy');
@@ -46,17 +46,26 @@ Rois2 = cellfun(@(x) x.searchROIs('LO1','wang','L'),RoiList,'UniformOutput',fals
 RoisI = cellfun(@(x,y) x.mergROIs(y),Rois1,Rois2,'UniformOutput',false);
 do_new_data_generation = false;
 % generate or read from disk
-if ~exist('data_for_spatial_filter_test_2source.mat','file') || do_new_data_generation
-    n_trials = 5;
+generated_date_filename = 'data_for_spatial_filter_test2_2source_allSubj.mat';
+%generated_date_filename = 'data_for_spatial_filter_test_2source_all_subjects.mat';
+%if ~exist('data_for_spatial_filter_test_2source.mat','file') || do_new_data_generation
+if ~exist(generated_date_filename,'file') || do_new_data_generation
+    n_trials = 200;
     Noise.lambda = 0 ; % noise only
-    [outSignal, FundFreq, SF]= mrC.Simulate.ModelSeedSignal('signalType','SSVEP','signalFreq',[2 2],'signalHarmonic',{[2,0,1.5,0],[1.5,0, 2,0]},'signalPhase',{[.1,0,.1,0],[pi/2+.1,0,pi/2+.1,0]});
+    [outSignal, FundFreq, SF]= mrC.Simulate.ModelSeedSignal('signalType','SSVEP','ns',200,'signalFreq',[2 2],'signalHarmonic',{[2,0,1.5,0],[1.5,0, 2,0]},'signalPhase',{[.1,0,.1,0],[pi/2+.1,0,pi/2+.1,0]});
     [EEGData_noise,EEGAxx_noise,EEGData_signal,EEGAxx_signal,~,masterList,subIDs,allSubjFwdMatrices,allSubjRois] = mrC.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,'signalArray',outSignal,'signalFF',FundFreq,'signalsf',SF,'NoiseParams',Noise,'rois',RoisI,'Save',false,'cndNum',1,'nTrials',n_trials);
-    save(fullfile(ResultPath,'data_for_spatial_filter_test2_2source.mat'));
-    save(fullfile(ResultPath,'data_for_spatial_filter_test_2source.mat'),'EEGAxx_noise','EEGData_noise','-v7.3');
+    save(fullfile(ResultPath,generated_date_filename));
 else
-    load(fullfile(ResultPath,'data_for_spatial_filter_test2_2source.mat'))
-    load(fullfile(ResultPath,'data_for_spatial_filter_test_2source.mat'))
+    load(fullfile(ResultPath,generated_date_filename))
 end
+%%
+% clean empty EEG data
+idxs_empty = cellfun(@isempty,EEGAxx_noise) ;
+EEGData_noise(idxs_empty) = [] ;
+EEGData_signal(idxs_empty) = [] ;
+EEGAxx_noise(idxs_empty) = [] ;
+EEGAxx_signal(idxs_empty) = [] ;
+subIDs(idxs_empty) = [] ;
 
 %%
 % mix signal and nose according to SNR and  convert to Axx
@@ -79,14 +88,16 @@ nDraws = 20 ;
 n_comps = 3 ;
 thisFundFreq = FundFreq(fund_freq_idx) ;
 
-subs = num2cell(1:min(length(subIDs),10)) ; %%%%%% SUBJECTS TO SELECT
-subNames = cellfun(@num2str,subs(1:min(length(subIDs),10)),'uni',false);
+subs = num2cell(1:min(sum(not(idxs_empty)),10)) ; %%%%%% SUBJECTS TO SELECT
+subNames = cellfun(@num2str,subs,'uni',false);
 
-EEGData_noise = cellfun(@(x) x(:,:,1:200),EEGData_noise,'uni',false); % reduce data size
-EEGAxx_noise = cellfun(@(x) x.SelectTrials(1:200),EEGAxx_noise,'uni',false);
+%EEGData_noise = cellfun(@(x) x(:,:,1:200),EEGData_noise,'uni',false); % reduce data size
+%EEGAxx_noise = cellfun(@(x) x.SelectTrials(1:200),EEGAxx_noise,'uni',false);
 
-rois = allSubjRois(cell2mat(subs)) ;
-fwdMatrix = allSubjFwdMatrices(cell2mat(subs)) ;
+rois = allSubjRois(not(idxs_empty)) ;
+rois = rois(cell2mat(subs)) ;
+fwdMatrix = allSubjFwdMatrices(not(idxs_empty)) ;
+fwdMatrix = fwdMatrix(cell2mat(subs)) ;
 Source_pattern = zeros(size(fwdMatrix{1},1),rois{1}.ROINum,numel(subs)) ;
 for sub = 1:numel(subs)
     for roi_idx = 1:rois{1}.ROINum
@@ -97,22 +108,25 @@ end
 
 % narrow-band normalization
 % harmonics considered for normalization
-snr_harmonics = [1,2,3,4] ;
+power_norm_harmonics = [1,2,3,4] ;
 
-f = [0:length(EEGData_signal{1})-1] *SF/length(EEGData_signal{1}) ;
-[~,snr_freq_idxs]=intersect(f,snr_harmonics*thisFundFreq) ;
+f = [0:size(EEGData_signal{1},1)-1] *SF/size(EEGData_signal{1},1) ;
+
+[~,power_norm_signal_freq_idxs]=intersect(f,power_norm_harmonics*thisFundFreq) ;
+[~,power_norm_noise_freq_idxs]=intersect(f,power_norm_harmonics*thisFundFreq) ;
 
 for subj_idx = 1:length(subIDs)
     %
     spec_noise = fft(EEGData_noise{subj_idx},[],1);
     spec_signal = fft(EEGData_signal{subj_idx},[],1);
-    power_noise = mean(mean(abs(spec_noise(snr_freq_idxs,:,:)).^2)) ; % mean noise power per trial
-    power_signal= mean(mean(abs(spec_signal(snr_freq_idxs,:,:)).^2)) ; 
+    power_noise = mean(mean(abs(spec_noise(power_norm_noise_freq_idxs,:,:)).^2)) ; % mean noise power per trial
+    power_signal= mean(mean(abs(spec_signal(power_norm_signal_freq_idxs,:,:)).^2)) ; 
     EEGData_noise{subj_idx} = EEGData_noise{subj_idx}./sqrt(power_noise);
     EEGData_signal{subj_idx} = EEGData_signal{subj_idx}./sqrt(power_signal);
 end
 
-
+% free some memory
+clear spec_noise spec_signal fwdMatrix RoiList allSubjFwdMatrices allSubjRois Rois1 Rois2 Wangs Wangnums
 for nLambda_idx = 1:numel(Lambda_list)
     lambda = Lambda_list(nLambda_idx);
     disp(['Generating EEG by adding signal and noise: SNR = ' num2str(lambda)]);
@@ -129,7 +143,7 @@ for nLambda_idx = 1:numel(Lambda_list)
         source_pattern = Source_pattern(:,:,subj_idx );
 
         decomp_methods = {'pca','ssd','csp','rca'} ;
-        considered_harms = snr_harmonics ;
+        considered_harms = power_norm_harmonics ;
 
         for nTrial_idx = 1:length(numTrials_list)
             nUsedTrials = numTrials_list(nTrial_idx);
@@ -366,7 +380,7 @@ for comp_idx = 1:2
     end
 end
 %[~, hobj, ~, ~] = legend(decomp_methods(1:2));
-[~, hobj, ~, ~] = legend({'pca - comp1','ssd - comp1','pca - comp2','ssd - comp2'},'Location','southeast');
+[~, hobj, ~, ~] = legend({'pca - comp1','ssd - comp1','pca - comp2','ssd - comp2'},'Location','northwest');
 legend('boxoff')
 hl = findobj(hobj,'type','line');
 set(hl,'LineWidth',1.5);

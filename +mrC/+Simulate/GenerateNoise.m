@@ -125,6 +125,14 @@ function [noise, pink_noise, alpha_noise,sensor_noise] = GenerateNoise(f_samplin
     sensor_noise = sensor_noise/norm(sensor_noise,'fro'); 
     
 %% --------------------combine different types of noise--------------------
+% optimizeParam = true;
+% if optimizeParam
+%     load('REC_REO_Averagre_Specs');
+%     AgeRange = [20 60];
+%     Cond = 'REO';
+%     
+% end
+
 if doFwdProjection
     norm_factor = sqrt(NoiseParams.mu.pink^2+NoiseParams.mu.alpha^2+NoiseParams.mu.sensor^2) ;
     noise = NoiseParams.mu.pink/norm_factor*pink_noise + NoiseParams.mu.alpha/norm_factor*alpha_noise + NoiseParams.mu.sensor/norm_factor*sensor_noise ;
