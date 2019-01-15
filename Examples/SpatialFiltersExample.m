@@ -125,7 +125,8 @@ for subj_idx = 1:length(subIDs)
     EEGData_signal{subj_idx} = EEGData_signal{subj_idx}./sqrt(power_signal);
 end
 
-
+% free some memory
+clear spec_noise spec_signal fwdMatrix RoiList allSubjFwdMatrices allSubjRois Rois1 Rois2 Wangs Wangnums
 for nLambda_idx = 1:numel(Lambda_list)
     lambda = Lambda_list(nLambda_idx);
     disp(['Generating EEG by adding signal and noise: SNR = ' num2str(lambda)]);
@@ -379,7 +380,7 @@ for comp_idx = 1:2
     end
 end
 %[~, hobj, ~, ~] = legend(decomp_methods(1:2));
-[~, hobj, ~, ~] = legend({'pca - comp1','ssd - comp1','pca - comp2','ssd - comp2'},'Location','southeast');
+[~, hobj, ~, ~] = legend({'pca - comp1','ssd - comp1','pca - comp2','ssd - comp2'},'Location','northwest');
 legend('boxoff')
 hl = findobj(hobj,'type','line');
 set(hl,'LineWidth',1.5);
