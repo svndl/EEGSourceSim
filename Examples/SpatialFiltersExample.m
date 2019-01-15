@@ -110,8 +110,7 @@ end
 % harmonics considered for normalization
 snr_harmonics = [1,2,3,4] ;
 
-f = [0:length(EEGData_signal{1})-1] *SF/length(EEGData_signal{1}) ;
-[~,snr_freq_idxs]=intersect(f,snr_harmonics*thisFundFreq) ;
+f = [0:size(EEGData_signal{1},1)-1] *SF/size(EEGData_signal{1},1) ;
 
 for subj_idx = 1:length(subIDs)
     %
