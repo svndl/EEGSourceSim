@@ -108,16 +108,19 @@ end
 
 % narrow-band normalization
 % harmonics considered for normalization
-snr_harmonics = [1,2,3,4] ;
+power_norm_harmonics = [1,2,3,4] ;
 
 f = [0:size(EEGData_signal{1},1)-1] *SF/size(EEGData_signal{1},1) ;
+
+[~,power_norm_signal_freq_idxs]=intersect(f,power_norm_harmonics*thisFundFreq) ;
+[~,power_norm_noise_freq_idxs]=intersect(f,power_norm_harmonics*thisFundFreq) ;
 
 for subj_idx = 1:length(subIDs)
     %
     spec_noise = fft(EEGData_noise{subj_idx},[],1);
     spec_signal = fft(EEGData_signal{subj_idx},[],1);
-    power_noise = mean(mean(abs(spec_noise(snr_freq_idxs,:,:)).^2)) ; % mean noise power per trial
-    power_signal= mean(mean(abs(spec_signal(snr_freq_idxs,:,:)).^2)) ; 
+    power_noise = mean(mean(abs(spec_noise(power_norm_noise_freq_idxs,:,:)).^2)) ; % mean noise power per trial
+    power_signal= mean(mean(abs(spec_signal(power_norm_signal_freq_idxs,:,:)).^2)) ; 
     EEGData_noise{subj_idx} = EEGData_noise{subj_idx}./sqrt(power_noise);
     EEGData_signal{subj_idx} = EEGData_signal{subj_idx}./sqrt(power_signal);
 end
@@ -139,7 +142,7 @@ for nLambda_idx = 1:numel(Lambda_list)
         source_pattern = Source_pattern(:,:,subj_idx );
 
         decomp_methods = {'pca','ssd','csp','rca'} ;
-        considered_harms = snr_harmonics ;
+        considered_harms = power_norm_harmonics ;
 
         for nTrial_idx = 1:length(numTrials_list)
             nUsedTrials = numTrials_list(nTrial_idx);
