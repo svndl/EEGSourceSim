@@ -1,6 +1,6 @@
 % This Script generates simulation for spatial filters
 % Author: Sebastian Bosse,
-%Modfied: Elham Barzegaran, 1/2019
+% Modfied: Elham Barzegaran, 1/2019
 
 
 %% Add latest mrC
@@ -9,7 +9,7 @@ SimFolder = fileparts(pwd);
 addpath(genpath(SimFolder));
 
 %% To be modified later
-if true % SBs setup
+if false % SBs setup
     addpath('../External/tools/BrewerMap/')
     %
     DataPath = '/export/data/';
@@ -44,7 +44,7 @@ Noise.mu.sensor=2;
 Rois1 = cellfun(@(x) x.searchROIs('V2d','wang','R'),RoiList,'UniformOutput',false);% % wang ROI
 Rois2 = cellfun(@(x) x.searchROIs('LO1','wang','L'),RoiList,'UniformOutput',false);
 RoisI = cellfun(@(x,y) x.mergROIs(y),Rois1,Rois2,'UniformOutput',false);
-do_new_data_generation = false;
+do_new_data_generation = true;
 % generate or read from disk
 generated_date_filename = 'data_for_spatial_filter_test2_2source_allSubj.mat';
 %generated_date_filename = 'data_for_spatial_filter_test_2source_all_subjects.mat';
