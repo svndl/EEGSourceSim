@@ -380,8 +380,7 @@ for s = 1:length(projectPath)
         for hemi = 1:2 % hemisphere by hemisphere
             source_idxs = (hemi-1)*size(C,2)+1:hemi*size(C,2) ;
             C_chan(source_idxs,:) =  C(source_idxs,:)*fwdMatrix(:,source_idxs)'; 
-            %C_chan =
-            %C_chan./repmat(sqrt(sum((C_chan.^2),1)),size(C_chan,1),1);% Normalization in electrode space?
+            %C_chan = C_chan./repmat(sqrt(sum((C_chan.^2),1)),size(C_chan,1),1);% Normalization in electrode space?
         end
         noise_mixing_data.matrices_chanSpace{band_idx} = C_chan;    
     end
@@ -394,7 +393,7 @@ for s = 1:length(projectPath)
 %         noiseSensor(:,:,trial_id) = thisSensorNoise;% measurement noise
     end
 
-[noise_sig,Noise] = mrC.Simulate.FitNoise(opt.signalsf, NS, Noise, PinkNoise,AlphaNoise, SensorNoise,fwdMatrix,opt.doFwdProjectNoise,true);   
+[noise_sig,Noise,SensorNoise] = mrC.Simulate.FitNoise(opt.signalsf, NS, Noise, PinkNoise,AlphaNoise, SensorNoise,fwdMatrix,opt.doFwdProjectNoise,true);   
 
 %------------------------ADD THE SIGNAL IN THE ROIs--------------------------
     
@@ -402,7 +401,7 @@ for s = 1:length(projectPath)
  
     subInd = strcmp(cellfun(@(x) x.subID,opt.rois,'UniformOutput',false),subIDs{s});
     allSubjRois{s} = opt.rois{find(subInd)} ;
-    [EEGData{s},EEGData_signal{s},sourceData] = mrC.Simulate.SrcSigMtx(opt.rois{find(subInd)},fwdMatrix,surfData,opt,noise_sig,noiseSensor,Noise.lambda,'active_nodes');%Noise.spatial_normalization_type);% ROIsig % NoiseParams
+    [EEGData{s},EEGData_signal{s},sourceData] = mrC.Simulate.SrcSigMtx(opt.rois{find(subInd)},fwdMatrix,surfData,opt,noise_sig,SensorNoise,Noise.lambda,'active_nodes');%Noise.spatial_normalization_type);% ROIsig % NoiseParams
        
     if (opt.nTrials==1) || (opt.originsource) % this is to avoid memory problem
         sourceDataOrigin{s} = sourceData;

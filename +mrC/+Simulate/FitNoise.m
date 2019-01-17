@@ -1,4 +1,4 @@
-function [noise_sig, NoiseParams] = FitNoise(f_sampling, n_samples,NoiseParams, pink_noise,alpha_noise, sensor_noise,fwdMatrix,doFwdProjection,optimizeParam)
+function [noise, NoiseParams,sensor_noise] = FitNoise(f_sampling, n_samples,NoiseParams, pink_noise,alpha_noise, sensor_noise,fwdMatrix,doFwdProjection,optimizeParam)
 % Fit the Noise-to-Noise ratio accroding to the real resting EEG data
 
 %% --------------------combine different types of noise--------------------
@@ -73,16 +73,20 @@ if optimizeParam
 end
 
 % 3- normalize the noises according to that
+norm_factor = sqrt(NoiseParams.mu.pink^2+NoiseParams.mu.alpha^2+NoiseParams.mu.sensor^2) ;
+NoiseParams.mu.pink = NoiseParams.mu.pink/norm_factor;
+NoiseParams.mu.alpha = NoiseParams.mu.alpha/norm_factor;
+NoiseParams.mu.sensor = NoiseParams.mu.sensor/norm_factor;
+
 if doFwdProjection
-    norm_factor = sqrt(NoiseParams.mu.pink^2+NoiseParams.mu.alpha^2+NoiseParams.mu.sensor^2) ;
     noise = NoiseParams.mu.pink/norm_factor*pink_noise + NoiseParams.mu.alpha/norm_factor*alpha_noise + NoiseParams.mu.sensor/norm_factor*sensor_noise ;
 else
-    norm_factor = sqrt(NoiseParams.mu.pink^2+NoiseParams.mu.alpha^2) ;
     noise = NoiseParams.mu.pink/norm_factor*pink_noise + NoiseParams.mu.alpha/norm_factor*alpha_noise ;
+    sensor_noise = NoiseParams.mu.sensor/norm_factor*sensor_noise/norm(noise(:,:,tr),'fro'); % NOT SURE ABOUT THIS
 end
 
 for tr = 1:size(noise,3)
-    noise(:,:,tr) = noise(:,:,tr)/norm(noise(:,:,tr),'fro') ;
+    noise(:,:,tr) = noise(:,:,tr)/norm(noise(:,:,tr),'fro') ; % in this case be careful about adding sensor noise later %%%%%%%%%%%%%
 end    
     
 end
