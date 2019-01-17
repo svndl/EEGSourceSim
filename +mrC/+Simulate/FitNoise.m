@@ -81,8 +81,13 @@ NoiseParams.mu.sensor = NoiseParams.mu.sensor/norm_factor;
 if doFwdProjection
     noise = NoiseParams.mu.pink/norm_factor*pink_noise + NoiseParams.mu.alpha/norm_factor*alpha_noise + NoiseParams.mu.sensor/norm_factor*sensor_noise ;
 else
-    noise = NoiseParams.mu.pink/norm_factor*pink_noise + NoiseParams.mu.alpha/norm_factor*alpha_noise ;
-    sensor_noise = NoiseParams.mu.sensor/norm_factor*sensor_noise/norm(noise(:,:,tr),'fro'); % NOT SURE ABOUT THIS
+    noise = NoiseParams.mu.pink/norm_factor*pink_noise + NoiseParams.mu.alpha/norm_factor*alpha_noise ; 
+    
+    for tr = 1:size(noise,3)% NOT SURE ABOUT THIS
+        noisetemp = noise(:,:,tr)*fwdMatrix'+NoiseParams.mu.sensor/norm_factor*sensor_noise(:,:,tr);
+        sensor_noise(:,:,tr) = NoiseParams.mu.sensor/norm_factor*sensor_noise(:,:,tr)/norm(noisetemp(:,:,tr),'fro'); 
+    end
+    
 end
 
 for tr = 1:size(noise,3)
