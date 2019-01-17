@@ -1,4 +1,4 @@
-function [noise, pink_noise, alpha_noise,sensor_noise] = GenerateNoise(f_sampling, n_samples, n_nodes, NoiseParams, noise_mixing_data, spatial_normalization_type,fwdMatrix,doFwdProjection)
+function [pink_noise, alpha_noise,sensor_noise] = GenerateNoise(f_sampling, n_samples, n_nodes, NoiseParams, noise_mixing_data, spatial_normalization_type,fwdMatrix,doFwdProjection)
 % Syntax: [noise, pink_noise, pink_noise_uncoh, alpha_noise] = GenerateNoise(f_sampling, n_samples, n_nodes, mu, alpha_nodes, noise_mixing_data, spatial_normalization_type,fwdMatrix)
 % Desciption: GENERATE_NOISE Returns noise of unit variance as a combination of alpha
 %               activity (bandpass filtered white noise) and spatially coherent pink
@@ -104,9 +104,6 @@ function [noise, pink_noise, alpha_noise,sensor_noise] = GenerateNoise(f_samplin
        loglog(mean(abs(normed_pink_noise_spec(1:n_samples/2,:)).^2,2),'b')
        hold on
        loglog(mean(abs(normed_pink_noise_spec_coh(1:n_samples/2,:)).^2,2),'r')
-       
-
-        
     end
     
     if strcmp(spatial_normalization_type,'active_nodes')
@@ -124,24 +121,6 @@ function [noise, pink_noise, alpha_noise,sensor_noise] = GenerateNoise(f_samplin
     sensor_noise = randn(n_samples, size(fwdMatrix,1)) ;
     sensor_noise = sensor_noise/norm(sensor_noise,'fro'); 
     
-%% --------------------combine different types of noise--------------------
-% optimizeParam = true;
-% if optimizeParam
-%     load('REC_REO_Averagre_Specs');
-%     AgeRange = [20 60];
-%     Cond = 'REO';
-%     
-% end
-
-if doFwdProjection
-    norm_factor = sqrt(NoiseParams.mu.pink^2+NoiseParams.mu.alpha^2+NoiseParams.mu.sensor^2) ;
-    noise = NoiseParams.mu.pink/norm_factor*pink_noise + NoiseParams.mu.alpha/norm_factor*alpha_noise + NoiseParams.mu.sensor/norm_factor*sensor_noise ;
-    noise = noise/norm(noise,'fro') ;
-else
-    norm_factor = sqrt(NoiseParams.mu.pink^2+NoiseParams.mu.alpha^2) ;
-    noise = NoiseParams.mu.pink/norm_factor*pink_noise + NoiseParams.mu.alpha/norm_factor*alpha_noise ;
-    noise = noise/norm(noise,'fro') ;
-end
 
 %% ---------------------------show resulting noise-------------------------
     if false % just to take a look at the noise components, averaged over all channels for power spectrum
@@ -220,7 +199,7 @@ function pink_noise = GetPinkNoise(n_samples,n_nodes)
 
     M = n_samples + rem(n_samples,2) ;
     n = 1:M ;
-    scalings = sqrt(1./n);
+    scalings = (1./n).^1;
     noise_spec = fft(randn(M,n_nodes)).*scalings' ;
     pink_noise = real(ifft(noise_spec))  ;
     pink_noise = pink_noise(1:n_samples,:) ;
