@@ -275,14 +275,14 @@ for s = 1:length(projectPath)
     
     
     % To avoid repeatition for subjects with several sessions
-    if s>1
-        SUBEXIST = strcmpi(subIDs,subIDs{s});
-        if sum(SUBEXIST(1:end-1))==1
-            disp('EEG simulation for this subject has been run before');
-            continue
-        end
-    end
-    
+%     if s>1
+%         SUBEXIST = strcmpi(subIDs,subIDs{s});
+%         if sum(SUBEXIST(1:end-1))==1
+%             disp('EEG simulation for this subject has been run before');
+%             continue
+%         end
+%     end
+%     
     if exist([fwdPath '-fwd.mat'],'file') % if the forward matrix have been generated already for this subject
         load([fwdPath '-fwd.mat']);
     else

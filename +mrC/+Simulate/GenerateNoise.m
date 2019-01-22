@@ -34,7 +34,7 @@ function [pink_noise, alpha_noise,sensor_noise] = GenerateNoise(f_sampling, n_sa
     end
     
     alpha_noise = zeros(n_samples,n_nodes);
-    alpha_noise(:,NoiseParams.AlphaSrc)  = repmat(GetAlphaActivity(n_samples,f_sampling,[8,12]),[1,length(NoiseParams.AlphaSrc )]); 
+    alpha_noise(:,NoiseParams.AlphaSrc)  = repmat(GetAlphaActivity(n_samples,f_sampling,[8.5,12]),[1,length(NoiseParams.AlphaSrc )]); 
     
     if doFwdProjection    
         alpha_noise = alpha_noise*fwdMatrix' ;
