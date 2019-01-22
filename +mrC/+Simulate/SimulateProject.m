@@ -373,11 +373,14 @@ for s = 1:length(projectPath)
         % accross sources!!! (which is the case for pink Gaussian noise)
         % this shold not be necessary (at least if decomposition is based
         % on cholesky)
-        C = C./repmat(sqrt(sum((C.^2),1)),size(C,1),1);
+        
+        %C = C./repmat(sqrt(sum((C.^2),1)),size(C,1),1);
+        noise_mixing_data.matrices {band_idx} = C;
         C_chan = zeros(size(fwdMatrix'));
         for hemi = 1:2 % hemisphere by hemisphere
             source_idxs = (hemi-1)*size(C,2)+1:hemi*size(C,2) ;
             C_chan(source_idxs,:) =  C(source_idxs,:)*fwdMatrix(:,source_idxs)'; 
+            %C_chan = C_chan./repmat(sqrt(sum((C_chan.^2),1)),size(C_chan,1),1);% Normalization in electrode space?
         end
         noise_mixing_data.matrices_chanSpace{band_idx} = C_chan;    
     end
@@ -385,11 +388,12 @@ for s = 1:length(projectPath)
     %noise = zeros(NS, size(fwdMatrix,1), opt.nTrials) ;
     for trial_id =1:opt.nTrials 
         disp(['Trial # ' num2str(trial_id)])
-        [thisNoise,thisPinkNoise,thisAlphaNoise,thisSensorNoise] = mrC.Simulate.GenerateNoise(opt.signalsf, NS, nSources, Noise, noise_mixing_data,Noise.spatial_normalization_type,fwdMatrix,opt.doFwdProjectNoise);   
-        noise(:,:,trial_id) = thisNoise ;% noises in source or sensor space
-        noiseSensor(:,:,trial_id) = thisSensorNoise;% measurement noise
+        [PinkNoise(:,:,trial_id),AlphaNoise(:,:,trial_id),SensorNoise(:,:,trial_id)] = mrC.Simulate.GenerateNoise(opt.signalsf, NS, nSources, Noise, noise_mixing_data,Noise.spatial_normalization_type,fwdMatrix,opt.doFwdProjectNoise);   
+%         noise(:,:,trial_id) = thisNoise ;% noises in source or sensor space
+%         noiseSensor(:,:,trial_id) = thisSensorNoise;% measurement noise
     end
 
+[noise_sig,Noise,SensorNoise] = mrC.Simulate.FitNoise(opt.signalsf, NS, Noise, PinkNoise,AlphaNoise, SensorNoise,fwdMatrix,opt.doFwdProjectNoise,true);   
 
 %------------------------ADD THE SIGNAL IN THE ROIs--------------------------
     
@@ -397,7 +401,7 @@ for s = 1:length(projectPath)
  
     subInd = strcmp(cellfun(@(x) x.subID,opt.rois,'UniformOutput',false),subIDs{s});
     allSubjRois{s} = opt.rois{find(subInd)} ;
-    [EEGData{s},EEGData_signal{s},sourceData] = mrC.Simulate.SrcSigMtx(opt.rois{find(subInd)},fwdMatrix,surfData,opt,noise,noiseSensor,Noise.lambda,'active_nodes');%Noise.spatial_normalization_type);% ROIsig % NoiseParams
+    [EEGData{s},EEGData_signal{s},sourceData] = mrC.Simulate.SrcSigMtx(opt.rois{find(subInd)},fwdMatrix,surfData,opt,noise_sig,SensorNoise,Noise.lambda,'active_nodes');%Noise.spatial_normalization_type);% ROIsig % NoiseParams
        
     if (opt.nTrials==1) || (opt.originsource) % this is to avoid memory problem
         sourceDataOrigin{s} = sourceData;
