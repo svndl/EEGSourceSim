@@ -158,6 +158,7 @@ opt	= ParseArgs(varargin,...
     'signalFF'      , [],...
     'signalSNRFreqBand' ,[],...
     'NoiseParams'   , struct,...
+    'RedoMixingMatrices', false,...
     'sensorFig'     , true,...
     'doSource'      , false,...
     'figFolder'     , [],...
@@ -343,7 +344,7 @@ for s = 1:length(projectPath)
     if strcmp(Noise.mixing_type_pink_noise,'coh')
         mixDir = fullfile(anatDir,subIDs{s},'Standard','meshes',['noise_mixing_data_' Noise.distanceType '.mat']);
         
-        if ~exist(mixDir,'file')% if the mixing data is not calculated already
+        if ~exist(mixDir,'file') || opt.RedoMixingMatrices% if the mixing data is not calculated already
             spat_dists = mrC.Simulate.CalculateSourceDistance(surfData,Noise.distanceType);
             disp(['Calculating mixing matrix for coherent pink noise ...'])
             noise_mixing_data = mrC.Simulate.GenerateMixingData(spat_dists);
@@ -373,8 +374,10 @@ for s = 1:length(projectPath)
         % accross sources!!! (which is the case for pink Gaussian noise)
         % this shold not be necessary (at least if decomposition is based
         % on cholesky)
+        C(1:size(C,2),:) = max(C(1:size(C,2),:),C(1:size(C,2),:)');
+        C(size(C,2)+1:end,:) = max(C(size(C,2)+1:end,:),C(size(C,2)+1:end,:)');
         
-        %C = C./repmat(sqrt(sum((C.^2),1)),size(C,1),1);
+        C = C./repmat(sqrt(sum((C.^2),1)),size(C,1),1);
         noise_mixing_data.matrices {band_idx} = C;
         C_chan = zeros(size(fwdMatrix'));
         for hemi = 1:2 % hemisphere by hemisphere
