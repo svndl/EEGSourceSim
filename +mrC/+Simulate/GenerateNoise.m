@@ -62,7 +62,7 @@ function [pink_noise, alpha_noise,sensor_noise] = GenerateNoise(f_sampling, n_sa
         % force noise to be spatially coherent within 'hard' frequency
         % ranges
         % for details see: DOI:10.1121/1.2987429
-        f = fftshift([-0.5:1/n_samples:0.5-1/n_samples]*f_sampling); % frequncy range
+        f = fftshift(([-0.5*n_samples:0.5*n_samples-1]*f_sampling/n_samples)); % frequncy range
         
         pink_noise_spec = fft(pink_noise,[],1);  
         
