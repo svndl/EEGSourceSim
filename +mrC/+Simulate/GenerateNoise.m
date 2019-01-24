@@ -71,14 +71,16 @@ function [pink_noise, alpha_noise,sensor_noise] = GenerateNoise(f_sampling, n_sa
         else
             pink_noise_spec_coh = zeros(size(pink_noise_spec));
         end
-        for band_idx = 1:length(noise_mixing_data.band_freqs)
+        band_names = fieldnames(noise_mixing_data.band_freqs) ;
+        for band_idx = 1:length(band_names)
+            this_band_name =  band_names{band_idx} ;
             % calc coherence for band
             if doFwdProjection
-                C = noise_mixing_data.matrices_chanSpace{band_idx}; 
+                C = noise_mixing_data.matrices_chanSpace.(this_band_name); 
             else
-                C = noise_mixing_data.matrices{band_idx}; 
+                C = noise_mixing_data.matrices.(this_band_name); 
             end
-            freq_bin_idxs = (noise_mixing_data.band_freqs{band_idx}(1)<=abs(f))&(abs(f)<noise_mixing_data.band_freqs{band_idx}(2));
+            freq_bin_idxs = (noise_mixing_data.band_freqs.(this_band_name)(1)<=abs(f))&(abs(f)<noise_mixing_data.band_freqs.(this_band_name)(2));
             for hemi = 1:2 % hemisphere by hemisphere
                 
                 if doFwdProjection

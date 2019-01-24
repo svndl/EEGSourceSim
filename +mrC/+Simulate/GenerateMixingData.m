@@ -15,7 +15,7 @@ end
 
 
 % preparing mixing matrices
-    load('spatial_decay_models_coherence_2')% this is located in simulate/private folder, it can be obtained by run the code 'spatial_decay_of_coherence.m'
+    load('spatial_decay_models_coherence_3')% this is located in simulate/private folder, it can be obtained by run the code 'spatial_decay_of_coherence.m'
 
     % calcualting the distances and the coherence takes some time, better to
     % precalculate, write and read
@@ -29,9 +29,10 @@ end
     
     hWait = waitbar(0,'Calculating mixing matrices ... ');
        
-    for freq_band_idx = 1:length(band_freqs)
-        this_spatial_decay_model = best_model.(band_names{freq_band_idx}) ;
-        mixing_matrix = zeros(size(spat_dists,1),size(spat_dists,2)/2) ;
+    for freq_band_idx = 1:length(band_names)
+        this_band_name = band_names{freq_band_idx} ;
+        this_spatial_decay_model = best_model.(this_band_name) ;
+        mixing_matrix = zeros(size(spat_dists,2)/2,size(spat_dists,1)) ;
         for hemisphere_idx = 1:2
             this_spat_dists = spat_dists((hemisphere_idx-1)*size(spat_dists,1)/2+(1:size(spat_dists,1)/2),...
                                 (hemisphere_idx-1)*size(spat_dists,2)/2+(1:size(spat_dists,2)/2));
@@ -46,9 +47,9 @@ end
             else
                 error('decomposition method not implemented')
             end
-            mixing_matrix((hemisphere_idx-1)*size(spat_dists,1)/2+(1:size(spat_dists,1)/2),:) = this_mixing_matrix;
+            mixing_matrix(:,(hemisphere_idx-1)*size(spat_dists,1)/2+(1:size(spat_dists,1)/2)) = this_mixing_matrix;
         end
-        noise_mixing_data.matrices{freq_band_idx} = mixing_matrix;
+        noise_mixing_data.matrices.(this_band_name) = mixing_matrix;
         waitbar(freq_band_idx/length(band_freqs));
     end       
     close(hWait);

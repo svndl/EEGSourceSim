@@ -355,8 +355,8 @@ for s = 1:length(projectPath)
         end
     end
     
-    
-    nSources = size(noise_mixing_data.matrices{1},1);
+    band_names = fieldnames(noise_mixing_data.matrices) ;
+    nSources = size(noise_mixing_data.matrices.(band_names{1}),2);
     % ----- Generate noise-----
     % this noise is NS x srcNum matrix, where srcNum is the number of source points on the cortical  meshe
 %     tic
@@ -366,26 +366,21 @@ for s = 1:length(projectPath)
     
     % calculate coherence in channel space to reduced computational effort
     % in every trial
-    for band_idx = 1:length(noise_mixing_data.band_freqs)
-        C = noise_mixing_data.matrices{band_idx}; 
+    for band_idx = 1:length(band_names)
+        this_band_name = band_names{band_idx} ;
+        C = noise_mixing_data.matrices.(this_band_name); 
         
-        % normalize mixing matrices in order to avoid amplification
-        % NOTE: this if only valid if the 'input signal' is uncorrelated
-        % accross sources!!! (which is the case for pink Gaussian noise)
-        % this shold not be necessary (at least if decomposition is based
-        % on cholesky)
-        C(1:size(C,2),:) = max(C(1:size(C,2),:),C(1:size(C,2),:)');
-        C(size(C,2)+1:end,:) = max(C(size(C,2)+1:end,:),C(size(C,2)+1:end,:)');
-        
-        C = C./repmat(sqrt(sum((C.^2),1)),size(C,1),1);
-        noise_mixing_data.matrices {band_idx} = C;
+        % normalize along column (per hemisphere) 
+        % see ?Generating nonstationary multisensor signals under a spatial coherence constraint
+        C = C./sqrt(sum((C.^2),1));
+        noise_mixing_data.matrices.(this_band_name) = C;
         C_chan = zeros(size(fwdMatrix'));
         for hemi = 1:2 % hemisphere by hemisphere
-            source_idxs = (hemi-1)*size(C,2)+1:hemi*size(C,2) ;
-            C_chan(source_idxs,:) =  C(source_idxs,:)*fwdMatrix(:,source_idxs)'; 
-            %C_chan = C_chan./repmat(sqrt(sum((C_chan.^2),1)),size(C_chan,1),1);% Normalization in electrode space?
+            source_idxs = (hemi-1)*size(C,1)+1:hemi*size(C,1) ;
+%             C(source_idxs,:) = 
+            C_chan(source_idxs,:) =  C(:,source_idxs)*fwdMatrix(:,source_idxs)'; 
         end
-        noise_mixing_data.matrices_chanSpace{band_idx} = C_chan;    
+        noise_mixing_data.matrices_chanSpace.(this_band_name) = C_chan;
     end
     
     %noise = zeros(NS, size(fwdMatrix,1), opt.nTrials) ;
