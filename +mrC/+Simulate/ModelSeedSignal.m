@@ -26,6 +26,9 @@ opt	= ParseArgs(varargin,...
     'signalFreq'       , [],...
     'signalHarmonic'   , [],...
     'signalPhase'      , [],...
+    'reliableAmp',       [],...
+    'reliablePhase',       [],...
+    'nTrials', 1 ,...
     'sf'            , 100,...
     'ns'            , 1000 ...
     );
@@ -60,6 +63,14 @@ if isempty(opt.signalPhase)
     for s = 1:seedNum, opt.signalPhase{s} = ((rand(1,NH(s))*2-1)*pi); end % random phase of harmonics between [-pi pi]
 end  
 
+if isempty(opt.reliableAmp)% all sources are reliable in amplitude
+    opt.reliableAmp = ones(1,seedNum);
+end
+
+if isempty(opt.reliablePhase)% all sources are reliable in phase
+    opt.reliablePhase = ones(1,seedNum);
+end
+
 % Checks if the input parameters match
 if (seedNum~=numel(opt.signalHarmonic)) || (seedNum~=numel(opt.signalPhase))
     error('Source parameters do not match');
@@ -71,17 +82,30 @@ for h = 1: numel(opt.signalHarmonic)
 end
 
 %% Generate SSVEP signal
-signalOut = zeros(opt.ns,seedNum);
+signalOut = zeros(opt.ns,opt.nTrials,seedNum);
 t = (0:opt.ns-1)/opt.sf ;
 
-% Generate signals for each source based on its harmonics
-for source_idx = 1:seedNum
-    for h_idx = 1:length(opt.signalHarmonic{source_idx}) % loop over harmonics                    
-        signalOut(:,source_idx) = signalOut(:,source_idx) + ...
-            opt.signalHarmonic{source_idx}(h_idx) * cos(2*pi*h_idx * opt.signalFreq(source_idx)*t+opt.signalPhase{source_idx}(h_idx))';
+
+for source_idx = 1:seedNum 
+    if opt.reliableAmp(source_idx) && opt.reliablePhase(source_idx) % model reliable sourse
+        signalOut(:,:,source_idx) = repmat(sum(opt.signalHarmonic{source_idx}'.*cos(2*pi*opt.signalFreq(source_idx)*[1:length(opt.signalHarmonic{source_idx})]'*t+opt.signalPhase{source_idx}')),[opt.nTrials,1])';
+    else % model unreliable sourse
+        if opt.reliableAmp(source_idx)
+            amps = repmat(opt.signalHarmonic{source_idx},opt.nTrials,1); 
+        else
+            amps = rand(1,opt.nTrials)' *opt.signalHarmonic{source_idx};
+        end
+        if opt.reliablePhase(source_idx)
+            phs = repmat(opt.signalPhase{source_idx},opt.nTrials,1);
+        else
+            phs = 2*pi*rand(opt.nTrials,length(opt.signalPhase{source_idx})) ;
+        end
+        for trial_idx = 1:opt.nTrials
+            signalOut(:,trial_idx,source_idx) = sum(amps(trial_idx,:)'.*cos(2*pi*opt.signalFreq(source_idx)*[1:length(opt.signalHarmonic{source_idx})]'*t+phs(trial_idx)')) ;
+        end
     end
 end
-
+%%
 FundFreq = opt.signalFreq;
 SF = opt.sf;
 
