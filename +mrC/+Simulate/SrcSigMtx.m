@@ -61,7 +61,7 @@ for r = 1:rois.ROINum % Read each Roi and check if they exist
 end
 
 
-if size(roiChunk,2)~= size(signalArray,2)
+if size(roiChunk,2)~= size(signalArray,3)
         EEGData=[]; 
         sourceData=[];
         roiSet=[];
@@ -82,11 +82,13 @@ if ~isempty(roiChunk)
 
     % place seed signal array in source space
     
-    sourceTemp = zeros(size(noise,1),size(fwdMatrix,2));
-    for s = 1: size(signalArray,2)% place the signal for each seed 
-        sourceTemp = sourceTemp + repmat (signalArray(:,s),[1 size(sourceTemp,2)]).*(repmat(spatfunc(:,s),[1 size(sourceTemp,1)])');
+    sourceTemp = zeros(size(noise,1),size(fwdMatrix,2),size(signalArray,2));
+    for s = 1: size(signalArray,3)% place the signal for each seed 
+        sourceTemp(:,find(spatfunc(:,s)),:) = sourceTemp(:,find(spatfunc(:,s)),:) + permute(repmat(signalArray(:,:,s), [1,1,sum(spatfunc(:,s))]),[1,3,2]) ;
     end
-
+    
+    
+    
     % Normalize the source signal
     if size(sourceTemp,2)==size(noise,2)
         if strcmp(spatial_normalization_type,'active_nodes')
@@ -114,9 +116,9 @@ if ~isempty(roiChunk)
     FInds = (F>=SNRFreqBand(1)) & (F<=SNRFreqBand(2));
        
      % fft of signal
-    sig = sourceTemp*fwdMatrix';
+    sig = permute(reshape(reshape(permute(sourceTemp,[1,3,2]),[],size(sourceTemp,2))*fwdMatrix',size(sourceTemp,1),size(sourceTemp,3),[] ),[1,3,2]);
     Fsig = abs(fft(sig)).^2;
-    signalM = max(mean(Fsig(FInds,:)));% max of signal
+    signalM = max(mean(mean(Fsig(FInds,:,:)),3));% max of signal with average over trials (for unreliable sources)
 
     % fft of noise
     if size(noise,2)==size(fwdMatrix,1)
@@ -151,7 +153,11 @@ if size(sourceTemp,2)==size(noise,2)
     end
 end
 % else: we add up in channel space
-EEGData_signal = sourceTemp*fwdMatrix';
+if exist('sig','var') && exist('sourceTemp','var')% reuse variable to save time
+    EEGData_signal = sig*SRatio;
+else
+    EEGData_signal = permute(reshape(reshape(permute(sourceTemp,[1,3,2]),[],size(sourceTemp,2))*fwdMatrix',size(sourceTemp,1),size(sourceTemp,3),[] ),[1,3,2]);
+end
 if size(EEGData_signal,2)==size(noise,2) % add up signal and noise in channel space
     % EEGData_signal = EEGData_signal/norm(EEGData_signal,'fro') ;%%%%????????????????????????????
     EEGData = sqrt(lambda/(lambda+1)) *(EEGData_signal) + sqrt(1/(lambda+1)) *noise;
