@@ -78,7 +78,7 @@ function [pink_noise, alpha_noise,sensor_noise] = GenerateNoise(f_sampling, n_sa
             if doFwdProjection
                 C = noise_mixing_data.matrices_chanSpace.(this_band_name); 
             else
-                C = noise_mixing_data.matrices.(this_band_name); 
+                C = noise_mixing_data.matrices.(this_band_name)'; 
             end
             freq_bin_idxs = (noise_mixing_data.band_freqs.(this_band_name)(1)<=abs(f))&(abs(f)<noise_mixing_data.band_freqs.(this_band_name)(2));
             for hemi = 1:2 % hemisphere by hemisphere
@@ -87,7 +87,7 @@ function [pink_noise, alpha_noise,sensor_noise] = GenerateNoise(f_sampling, n_sa
                     source_idxs = (hemi-1)*size(C,1)/2+1:hemi*size(C,1)/2 ;
                     pink_noise_spec_coh(freq_bin_idxs,:) = pink_noise_spec_coh(freq_bin_idxs,:)+pink_noise_spec(freq_bin_idxs,source_idxs)*C(source_idxs,:); 
                 else
-                    source_idxs = (hemi-1)*size(C,2)+1:hemi*size(C,2) ;
+                    source_idxs = (hemi-1)*size(C,1)/2+1:hemi*size(C,1)/2 ;
                     pink_noise_spec_coh(freq_bin_idxs,source_idxs) =  pink_noise_spec(freq_bin_idxs,source_idxs)*C(source_idxs,:); 
                 end
             end

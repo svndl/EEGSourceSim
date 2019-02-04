@@ -17,11 +17,11 @@ y.alpha =  [7., 6.3, 6.1, 6.05, 5.75, 5.5,  5.25, 5.1,  5]/7;
 y.beta = [7., 5.1, 4.9, 4.8,  4.45, 4.2,  3.9,  3.8,  3.6]/7;
 y.gamma = [7., 3.2, 2.9, 2.75, 2.3,  2.05, 1.9,  1.75, 1.6]/7;
 
-band_freqs{1} = [0,4];
-band_freqs{2} = [4,8];
-band_freqs{3} = [8,12];
-band_freqs{4} = [12,30];
-band_freqs{5} = [30,80];
+band_freqs.delta = [0,4];
+band_freqs.theta = [4,8];
+band_freqs.alpha = [8,12];
+band_freqs.beta = [12,30];
+band_freqs.gamma = [30,80];
 
 fig=figure ;
 freq_band_names = fieldnames(y) ;
@@ -73,7 +73,7 @@ for i = 1:length(freq_band_names)
 
 end
 legend(handles,freq_band_names)
-save('spatial_decay_models_coherence_2','model_fun','model_params','best_model','band_freqs')
+save('spatial_decay_models_coherence_3','model_fun','model_params','best_model','band_freqs')
 %%
 % plot best model
 if true

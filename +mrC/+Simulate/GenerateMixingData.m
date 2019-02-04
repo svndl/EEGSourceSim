@@ -49,6 +49,7 @@ end
             end
             mixing_matrix(:,(hemisphere_idx-1)*size(spat_dists,1)/2+(1:size(spat_dists,1)/2)) = this_mixing_matrix;
         end
+        %noise_mixing_data.band_freqs.(this_band_name) = band_freqs{freq_band_idx} ;
         noise_mixing_data.matrices.(this_band_name) = mixing_matrix;
         waitbar(freq_band_idx/length(band_freqs));
     end       
