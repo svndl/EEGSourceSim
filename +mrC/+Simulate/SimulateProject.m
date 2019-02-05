@@ -17,11 +17,9 @@ function [EEGData,EEGAxx,EEGData_signal,EEGAxx_signal,sourceDataOrigin,masterLis
   %   <options>:
     %
   % (Source Signal Parameters)
-    %       signalArray:    a NS x seedNum matrix, where NS is the number of
+    %       signalArray:    a NS x nTrials x seedNum matrix, where NS is the number of
     %                       time samples and seedNum is the number of seed sources
-    %                       [NS x 2 SSVEP sources] -> for these two, the
-    %                       random ROIs in functional
-    %                       roitype is selected
+    %                       [NS x 1 x 2 SSVEP sources]
     %
     %       signalsf:       sampling frequency of the input source signal
     %
@@ -320,7 +318,7 @@ for s = 1:length(projectPath)
     Noise = opt.NoiseParams;
     Noisefield = fieldnames(Noise);
     % TODO: update tests
-    if ~any(strcmp(Noisefield, 'mu')),Noise.mu = 1;end % power distribution between alpha noise and pink noise ('noise-to-noise ratio')
+    if ~any(strcmp(Noisefield, 'mu')),Noise.mu.pink = 1;Noise.mu.alpha = 1;Noise.mu.sensor = 1;end % power distribution between alpha noise and pink noise ('noise-to-noise ratio')
     if ~any(strcmp(Noisefield, 'lambda')),Noise.lambda = 1/NS/2;end % power distribution between signal and 'total noise' (SNR)
     if ~any(strcmp(Noisefield, 'spatial_normalization_type')),Noise.spatial_normalization_type = 'all_nodes';end% 'active_nodes'/['all_nodes']
     if ~any(strcmp(Noisefield, 'distanceType')),Noise.distanceType = 'Euclidean';end
@@ -372,12 +370,12 @@ for s = 1:length(projectPath)
         
         % normalize along column (per hemisphere) 
         % see ?Generating nonstationary multisensor signals under a spatial coherence constraint
-        C = C./sqrt(sum((C.^2),1));
+        %C = C./sqrt(sum((C.^2),1));
         noise_mixing_data.matrices.(this_band_name) = C;
         C_chan = zeros(size(fwdMatrix'));
         for hemi = 1:2 % hemisphere by hemisphere
             source_idxs = (hemi-1)*size(C,1)+1:hemi*size(C,1) ;
-%             C(source_idxs,:) = 
+            C(:,source_idxs) = C(:,source_idxs)./sqrt(sum((C(:,source_idxs).^2),1));
             C_chan(source_idxs,:) =  C(:,source_idxs)*fwdMatrix(:,source_idxs)'; 
         end
         noise_mixing_data.matrices_chanSpace.(this_band_name) = C_chan;
