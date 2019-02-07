@@ -307,6 +307,8 @@ classdef ROIs
                 NameList = cellfun(@(x,y,z) [x '_' y '_' z],{obj.ROIList.Type},{obj.ROIList.Name},{obj.ROIList.Hemi},'UniformOutput',false);
             elseif strcmp(mode,'noatlas')
                 NameList = cellfun(@(y,z) [y '_' z],{obj.ROIList.Name},{obj.ROIList.Hemi},'UniformOutput',false);
+            elseif strcmp(mode,'noatlashemi')
+                NameList = cellfun(@(y,z) [y],{obj.ROIList.Name},'UniformOutput',false);
             else
                 warning('The defined mode is wrong, use atlas or noatlas');
                 NameList=[];
