@@ -253,68 +253,76 @@ for nLambda_idx = 1:numel(Lambda_list)
     EEGAxx = {} ;
 end
 
-%%
-% scalp plots
+do_save_plots = false ;
+
+%% scalp plots
+% settings for data
 Subject_idx = 1;
 source_pattern = Source_pattern(:,:,Subject_idx);
 n_comps = 2;
-decomp_methods = {'pca','ssd','rca'};
-FigH = figure('DefaultAxesPosition', [0.1, 0.1, 0.8, 0.8]);
-nCols = 1+n_comps*length(decomp_methods) ;
-nRows = length(Lambda_list);
-set(FigH,'Unit','Inch','position',[5, 5, 18, 9],'color','w');
-rowCounter = 1 ;
+decomp_methods = {'pca','rca','ssd'};
 
-for src = 1:2%n_comps
-    S = subplot_tight(nRows,nCols,1+nCols*(floor(nRows/2)+src-1),[-0.01,-0.005]);
-    set(S,'position',get(S,'position')+[.05 0 0 0])
-    mrC.Simulate.PlotScalp(source_pattern(:,src),['Source' num2str(src)]);
-    caxis([-max(abs(source_pattern(:,src))) max(abs(source_pattern(:,src)))]);
+% settings for plot
+fig_width = 8.5 ;
+top_margin = 0.5 ;
+left_margin = 0 ;
+text_height = 0.25 ;
+text_width = 1 ;
+hor_comp_dist = 0.2 ;
+
+sbpl_width = (fig_width-text_width-hor_comp_dist*length(decomp_methods))/(1+n_comps*length(decomp_methods));
+sbpl_height = sbpl_width;
+fig_height = top_margin+2*text_height + length(Lambda_list)* sbpl_height ;
+
+FigH = figure();
+set(FigH,'Units','Inches','position',[40, 30, fig_width, fig_height],'color','w');
+
+for source_idx = 1:2
+    x = left_margin ;
+    y = fig_height - (top_margin+text_height + 0.5*length(Lambda_list)*sbpl_height + (source_idx-1)* (sbpl_height+text_height) ) ;
+    ax = axes('parent',FigH,    'Units','Inches','Position',[x,y,sbpl_width,sbpl_height]) ;
+
+    Topo = source_pattern(:,source_idx);
+    if abs(min(Topo))>max(Topo), Topo = -1*Topo;end
+    
+    this_title = sprintf('%s %i','Source ',source_idx) ;
+    mrC.Simulate.PlotScalp(Topo,this_title);
 end
 
-for nLambda_idx = 1:length(Lambda_list)
-    colCounter = 1 ;
-    for decomp_method_idx=1:length(decomp_methods)
-        this_decomp_method = decomp_methods{decomp_method_idx};
-        for comp_idx = 1:min(n_comps,    size(A.(this_decomp_method){Subject_idx}{nLambda_idx}{1},2 ))
-            Sub = subplot_tight(nRows,nCols,1+(colCounter-1)*n_comps+comp_idx+(rowCounter-1)*nCols,[-0.01,-0.005]);
-            set(Sub,'position',get(Sub,'position')+[0.05-(comp_idx*.025) -0.02 0 0]);
+for this_decomp_method_idx = 1:length(decomp_methods)
+    this_decomp_method = decomp_methods{this_decomp_method_idx};
+    for this_comp_idx = 1:2
+        x = left_margin+hor_comp_dist+   this_comp_idx* sbpl_width +(this_decomp_method_idx-1)*(2*sbpl_width+hor_comp_dist) ;
 
-            Topo = A.(this_decomp_method){Subject_idx}{nLambda_idx}{1}(:,comp_idx);
+        for nLambda_idx = 1:length(Lambda_list)
+            y = fig_height - (top_margin+text_height + nLambda_idx*sbpl_height) ;
+            ax = axes('parent',FigH,    'Units','Inches','Position',[x,y,sbpl_width,sbpl_height]) ;
+            Topo = A.(this_decomp_method){Subject_idx}{nLambda_idx}{1}(:,this_comp_idx);
             if abs(min(Topo))>max(Topo), Topo = -1*Topo;end
-            mrC.Simulate.PlotScalp(Topo);
-            if comp_idx ==1
-                this_title = sprintf('SNR = %i (dB)',round(10*log10(Lambda_list(nLambda_idx))));
-                T = title(this_title);
-                set(T,'position',get(T,'position')+[2  0 0]);
-            end    
-
-            if rowCounter == 1
-    %             axes('position',[.18+(.10*(comp_idx-1))+(.22*(decomp_method_idx-1)) .98 .2 .1 ]);
-    %             this_title = sprintf('%s %1i',this_decomp_method,  comp_idx) ;
-    %             text(0,0,this_title,'fontsize',12,'fontweight','bold'); axis off;
-                if comp_idx == 1
-                    axes('position',[.38+(.4*(decomp_method_idx-1))-(.08) .99 .2 .1 ]);
-                    this_title = sprintf('%s %i',this_decomp_method,comp_idx) ;
-                    text(0,0,this_title,'fontsize',12,'fontweight','bold'); axis off;
-                else
-                    axes('position',[.38+(.4*(decomp_method_idx-1))+.1 .99 .2 .1 ]);
-                    this_title = sprintf('%s %i',this_decomp_method,comp_idx) ;
-                    text(0,0,this_title,'fontsize',12,'fontweight','bold'); axis off;
+            if nLambda_idx == 1
+                this_title = sprintf('%s %i','Comp ',this_comp_idx) ;
+                mrC.Simulate.PlotScalp(Topo,this_title);
+                if this_comp_idx == 1
+                    ax = axes('parent',FigH,    'Units','Inches','Position',[x+sbpl_width,y+sbpl_height+text_height,0,0]) ;
+                    text(0,0,upper(this_decomp_method),'Units','Inches', 'HorizontalAlignment','center','VerticalAlignment','bottom','FontSize',12,'FontWeight', 'bold');axis off
                 end
             else
-                    this_title = sprintf('%i trials',Lambda_list(nLambda_idx));
+                mrC.Simulate.PlotScalp(Topo);
             end
-            caxis([-max(abs(Topo)) max(abs(Topo))]);
+            if (this_decomp_method_idx==length(decomp_methods)) && (this_comp_idx==2)
+                ax = axes('parent',FigH,    'Units','Inches','Position',[x+sbpl_width+hor_comp_dist,y+0.5*sbpl_height,0,0]) ;
+                this_text = sprintf('%i dB',Db_list(nLambda_idx)) ;
+                text(0,0,this_text,'Units','Inches', 'HorizontalAlignment','left','VerticalAlignment','middle','FontSize',12,'FontWeight', 'bold');axis off
+            end
+            
         end
-        colCounter = colCounter +1 ;
     end
-    rowCounter = rowCounter+1 ;
 end
-colormap(jmaColors('coolhotcortex'))
-set(FigH,'Unit','Inch','position',[5, 5, 10, 7],'color','w');
-export_fig(FigH,fullfile(FigPath,'SpatialFilters_topographies_SNR_average'),'-pdf');
-%close;
+
+if do_save_plots
+    export_fig(FigH,fullfile(FigPath,'SpatialFilters_topographies_SNR_average'),'-pdf');
+    close(FigH);
+end
 
  %%  plots angular error of topographies
 snrs_orig = cellfun(@(x) x(1:10,:,:),snrs_orig,'uni',false);
