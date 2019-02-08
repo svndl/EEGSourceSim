@@ -140,11 +140,12 @@ decomp_methods = {'pca','ssd','csp','rca'} ;
 for decomp_method_idx = 1:length(decomp_methods)
     this_decomp_method = decomp_methods{decomp_method_idx};
     for s = 1:numel(subs)
-        err_angles.(this_decomp_method){s} = zeros(2,128,numel(Lambda_list),nDraws);
-%         residuals.(this_decomp_method){s} = zeros(2,128,numel(Lambda_list),nDraws);
+        err_angles.(this_decomp_method){s} = zeros(2,128,numel(Lambda_list),nDraws) ;
+        residuals.(this_decomp_method){s} = zeros(2,128,numel(Lambda_list),nDraws) ;
     end
 end
     
+ref_signals = squeeze(mean(outSignal(1:100,:,:),2)) ;
 
 
 for nLambda_idx = 1:numel(Lambda_list)
@@ -239,19 +240,13 @@ for nLambda_idx = 1:numel(Lambda_list)
                   % residual (mse over sampmles averaged and trials)
                 % calculate residuals as mse over samples and trials
                 est_signal = thisDecompAxx.Wave ;               
-                ref_signal = outSignal(1:100,:);
 
-                for tr = 1:thisDecompAxx.nTrl
-                    tR = corr(est_signal(:,:,tr),ref_signal);                       
-                    R2 = tR(1:2,:).^2;
-                    if R2(1,1)<R2(1,2)% if the order of components is flipped
-                        R2 = R2(:,2:-1:1);
-                    end
-                    trial_R2(:,:,tr) = R2;
-                end             
-
-                residuals.(this_decomp_method){s}(:,1:2,nLambda_idx,draw_idx) = squeeze(mean(trial_R2,3))'; % average residual over trials
-                clear trial_R2;
+                corr_per_trial = zeros(2,thisDecompAxx.nCh,thisDecompAxx.nTrl) ;
+                for trial_idx = 1:thisDecompAxx.nTrl
+                    corr_per_trial(:,:,trial_idx) = corr(ref_signals, est_signal(:,:,trial_idx)) ;
+                end
+                residuals.(this_decomp_method){s}(:,1:thisDecompAxx.nCh,nLambda_idx,draw_idx) = mean(corr_per_trial.^2,3); % average residual over trials
+                
             end
             snrs_orig{s}(:,nLambda_idx,draw_idx)=mean(mean(thisAxx.Amp(signal_freq_idxs,:,:).^2)./mean(thisAxx.Amp(noise_freq_idxs,:,:).^2),3);
 
@@ -357,6 +352,7 @@ end
 for source_idx = 1:2 ;
 subplot(1,2,source_idx)
 for decomp_method_idx=1:length(decomp_methods)
+    this_decomp_method = decomp_methods{decomp_method_idx};
     combined_err_angles.(this_decomp_method) = cat(5, err_angles.(this_decomp_method){:}) ;
     for comp_idx = 1:2
         this_decomp_method = decomp_methods{decomp_method_idx};
@@ -378,8 +374,43 @@ if do_save_plots
     close(fig_err_ang);
 end
 
-%%
-err_angle_bak = err_angles ;
+
+
+
+%% plot residual
+fig_width = 8.5 ;
+fig_height = fig_width*5/8/2 ;
+
+fig_res = figure ;
+set(fig_res,'Units','Inches','position',[40, 30, fig_width, fig_height],'color','w');
+
+for source_idx = 1:2 ;
+subplot(1,2,source_idx)
+for decomp_method_idx=1:length(decomp_methods)
+    this_decomp_method = decomp_methods{decomp_method_idx};
+    combined_residuals.(this_decomp_method) = cat(5, residuals.(this_decomp_method){:}) ;
+    for comp_idx = 1:2
+        
+        this_avg_residuals = squeeze(mean(mean(combined_residuals.(this_decomp_method)(source_idx,comp_idx,:,:,:),4),5)) ;
+        plot(Db_list,this_avg_residuals ,markers{comp_idx},'LineWidth',2,'MarkerSize',10,'color',colors(decomp_method_idx,:));
+    hold on
+end
+end
+
+title(sprintf('Relative to source %i', source_idx))
+xlabel('SNR [dB]')
+ylabel('Residual [1-R^2]')
+end
+
+[~, hobj, ~, ~] = legend(legend_entries,'Location','southwest');
+
+if do_save_plots
+    export_fig(fig_res,fullfile(FigPath,'residual_averaged'),'-pdf');
+    close(fig_res);
+end
+
+return
+
 %%
 
  %%  plots angular error of topographies
