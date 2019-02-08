@@ -9,7 +9,7 @@ SimFolder = fileparts(pwd);
 addpath(genpath(SimFolder));
 
 %% To be modified later
-if false % SBs setup
+if true % SBs setup
     addpath('../External/tools/BrewerMap/')
     %
     DataPath = '/export/data/';
@@ -38,13 +38,14 @@ Wangnums = cellfun(@(x) x.ROINum,Wangs)>0;
 Noise.mu.pink=2;
 Noise.mu.alpha=2;
 Noise.mu.sensor=2;
+%Noise.distanceType = 'geodesic';
 
 % define locations of sources
 %--------------------------Cond1: V2d_R -----------------------------
 Rois1 = cellfun(@(x) x.searchROIs('V2d','wang','R'),RoiList,'UniformOutput',false);% % wang ROI
 Rois2 = cellfun(@(x) x.searchROIs('LO1','wang','L'),RoiList,'UniformOutput',false);
 RoisI = cellfun(@(x,y) x.mergROIs(y),Rois1,Rois2,'UniformOutput',false);
-do_new_data_generation = true;
+do_new_data_generation = false;
 % generate or read from disk
 generated_date_filename = 'data_for_spatial_filter_test2_2source_allSubj.mat';
 %generated_date_filename = 'data_for_spatial_filter_test_2source_all_subjects.mat';
@@ -52,9 +53,9 @@ generated_date_filename = 'data_for_spatial_filter_test2_2source_allSubj.mat';
 if ~exist(generated_date_filename,'file') || do_new_data_generation
     n_trials = 200;
     Noise.lambda = 0 ; % noise only
-    [outSignal, FundFreq, SF]= mrC.Simulate.ModelSeedSignal('signalType','SSVEP','ns',200,'signalFreq',[2 2],'signalHarmonic',{[2,0,1.5,0],[1.5,0, 2,0]},'signalPhase',{[.1,0,.1,0],[pi/2+.1,0,pi/2+.1,0]});
+    [outSignal, FundFreq, SF]= mrC.Simulate.ModelSeedSignal('signalType','SSVEP','ns',200,'signalFreq',[2 2],'signalHarmonic',{[2,0,1.5,0],[1,0, 1,0]},'signalPhase',{[0,0,0,0],[pi/2,0,pi/2,0]},'reliableAmp',[1,0],'nTrials',n_trials);
     [EEGData_noise,EEGAxx_noise,EEGData_signal,EEGAxx_signal,~,masterList,subIDs,allSubjFwdMatrices,allSubjRois] = mrC.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,'signalArray',outSignal,'signalFF',FundFreq,'signalsf',SF,'NoiseParams',Noise,'rois',RoisI,'Save',false,'cndNum',1,'nTrials',n_trials);%,'RedoMixingMatrices',true);
-    save(fullfile(ResultPath,generated_date_filename));
+    save(fullfile(ResultPath,generated_date_filename),'-v7.3');
 else
     load(fullfile(ResultPath,generated_date_filename))
 end
@@ -83,7 +84,7 @@ Lambda_list = 10.^(Db_list/10) ;
 
 % spatial filter test parameters
 fund_freq_idx = 1 ;            
-numTrials_list = 20;%2.^[1,2,3,4,5,6,7];     
+nTrials = 20;
 nDraws = 20 ;
 n_comps = 3 ;
 thisFundFreq = FundFreq(fund_freq_idx) ;
@@ -120,13 +121,21 @@ for subj_idx = 1:length(subIDs)
     spec_noise = fft(EEGData_noise{subj_idx},[],1);
     spec_signal = fft(EEGData_signal{subj_idx},[],1);
     power_noise = mean(mean(abs(spec_noise(power_norm_noise_freq_idxs,:,:)).^2)) ; % mean noise power per trial
-    power_signal= mean(mean(abs(spec_signal(power_norm_signal_freq_idxs,:,:)).^2)) ; 
+    power_signal= mean(mean(abs(spec_signal(power_norm_signal_freq_idxs,:,:)).^2)) ; % mean noise power per trial
     EEGData_noise{subj_idx} = EEGData_noise{subj_idx}./sqrt(power_noise);
     EEGData_signal{subj_idx} = EEGData_signal{subj_idx}./sqrt(power_signal);
 end
 
 % free some memory
 clear spec_noise spec_signal fwdMatrix RoiList allSubjFwdMatrices allSubjRois Rois1 Rois2 Wangs Wangnums
+
+if size(EEGData_signal{subj_idx},3)>= nDraws*nTrials % enough trials for disjoint draws
+    trial_idxs = 1:nDraws*nTrials ;
+else
+    trial_idxs = randi( size(EEGData_signal{subj_idx},3), 1,nDraws*nTrials) ; % not enough trials
+end
+trial_idxs_per_draw = reshape(trial_idxs,nDraws,[]) ;
+
 for nLambda_idx = 1:numel(Lambda_list)
     lambda = Lambda_list(nLambda_idx);
     disp(['Generating EEG by adding signal and noise: SNR = ' num2str(lambda)]);
@@ -145,110 +154,101 @@ for nLambda_idx = 1:numel(Lambda_list)
         decomp_methods = {'pca','ssd','csp','rca'} ;
         considered_harms = power_norm_harmonics ;
 
-        for nTrial_idx = 1:length(numTrials_list)
-            nUsedTrials = numTrials_list(nTrial_idx);
-            for draw_idx = 1:nDraws
-                fprintf('nUsedTrials = %i, draw_idx = %i \n',nUsedTrials, draw_idx) ;
-                random_numbers = randperm(EEGAxx_noise{1}.nTrl) ;
-                % todo: improve indexing to avoid identical trials in different
-                % draws. requires simulation of enough trials
-                % for starters: just take random trials
-                trial_idxs = random_numbers(1:nUsedTrials);
+        for draw_idx = 1:nDraws
+            trial_idxs = trial_idxs_per_draw(draw_idx,:);
 
-                thisAxx = cellfun(@(x) x.SelectTrials(trial_idxs),EEGAxx(subj_idx),'uni',false);
-                T = thisAxx{1};
-                for sub = 2:numel(thisAxx)
-                    T = T.MergeTrials(thisAxx{sub});
-                end
-                thisAxx = T;
-                thisTempMean = mean(mean(thisAxx.Wave,3),1) ;
-
-                % make sure the no-stimulation condition does not see the same
-                % noise component
-                noise_trial_idxs = random_numbers(nUsedTrials+1:2*nUsedTrials);
-                thisNoiseAxx = cellfun(@(x) x.SelectTrials(trial_idxs),EEGAxx_noise(subj_idx),'uni',false);
-                T = thisNoiseAxx{1};
-                for sub = 2:numel(thisNoiseAxx)
-                    T = T.MergeTrials(thisNoiseAxx{sub});
-                end
-                thisNoiseAxx = T;
-                     
-                for decomp_method_idx = 1:length(decomp_methods)
-                    this_decomp_method = decomp_methods{decomp_method_idx};
-
-                    if strcmpi(this_decomp_method,'pca')
-                        [thisDecompAxx,thisW,thisA,thisD] = mrC.SpatialFilters.PCA(thisAxx,'freq_range',thisFundFreq*considered_harms);
-                    elseif strcmpi(this_decomp_method,'pca_cart')
-                        [thisDecompAxx,thisW,thisA,thisD] = mrC.SpatialFilters.PCA(thisAxx,'freq_range',thisFundFreq*considered_harms,'model_type','cartesian');
-                    elseif strcmpi(this_decomp_method,'fullfreqPca')
-                        [thisDecompAxx,thisW,thisA,thisD] = mrC.SpatialFilters.PCA(thisAxx);
-                    elseif strcmpi(this_decomp_method,'fullfreqPca')
-                        [thisDecompAxx,thisW,thisA,thisD] = mrC.SpatialFilters.PCA(thisAxx,'freq_range',[1:50]);
-                    elseif strcmpi(this_decomp_method,'tpca')
-                        [thisDecompAxx,thisW,thisA,thisD] = mrC.SpatialFilters.tPCA(thisAxx);
-                    elseif strcmpi(this_decomp_method,'ssd')
-                        [thisDecompAxx,thisW,thisA,thisD]= mrC.SpatialFilters.SSD(thisAxx,thisFundFreq*considered_harms,'do_whitening',true);
-                    elseif strcmpi(this_decomp_method,'rca')
-                        [thisDecompAxx,thisW,thisA,thisD] = mrC.SpatialFilters.RCA(thisAxx,'freq_range',thisFundFreq*considered_harms,'do_whitening',true);
-
-                    elseif strcmpi(this_decomp_method,'csp')
-                        [theseDecompAxxs,thisW,thisA,thisD] = mrC.SpatialFilters.CSP({thisAxx,thisNoiseAxx},'freq_range',thisFundFreq*considered_harms,'do_whitening',true);
-                        thisDecompAxx=theseDecompAxxs{1};
-                    end
-                    for i = 1:size(thisA,2)
-                        if source_pattern(:,1)'*thisA(:,i)<0
-                            thisA(:,i) = thisA(:,i)*-1 ;
-                        end
-                    end
-                    Axx_compspace.(this_decomp_method){s}{nLambda_idx}{draw_idx} = thisDecompAxx ;
-                    W.(this_decomp_method){s}{nLambda_idx}{draw_idx} = thisW ;
-                    A.(this_decomp_method){s}{nLambda_idx}{draw_idx} = thisA ;
-                    D.(this_decomp_method){s}{nLambda_idx}{draw_idx} = thisD ;
-
-                    % metrics for first 2 components
-                    % calculate error angles
-                    freqs = [0:thisDecompAxx.nFr]*thisDecompAxx.dFHz;
-                    signal_freq_idxs = find(ismember(freqs,thisFundFreq*considered_harms));
-                    noise_freq_idxs = reshape([signal_freq_idxs-1;signal_freq_idxs+1],1,[]) ;
-
-                    %err_angles.(this_decomp_method)(comp_idx,nTrial_idx,draw_idx) = 180/pi* acos(abs(source_pattern(:,1)'*thisA(:,comp_idx))/sqrt(sum(source_pattern(:,1).^2)*sum(thisA(:,comp_idx).^2))) ;
-                    ERAngle = 180/pi* acos(abs(source_pattern'*thisA)./sqrt(repmat(sum(source_pattern.^2)',[1 size(thisA,2)]).*repmat(sum(thisA.^2),[size(source_pattern,2) 1]))) ;
-                    ERAngle = ERAngle(1:2,1:2);
-                    if ERAngle (1,1)> ERAngle (1,2)% if the order of components is flipped
-                            ERAngle = ERAngle(1:2,2:-1:1);
-                    end
-                    err_angles.(this_decomp_method){s}(:,1:2,nLambda_idx,draw_idx) = ERAngle;
-                    err_angles.(this_decomp_method){s}(:,:,nLambda_idx,draw_idx)=...
-                            real(err_angles.(this_decomp_method){s}(:,:,nLambda_idx,draw_idx));
-
-
-                    %calculate snrs assuming ssveps, mean over all trials
-                    snrs.(this_decomp_method){s}(1:size(thisA,2),nLambda_idx,draw_idx)=mean(mean(thisDecompAxx.Amp(signal_freq_idxs,:,:).^2)./mean(thisDecompAxx.Amp(noise_freq_idxs,:,:).^2),3);
-                      % residual (mse over sampmles averaged and trials)
-                    % calculate residuals as mse over samples and trials
-                    est_signal = thisDecompAxx.Wave ;               
-                    ref_signal = outSignal(1:100,:);
-
-                    for tr = 1:thisDecompAxx.nTrl
-                        tR = corr(est_signal(:,:,tr),ref_signal);                       
-                        R2 = tR(1:2,:).^2;
-                        if R2(1,1)<R2(1,2)% if the order of components is flipped
-                            R2 = R2(:,2:-1:1);
-                        end
-                        trial_R2(:,:,tr) = R2;
-                    end             
-                    
-                    residuals.(this_decomp_method){s}(:,1:2,nLambda_idx,draw_idx) = squeeze(mean(trial_R2,3))'; % average residual over trials
-                    clear trial_R2;
-                end
-                snrs_orig{s}(:,nLambda_idx,draw_idx)=mean(mean(thisAxx.Amp(signal_freq_idxs,:,:).^2)./mean(thisAxx.Amp(noise_freq_idxs,:,:).^2),3);
-                  
+            thisAxx = cellfun(@(x) x.SelectTrials(trial_idxs),EEGAxx(subj_idx),'uni',false);
+            T = thisAxx{1};
+            for sub = 2:numel(thisAxx)
+                T = T.MergeTrials(thisAxx{sub});
             end
-        end
+            thisAxx = T;
+            thisTempMean = mean(mean(thisAxx.Wave,3),1) ;
 
-        %
-               
+            % make sure the no-stimulation condition does not see the same
+            % noise component
+            noise_trial_idxs = trial_idxs_per_draw(mod(draw_idx,nDraws)+1,:);
+            
+            thisNoiseAxx = cellfun(@(x) x.SelectTrials(trial_idxs),EEGAxx_noise(subj_idx),'uni',false);
+            T = thisNoiseAxx{1};
+            for sub = 2:numel(thisNoiseAxx)
+                T = T.MergeTrials(thisNoiseAxx{sub});
+            end
+            thisNoiseAxx = T;
+
+            for decomp_method_idx = 1:length(decomp_methods)
+                this_decomp_method = decomp_methods{decomp_method_idx};
+
+                if strcmpi(this_decomp_method,'pca')
+                    [thisDecompAxx,thisW,thisA,thisD] = mrC.SpatialFilters.PCA(thisAxx,'freq_range',thisFundFreq*considered_harms);
+                elseif strcmpi(this_decomp_method,'pca_cart')
+                    [thisDecompAxx,thisW,thisA,thisD] = mrC.SpatialFilters.PCA(thisAxx,'freq_range',thisFundFreq*considered_harms,'model_type','cartesian');
+                elseif strcmpi(this_decomp_method,'fullfreqPca')
+                    [thisDecompAxx,thisW,thisA,thisD] = mrC.SpatialFilters.PCA(thisAxx);
+                elseif strcmpi(this_decomp_method,'fullfreqPca')
+                    [thisDecompAxx,thisW,thisA,thisD] = mrC.SpatialFilters.PCA(thisAxx,'freq_range',[1:50]);
+                elseif strcmpi(this_decomp_method,'tpca')
+                    [thisDecompAxx,thisW,thisA,thisD] = mrC.SpatialFilters.tPCA(thisAxx);
+                elseif strcmpi(this_decomp_method,'ssd')
+                    [thisDecompAxx,thisW,thisA,thisD]= mrC.SpatialFilters.SSD(thisAxx,thisFundFreq*considered_harms,'do_whitening',true);
+                elseif strcmpi(this_decomp_method,'rca')
+                    [thisDecompAxx,thisW,thisA,thisD] = mrC.SpatialFilters.RCA(thisAxx,'freq_range',thisFundFreq*considered_harms,'do_whitening',true);
+
+                elseif strcmpi(this_decomp_method,'csp')
+                    [theseDecompAxxs,thisW,thisA,thisD] = mrC.SpatialFilters.CSP({thisAxx,thisNoiseAxx},'freq_range',thisFundFreq*considered_harms,'do_whitening',true);
+                    thisDecompAxx=theseDecompAxxs{1};
+                end
+                for i = 1:size(thisA,2)
+                    if source_pattern(:,1)'*thisA(:,i)<0
+                        thisA(:,i) = thisA(:,i)*-1 ;
+                    end
+                end
+                Axx_compspace.(this_decomp_method){s}{nLambda_idx}{draw_idx} = thisDecompAxx ;
+                W.(this_decomp_method){s}{nLambda_idx}{draw_idx} = thisW ;
+                A.(this_decomp_method){s}{nLambda_idx}{draw_idx} = thisA ;
+                D.(this_decomp_method){s}{nLambda_idx}{draw_idx} = thisD ;
+
+                % metrics for first n_comps components
+                % calculate error angles
+                freqs = [0:thisDecompAxx.nFr]*thisDecompAxx.dFHz;
+                signal_freq_idxs = find(ismember(freqs,thisFundFreq*considered_harms));
+                noise_freq_idxs = reshape([signal_freq_idxs-1;signal_freq_idxs+1],1,[]) ;
+
+                %err_angles.(this_decomp_method)(comp_idx,nTrial_idx,draw_idx) = 180/pi* acos(abs(source_pattern(:,1)'*thisA(:,comp_idx))/sqrt(sum(source_pattern(:,1).^2)*sum(thisA(:,comp_idx).^2))) ;
+                ERAngle = 180/pi* acos(abs(source_pattern'*thisA)./sqrt(repmat(sum(source_pattern.^2)',[1 size(thisA,2)]).*repmat(sum(thisA.^2),[size(source_pattern,2) 1]))) ;
+                ERAngle = ERAngle(1:2,1:2);
+                if ERAngle (1,1)> ERAngle (1,2)% if the order of components is flipped
+                        ERAngle = ERAngle(1:2,2:-1:1);
+                end
+                err_angles.(this_decomp_method){s}(:,1:2,nLambda_idx,draw_idx) = ERAngle;
+                err_angles.(this_decomp_method){s}(:,:,nLambda_idx,draw_idx)=...
+                        real(err_angles.(this_decomp_method){s}(:,:,nLambda_idx,draw_idx));
+
+
+                %calculate snrs assuming ssveps, mean over all trials
+                snrs.(this_decomp_method){s}(1:size(thisA,2),nLambda_idx,draw_idx)=mean(mean(thisDecompAxx.Amp(signal_freq_idxs,:,:).^2)./mean(thisDecompAxx.Amp(noise_freq_idxs,:,:).^2),3);
+                  % residual (mse over sampmles averaged and trials)
+                % calculate residuals as mse over samples and trials
+                est_signal = thisDecompAxx.Wave ;               
+                ref_signal = outSignal(1:100,:);
+
+                for tr = 1:thisDecompAxx.nTrl
+                    tR = corr(est_signal(:,:,tr),ref_signal);                       
+                    R2 = tR(1:2,:).^2;
+                    if R2(1,1)<R2(1,2)% if the order of components is flipped
+                        R2 = R2(:,2:-1:1);
+                    end
+                    trial_R2(:,:,tr) = R2;
+                end             
+
+                residuals.(this_decomp_method){s}(:,1:2,nLambda_idx,draw_idx) = squeeze(mean(trial_R2,3))'; % average residual over trials
+                clear trial_R2;
+            end
+            snrs_orig{s}(:,nLambda_idx,draw_idx)=mean(mean(thisAxx.Amp(signal_freq_idxs,:,:).^2)./mean(thisAxx.Amp(noise_freq_idxs,:,:).^2),3);
+
+        end
     end
+
     EEGData = {};
     EEGAxx = {} ;
 end
@@ -258,7 +258,7 @@ end
 Subject_idx = 1;
 source_pattern = Source_pattern(:,:,Subject_idx);
 n_comps = 2;
-decomp_methods = {'pca','ssd'};
+decomp_methods = {'pca','ssd','rca'};
 FigH = figure('DefaultAxesPosition', [0.1, 0.1, 0.8, 0.8]);
 nCols = 1+n_comps*length(decomp_methods) ;
 nRows = length(Lambda_list);
