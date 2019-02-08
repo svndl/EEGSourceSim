@@ -136,6 +136,17 @@ else
 end
 trial_idxs_per_draw = reshape(trial_idxs,nDraws,[]) ;
 
+decomp_methods = {'pca','ssd','csp','rca'} ;
+for decomp_method_idx = 1:length(decomp_methods)
+    this_decomp_method = decomp_methods{decomp_method_idx};
+    for s = 1:numel(subs)
+        err_angles.(this_decomp_method){s} = zeros(2,128,numel(Lambda_list),nDraws);
+%         residuals.(this_decomp_method){s} = zeros(2,128,numel(Lambda_list),nDraws);
+    end
+end
+    
+
+
 for nLambda_idx = 1:numel(Lambda_list)
     lambda = Lambda_list(nLambda_idx);
     disp(['Generating EEG by adding signal and noise: SNR = ' num2str(lambda)]);
@@ -150,8 +161,6 @@ for nLambda_idx = 1:numel(Lambda_list)
         subj_idx = subs{s};
         
         source_pattern = Source_pattern(:,:,subj_idx );
-
-        decomp_methods = {'pca','ssd','csp','rca'} ;
         considered_harms = power_norm_harmonics ;
 
         for draw_idx = 1:nDraws
@@ -216,13 +225,13 @@ for nLambda_idx = 1:numel(Lambda_list)
 
                 %err_angles.(this_decomp_method)(comp_idx,nTrial_idx,draw_idx) = 180/pi* acos(abs(source_pattern(:,1)'*thisA(:,comp_idx))/sqrt(sum(source_pattern(:,1).^2)*sum(thisA(:,comp_idx).^2))) ;
                 ERAngle = 180/pi* acos(abs(source_pattern'*thisA)./sqrt(repmat(sum(source_pattern.^2)',[1 size(thisA,2)]).*repmat(sum(thisA.^2),[size(source_pattern,2) 1]))) ;
-                ERAngle = ERAngle(1:2,1:2);
-                if ERAngle (1,1)> ERAngle (1,2)% if the order of components is flipped
-                        ERAngle = ERAngle(1:2,2:-1:1);
-                end
-                err_angles.(this_decomp_method){s}(:,1:2,nLambda_idx,draw_idx) = ERAngle;
-                err_angles.(this_decomp_method){s}(:,:,nLambda_idx,draw_idx)=...
-                        real(err_angles.(this_decomp_method){s}(:,:,nLambda_idx,draw_idx));
+%                 ERAngle = ERAngle(1:2,1:2);
+% %                 if ERAngle (1,1)> ERAngle (1,2)% if the order of components is flipped
+% %                         ERAngle = ERAngle(1:2,2:-1:1);
+% %                 end
+                err_angles.(this_decomp_method){s}(:,1:size(ERAngle,2),nLambda_idx,draw_idx) = ERAngle;
+%                 err_angles.(this_decomp_method){s}(:,:,nLambda_idx,draw_idx)=...
+%                         real(err_angles.(this_decomp_method){s}(:,:,nLambda_idx,draw_idx));
 
 
                 %calculate snrs assuming ssveps, mean over all trials
@@ -274,13 +283,13 @@ sbpl_width = (fig_width-text_width-hor_comp_dist*length(decomp_methods))/(1+n_co
 sbpl_height = sbpl_width;
 fig_height = top_margin+2*text_height + length(Lambda_list)* sbpl_height ;
 
-FigH = figure();
-set(FigH,'Units','Inches','position',[40, 30, fig_width, fig_height],'color','w');
+fig_scalp_plots = figure();
+set(fig_scalp_plots,'Units','Inches','position',[40, 30, fig_width, fig_height],'color','w');
 
 for source_idx = 1:2
     x = left_margin ;
     y = fig_height - (top_margin+text_height + 0.5*length(Lambda_list)*sbpl_height + (source_idx-1)* (sbpl_height+text_height) ) ;
-    ax = axes('parent',FigH,    'Units','Inches','Position',[x,y,sbpl_width,sbpl_height]) ;
+    ax = axes('parent',fig_scalp_plots,    'Units','Inches','Position',[x,y,sbpl_width,sbpl_height]) ;
 
     Topo = source_pattern(:,source_idx);
     if abs(min(Topo))>max(Topo), Topo = -1*Topo;end
@@ -296,21 +305,21 @@ for this_decomp_method_idx = 1:length(decomp_methods)
 
         for nLambda_idx = 1:length(Lambda_list)
             y = fig_height - (top_margin+text_height + nLambda_idx*sbpl_height) ;
-            ax = axes('parent',FigH,    'Units','Inches','Position',[x,y,sbpl_width,sbpl_height]) ;
+            ax = axes('parent',fig_scalp_plots,    'Units','Inches','Position',[x,y,sbpl_width,sbpl_height]) ;
             Topo = A.(this_decomp_method){Subject_idx}{nLambda_idx}{1}(:,this_comp_idx);
             if abs(min(Topo))>max(Topo), Topo = -1*Topo;end
             if nLambda_idx == 1
                 this_title = sprintf('%s %i','Comp ',this_comp_idx) ;
                 mrC.Simulate.PlotScalp(Topo,this_title);
                 if this_comp_idx == 1
-                    ax = axes('parent',FigH,    'Units','Inches','Position',[x+sbpl_width,y+sbpl_height+text_height,0,0]) ;
+                    ax = axes('parent',fig_scalp_plots,    'Units','Inches','Position',[x+sbpl_width,y+sbpl_height+text_height,0,0]) ;
                     text(0,0,upper(this_decomp_method),'Units','Inches', 'HorizontalAlignment','center','VerticalAlignment','bottom','FontSize',12,'FontWeight', 'bold');axis off
                 end
             else
                 mrC.Simulate.PlotScalp(Topo);
             end
             if (this_decomp_method_idx==length(decomp_methods)) && (this_comp_idx==2)
-                ax = axes('parent',FigH,    'Units','Inches','Position',[x+sbpl_width+hor_comp_dist,y+0.5*sbpl_height,0,0]) ;
+                ax = axes('parent',fig_scalp_plots,    'Units','Inches','Position',[x+sbpl_width+hor_comp_dist,y+0.5*sbpl_height,0,0]) ;
                 this_text = sprintf('%i dB',Db_list(nLambda_idx)) ;
                 text(0,0,this_text,'Units','Inches', 'HorizontalAlignment','left','VerticalAlignment','middle','FontSize',12,'FontWeight', 'bold');axis off
             end
@@ -320,9 +329,58 @@ for this_decomp_method_idx = 1:length(decomp_methods)
 end
 
 if do_save_plots
-    export_fig(FigH,fullfile(FigPath,'SpatialFilters_topographies_SNR_average'),'-pdf');
-    close(FigH);
+    export_fig(fig_scalp_plots,fullfile(FigPath,'SpatialFilters_topographies_SNR_average'),'-pdf');
+    close(fig_scalp_plots);
 end
+
+
+%%  plots angular error of topographies
+fig_width = 8.5 ;
+fig_height = fig_width*5/8/2 ;
+
+fig_err_ang = figure ;
+set(fig_err_ang,'Units','Inches','position',[40, 30, fig_width, fig_height],'color','w');
+
+
+colors = brewermap(4,'Set2') ;
+markers = {'-o',':o'};
+legend_entries = {} ;
+
+for decomp_method_idx=1:length(decomp_methods)
+for comp_idx = 1:2
+        this_decomp_method = decomp_methods{decomp_method_idx};
+        legend_entries{end+1} = sprintf('%s, Comp %i',upper(this_decomp_method), comp_idx) ;
+end
+end
+    
+    
+for source_idx = 1:2 ;
+subplot(1,2,source_idx)
+for decomp_method_idx=1:length(decomp_methods)
+    combined_err_angles.(this_decomp_method) = cat(5, err_angles.(this_decomp_method){:}) ;
+    for comp_idx = 1:2
+        this_decomp_method = decomp_methods{decomp_method_idx};
+        this_avg_err_angles = squeeze(mean(mean(combined_err_angles.(this_decomp_method)(source_idx,comp_idx,:,:,:),4),5)) ;
+        plot(Db_list,this_avg_err_angles ,markers{comp_idx},'LineWidth',2,'MarkerSize',10,'color',colors(decomp_method_idx,:));
+    hold on
+end
+end
+
+title(sprintf('Relative to source %i', source_idx))
+xlabel('SNR [dB]')
+ylabel('Error Angle [Degrees]')
+end
+
+[~, hobj, ~, ~] = legend(legend_entries,'Location','southwest');
+
+if do_save_plots
+    export_fig(fig_err_ang,fullfile(FigPath,'error_angle_averaged'),'-pdf');
+    close(fig_err_ang);
+end
+
+%%
+err_angle_bak = err_angles ;
+%%
 
  %%  plots angular error of topographies
 snrs_orig = cellfun(@(x) x(1:10,:,:),snrs_orig,'uni',false);
