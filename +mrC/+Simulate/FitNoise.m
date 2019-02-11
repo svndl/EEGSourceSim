@@ -94,6 +94,96 @@ for tr = 1:size(noise,3)
     noise(:,:,tr) = noise(:,:,tr)/norm(noise(:,:,tr),'fro') ; % in this case be careful about adding sensor noise later %%%%%%%%%%%%%
 end    
     
+%% plot the noises
+
+if true
+   FIG = figure;
+   LW = 1.5;
+   FS = 14;
+   el = 29;
+   % PINK
+   S(1,1) = subplot(4,2,1);
+   plot(muR(1)*pink_noise(:,el,1),'k','linewidth',LW-.5);
+   ylabel('Amplitude','FontSize',FS)
+   set(gca,'xtick',0:300:600,'xticklabel',0:2,'fontsize',FS);
+   
+   S(1,2) = subplot(4,2,2);
+   plot(FreqI,muR(1)*PNoiseASD,'k','linewidth',LW);
+   ylabel('ASD','FontSize',FS)
+   set(gca,'fontsize',FS);
+   xlim([1.5 30])
+   ylim([0 2])
+   
+   % ALPHA
+   S(2,1)=subplot(4,2,3);
+   plot(muR(2)*alpha_noise(:,el,1),'k','linewidth',LW-.5);
+   ylabel('Amplitude','FontSize',FS)
+   set(gca,'xtick',0:300:600,'xticklabel',0:2,'fontsize',FS);
+   
+   S(2,2) = subplot(4,2,4);
+   plot(FreqI,muR(2)*ANoiseASD,'k','linewidth',LW);
+   ylabel('ASD','FontSize',FS);
+   set(gca,'fontsize',FS);
+   xlim([1.5 30])
+   ylim([0 2])
+   
+   % Sensor
+   S(3,1)=subplot(4,2,5);
+   plot(muR(3)*sensor_noise(:,el,1),'k','linewidth',LW-.5);
+   ylim([-.1 .1])
+   ylabel('Amplitude','FontSize',FS)
+   set(gca,'xtick',0:300:600,'xticklabel',0:2,'fontsize',FS);
+   
+   S(3,2)= subplot(4,2,6);
+   plot(FreqI,muR(3)*SNoiseASD,'k','linewidth',LW);
+   ylabel('ASD','FontSize',FS)
+   set(gca,'fontsize',FS);
+   xlim([1.5 30])
+   ylim([0 2])
+   
+   % ALL
+   S(4,1) = subplot(4,2,7);
+   plot(noise(:,el,1),'k','linewidth',LW-.5);
+   xlabel('Time(S)','FontSize',FS);
+   ylabel('Amplitude','FontSize',FS);
+   set(gca,'xtick',0:300:600,'xticklabel',0:2,'fontsize',FS);
+   
+   S(4,2) = subplot(4,2,8);
+   plot(FreqI,(muR(1)*PNoiseASD+muR(2)*ANoiseASD+muR(3)*SNoiseASD),'k','linewidth',LW); 
+   hold on; plot(FreqI,MASDEEG,'-','color','r','linewidth',LW);
+   xlim([1.5 30])
+   ylim([0 2.5])
+   xlabel('Frequency(Hz)','FontSize',FS)
+   set(gca,'fontsize',FS);
+   ylabel('ASD','FontSize',FS)
+   
+   L = legend('Simulated Noise','Resting State EEG');
+   set(L,'fontsize',FS,'box', 'off');
+   
+   for r = 1:4
+       set(S(r,1),'position',get(S(r,1),'position')+[ -.0 -.0 -.0 -.01]);
+       set(S(r,2),'position',get(S(r,2),'position')+[ -.02 -.0 -.0 -.01]);
+   end
+   
+    set(FIG,'paperposition',[1 1 8 8 ]);
+    set(FIG,'Unit','Inch','position',[12 5 8 8 ],'color','w');
+   
+    axes('NextPlot','add','position',[.44 .89 .2 .1]);
+    text(.0,.5,'1/f-Activity','fontsize',FS); axis off
+
+    axes('NextPlot','add','position',[.45 .67 .2 .1]);
+    text(.0,.5,'\alpha-Activity','fontsize',FS); axis off
+
+    axes('NextPlot','add','position',[.44 .45 .2 .1]);
+    h=text(.0,.5,'Sensor Noise','fontsize',FS); axis off
+
+    axes('NextPlot','add','position',[.44 .2 .2 .1]);
+    h=text(.0,.5,'Combined Noise','fontsize',FS); axis off
+    
+    print(fullfile('Figures','Noise_modeling.tif'),'-r300','-dtiff');
+    export_fig(FIG,fullfile('Figures','Noise_modeling'),'-pdf');
+
+end
 end
 
 
