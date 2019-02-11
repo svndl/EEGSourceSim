@@ -96,7 +96,12 @@ end
     
 %% plot the noises
 
-if true
+if false
+    plot_noise(pink_noise,PNoiseASD,alpha_noise,ANoiseASD,sensor_noise,SNoiseASD,noise,MASDEEG,muR,FreqI);
+end
+end
+
+function plot_noise(pink_noise,PNoiseASD,alpha_noise,ANoiseASD,sensor_noise,SNoiseASD,noise,MASDEEG,muR,FreqI)
    FIG = figure;
    LW = 1.5;
    FS = 14;
@@ -177,13 +182,12 @@ if true
     axes('NextPlot','add','position',[.44 .45 .2 .1]);
     h=text(.0,.5,'Sensor Noise','fontsize',FS); axis off
 
-    axes('NextPlot','add','position',[.44 .2 .2 .1]);
+    axes('NextPlot','add','position',[.42 .23 .2 .1]);
     h=text(.0,.5,'Combined Noise','fontsize',FS); axis off
     
     print(fullfile('Figures','Noise_modeling.tif'),'-r300','-dtiff');
     export_fig(FIG,fullfile('Figures','Noise_modeling'),'-pdf');
+    close;
 
 end
-end
-
 

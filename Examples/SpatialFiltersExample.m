@@ -9,7 +9,7 @@ SimFolder = fileparts(pwd);
 addpath(genpath(SimFolder));
 
 %% To be modified later
-if true % SBs setup
+if false % SBs setup
     addpath('../External/tools/BrewerMap/')
     %
     DataPath = '/export/data/';
@@ -53,7 +53,7 @@ generated_date_filename = 'data_for_spatial_filter_test2_2source_allSubj.mat';
 if ~exist(generated_date_filename,'file') || do_new_data_generation
     n_trials = 200;
     Noise.lambda = 0 ; % noise only
-    [outSignal, FundFreq, SF]= mrC.Simulate.ModelSeedSignal('signalType','SSVEP','ns',200,'signalFreq',[2 2],'signalHarmonic',{[2,0,1.5,0],[1,0, 1,0]},'signalPhase',{[0,0,0,0],[pi/2,0,pi/2,0]},'reliableAmp',[1,0],'nTrials',n_trials);
+    [outSignal, FundFreq, SF]= mrC.Simulate.ModelSeedSignal('signalType','SSVEP','ns',200,'signalFreq',[2 2],'HarmonicAmp',{[2,0,1.5,0],[1,0, 1,0]},'HarmonicPhase',{[0,0,0,0],[pi/2,0,pi/2,0]},'reliableAmp',[1,0],'nTrials',n_trials);
     [EEGData_noise,EEGAxx_noise,EEGData_signal,EEGAxx_signal,~,masterList,subIDs,allSubjFwdMatrices,allSubjRois] = mrC.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,'signalArray',outSignal,'signalFF',FundFreq,'signalsf',SF,'NoiseParams',Noise,'rois',RoisI,'Save',false,'cndNum',1,'nTrials',n_trials);%,'RedoMixingMatrices',true);
     save(fullfile(ResultPath,generated_date_filename),'-v7.3');
 else

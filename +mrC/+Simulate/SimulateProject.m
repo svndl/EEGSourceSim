@@ -79,11 +79,6 @@ function [EEGData,EEGAxx,EEGData_signal,EEGAxx_signal,sourceDataOrigin,masterLis
     %
     %       distanceType: how to calculate source distances ['Euclidean']/'Geodesic', Geodesic is not implemented yet
     
-  % (Plotting Parametes)
-    %       sensorFig:      logical indicating whether to draw topo plots of
-    %                       the simulated ROI data in sensor space. [true]/false
-    %       figFolder:        string specifying folder in which to save sensor
-    %                       figs. [Users' Desktop]
     
 
   % (Save Parameters)
@@ -144,6 +139,7 @@ function [EEGData,EEGAxx,EEGData_signal,EEGAxx_signal,sourceDataOrigin,masterLis
  
 %--------------------------set up default values---------------------------
 opt	= ParseArgs(varargin,...
+    'anatomyPath'   , [],...   
     'subSelect'        ,[],...
     'inverse'		, [], ...
     'rois'          , [], ...
@@ -159,11 +155,6 @@ opt	= ParseArgs(varargin,...
     'doFwdProjectNoise' ,true, ...
     'OptimizeNoiseParam' ,true,...
     'RedoMixingMatrices', false,...
-    'sensorFig'     , true,...
-    'doSource'      , false,...
-    'figFolder'     , [],...
-    'anatomyPath'   , [],...   
-    'plotting'      , 0 ,...
     'Save'          ,true,...
     'cndNum'        ,1, ...
     'nTrials'       ,1, ...
@@ -189,14 +180,6 @@ if ~strcmp(opt.roiType,'main')% THIS SHOUDL BE CORRECTED
 else
 end
 
-
-%-------Set folder for saving the results if not defined (default is desktop)----------
-if isempty(opt.figFolder)
-    if ispc,home = [getenv('HOMEDRIVE') getenv('HOMEPATH')];
-    else home = getenv('HOME');end
-    opt.figFolder = fullfile(home,'Desktop');
-else
-end
 
 %------------------set anatomy data path if not defined ---------------------
 if isempty(opt.anatomyPath)
@@ -357,12 +340,6 @@ for s = 1:length(projectPath)
     band_names = fieldnames(noise_mixing_data.matrices) ;
     nSources = size(noise_mixing_data.matrices.(band_names{1}),2);
     % ----- Generate noise-----
-    % this noise is NS x srcNum matrix, where srcNum is the number of source points on the cortical  meshe
-%     tic
-%     noise_signal = mrC.Simulate.GenerateNoise_2(opt.signalsf, NS, size(spat_dists,1), Noise.mu, AlphaSrc, noise_mixing_data,Noise.spatial_normalization_type,opt.nTrials);   
-%     toc
-    %noise_signal = zeros(NS, nSources, opt.nTrials); 
-    
     % calculate coherence in channel space to reduced computational effort
     % in every trial
     for band_idx = 1:length(band_names)
@@ -390,7 +367,7 @@ for s = 1:length(projectPath)
 %         noiseSensor(:,:,trial_id) = thisSensorNoise;% measurement noise
     end
 
-[noise_sig,Noise,SensorNoise] = mrC.Simulate.FitNoise(opt.signalsf, NS, Noise, PinkNoise,AlphaNoise, SensorNoise,fwdMatrix,opt.doFwdProjectNoise,OptimizeNoiseParam);   
+[noise_sig,Noise,SensorNoise] = mrC.Simulate.FitNoise(opt.signalsf, NS, Noise, PinkNoise,AlphaNoise, SensorNoise,fwdMatrix,opt.doFwdProjectNoise,opt.OptimizeNoiseParam);   
 
 %------------------------ADD THE SIGNAL IN THE ROIs--------------------------
     
