@@ -254,17 +254,7 @@ for s = 1:length(projectPath)
         warning(['Skip subject ' subIDs{s} '... ROIs can not be found for this subject! '])
         continue;
     end
-    
-    
-    % To avoid repeatition for subjects with several sessions
-%     if s>1
-%         SUBEXIST = strcmpi(subIDs,subIDs{s});
-%         if sum(SUBEXIST(1:end-1))==1
-%             disp('EEG simulation for this subject has been run before');
-%             continue
-%         end
-%     end
-%     
+     
     if exist([fwdPath '-fwd.mat'],'file') % if the forward matrix have been generated already for this subject
         load([fwdPath '-fwd.mat']);
     else
@@ -363,8 +353,6 @@ for s = 1:length(projectPath)
     for trial_id =1:opt.nTrials 
         disp(['Trial # ' num2str(trial_id)])
         [PinkNoise(:,:,trial_id),AlphaNoise(:,:,trial_id),SensorNoise(:,:,trial_id)] = mrC.Simulate.GenerateNoise(opt.signalsf, NS, nSources, Noise, noise_mixing_data,Noise.spatial_normalization_type,fwdMatrix,opt.doFwdProjectNoise);   
-%         noise(:,:,trial_id) = thisNoise ;% noises in source or sensor space
-%         noiseSensor(:,:,trial_id) = thisSensorNoise;% measurement noise
     end
 
 [noise_sig,Noise,SensorNoise] = mrC.Simulate.FitNoise(opt.signalsf, NS, Noise, PinkNoise,AlphaNoise, SensorNoise,fwdMatrix,opt.doFwdProjectNoise,opt.OptimizeNoiseParam);   
