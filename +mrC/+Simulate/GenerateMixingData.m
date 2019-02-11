@@ -15,7 +15,7 @@ end
 
 
 % preparing mixing matrices
-    load('spatial_decay_models_coherence_test');% this is located in simulate/private folder, it can be obtained by run the code 'spatial_decay_of_coherence.m'
+    load('spatial_decay_models_coherence')% this is located in simulate/private folder, it can be obtained by run the code 'spatial_decay_of_coherence.m'
 
     % calcualting the distances and the coherence takes some time, better to
     % precalculate, write and read
