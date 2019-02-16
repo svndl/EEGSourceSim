@@ -173,7 +173,7 @@ classdef axx
         outAxx.nTrl = obj1.nTrl+obj2.nTrl;
         outAxx.Amp = cat(3,obj1.Amp,obj2.Amp);
         outAxx.Cos = cat(3,obj1.Cos,obj2.Cos);
-        outAxx.Sin = cat(3,obj1.Cos,obj2.Sin);
+        outAxx.Sin = cat(3,obj1.Sin,obj2.Sin);
         outAxx.Wave = cat(3,obj1.Wave,obj2.Wave);
 
     end
