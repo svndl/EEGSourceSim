@@ -6,6 +6,7 @@ clear; clc;
 SimFolder = fileparts(pwd);
 addpath(genpath(SimFolder));
 addpath(genpath(fullfile('..','BrainNetSimulation')));% add BrainNet Toolbox
+% requires fieldtrip for WPLI calculation
 
 %% Prepare the results folders
 FigPath = 'Figures';
@@ -13,10 +14,8 @@ ResultPath = 'ResultData';
 if ~exist(fullfile(pwd,FigPath),'dir'),mkdir(FigPath);end
 if ~exist(fullfile(pwd,ResultPath),'dir'),mkdir(ResultPath);end
 
-%% Important Parameters
+%% Redo Simulation?
 simulateEEG = 1; % if simulateEEG = 0, then it loads in the data otherwise do the simulation using Simulate functions
-Lambda = [.1 .2 .3 .4 .5 .6 .7 .8 .9 1];%SNR level
-controlcond = 0; % to use control condition or not
 
 %% Prepare Project path and ROIs
 DestPath = fullfile(SimFolder,'Examples','ExampleData_Inverse');
@@ -32,7 +31,7 @@ Net_RoiList = cellfun(@(x,y,z) {mergROIs(mergROIs(x,y),z)},V1_RoiList,V3_RoiList
 All_RoiList = Net_RoiList;
 
 %% Load in wang ROIs and inverses
-load(fullfile(ResultPath,'ROI_colors_Paper.mat'));
+% load(fullfile(ResultPath,'ROI_colors_Paper.mat'));
 
 Wang_RoiList = cellfun(@(x) {x.getAtlasROIs('wang')},RoiList);
 Wang_Chunks = cellfun(@(x) x.ROI2mat(20484),Wang_RoiList,'uni',false);
@@ -48,45 +47,73 @@ SF = Net_connect.SF;
 eplength = 2*SF; % two seconds
 epNum = 15;
 TS_all = TS_connect(1:3,1:epNum*eplength);
+TS_all_UC = TS_unconnect(1:3,1:epNum*eplength);
 
 %% Simulating network
-ModeNames= {'connect','unconnect'};
-% define noise properties
-Noise.mu.pink=2;
-Noise.mu.alpha=2;
-Noise.mu.sensor=2;
 
-if simulateEEG
-    for L = 1:numel(Lambda) % different noise levels
-        Noise.lambda = Lambda(L);
-        for Mode = 1:1 % Mode 1 is connected network: Test, Mode 2 is unconnected network: COntrol
-            if ~exist(fullfile(ResultPath,['ConnectExampleData_' ModeNames{Mode} '_Lambda' num2str(Lambda(L)) '.mat']),'file')
-                clear OrigROIData ReconsROIData EEG;
-                eval(['TS = TS_' ModeNames{Mode} ';']);
-                for ep = 1:epNum
-                    disp(['Generating EEG: Epoch #' num2str(ep)]);
-                    [EEGData_noise,~,EEGData_signal,~,~,masterList,subIDs] = mrC.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,...
-                        'signalArray',TS_all(:,(ep-1)*eplength+1:ep*eplength)','signalsf',SF,'NoiseParams',Noise,'rois',All_RoiList,...
-                        'Save',true,'cndNum',1,'doSource' ,true,'signalSNRFreqBand',[5 15],'doFwdProjectNoise',false);
-                    OrigROIData{ep} = cellfun(@(x,y) x*y./repmat(sum(y), [size(x,1) 1]), SourceData, Wang_Chunks,'uni',false);% sum? or average?
-                    ReconsROIData{ep} = cellfun(@(x,y,z) x*y*z./repmat(sum(z), [size(x,1) 1]), EEGData1,Inverse , Wang_Chunks,'uni',false);% sum? or average?
-                    EEG{ep} = EEGData1;
-                end
-                OrigROIData = cat(1,OrigROIData{:});
-                ReconsROIData = cat(1,ReconsROIData{:});
-                EEG = cat(1,EEG{:});
-                save(fullfile(ResultPath,['ConnectExampleData_' ModeNames{Mode} '_Lambda' num2str(Lambda(L))]),'OrigROIData','ReconsROIData','EEG','subIDs','masterList')
-            else
-                load(fullfile(ResultPath,['ConnectExampleData_' ModeNames{Mode} '_Lambda' num2str(Lambda(L)) '.mat']));
+ModeNames= {'connect','unconnect'};
+Noise.lambda = 0;
+if ~exist(fullfile(ResultPath,'ConnectitvityExampleData.mat'),'file') || simulateEEG
+        SignalArray = reshape(TS_all(:,1:epNum*eplength)',eplength,15,size(TS_all,1));
+        
+        [EEGData_noise,~,EEGData_signal_connect,~,~,masterList,subIDs] = mrC.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,...
+            'signalArray',SignalArray,'signalsf',SF,'NoiseParams',Noise,'rois',All_RoiList,...
+            'Save',false,'cndNum',1,'doSource' ,true,'signalSNRFreqBand',[5 15],...
+            'doFwdProjectNoise',true,'RedoMixingMatrices',false,'nTrials',epNum);
+
+        SignalArray = reshape(TS_all_UC(:,1:15*eplength)',eplength,15,size(TS_all_UC,1));
+        [~,~,EEGData_signal_unconnect] = mrC.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,...
+            'signalArray',SignalArray,'signalsf',SF,'NoiseParams',Noise,'rois',All_RoiList,...
+            'Save',false,'cndNum',1,'doSource' ,true,'signalSNRFreqBand',[5 15],...
+            'doFwdProjectNoise',true,'RedoMixingMatrices',false,'nTrials',epNum);
+        
+    save(fullfile(ResultPath,'ConnectitvityExampleData.mat'),'EEGData_noise','EEGData_signal_connect','EEGData_signal_unconnect','subIDs','masterList');
+else
+    load(fullfile(ResultPath,'ConnectitvityExampleData.mat'));
+end
+%% prepare the EEGs based on different SNR levels
+dB_list = [-25:5:10] ; 
+Lambda_list = 10.^(dB_list/10) ;
+
+f = [0:eplength-1] *SF/eplength ;
+SNR_freq_idxs = (f>=5)&(f<=25);
+if true
+    for subj_idx = 1:length(subIDs)
+        %
+        spec_noise = fft(EEGData_noise{subj_idx},[],1);
+        spec_signalC = fft(EEGData_signal_connect{subj_idx},[],1);
+        spec_signalNC = fft(EEGData_signal_unconnect{subj_idx},[],1);
+        power_noise = mean(mean(abs(spec_noise(SNR_freq_idxs,:,:)).^2)) ; % mean noise power per trial
+        power_signalC= mean(mean(abs(spec_signalC(SNR_freq_idxs,:,:)).^2)) ;
+        power_signalNC= mean(mean(abs(spec_signalNC(SNR_freq_idxs,:,:)).^2)) ; 
+        EEGData_noise{subj_idx} = EEGData_noise{subj_idx}./sqrt(power_noise);
+        EEGData_signal_connect{subj_idx} = EEGData_signal_connect{subj_idx}./sqrt(power_signalC);
+        EEGData_signal_unconnect{subj_idx} = EEGData_signal_unconnect{subj_idx}./sqrt(power_signalNC);
+    end
+
+    % Generate EEG, calculate sources and then power spectra
+    for nLambda_idx = 1:numel(Lambda_list)
+        lambda = Lambda_list(nLambda_idx);
+        disp(['Generating EEG by adding signal and noise: SNR = ' num2str(lambda)]);
+        for subj_idx = 1:length(subIDs)
+            EEGData_C{subj_idx} = sqrt(lambda/(1+lambda))*EEGData_signal_connect{subj_idx} + sqrt(1/(1+lambda)) * EEGData_noise{subj_idx} ;
+            for tr = 1:epNum
+                ROIData{subj_idx}(:,:,tr) = EEGData_C{subj_idx}(:,:,tr)*Inverse{subj_idx}*Wang_Chunks{subj_idx}./repmat(sum(Wang_Chunks{subj_idx}), [eplength 1]);
             end
-%            MF = 40; % maximum frequency to keep
+            [CSD_C{subj_idx,nLambda_idx},COH_C{subj_idx,nLambda_idx}] = mrC.Connectivity.EEGcpsd(ROIData{subj_idx} ,'SF',SF,'Type','fft','winLen',300,'Nov',150);
+            %EEGData_NC{subj_idx} = sqrt(lambda/(1+lambda))*EEGData_signal_unconnect{subj_idx} + sqrt(1/(1+lambda)) * EEGData_noise{subj_idx} ;
         end
     end
+
+    save(fullfile(ResultPath,'ConnectivityExampleResults.mat'),'CSD_C','COH_C','subIDs','masterList');
+else
+    load(fullfile(ResultPath,'ConnectivityExampleResults.mat'));
 end
-%% cross spectrum density calculations
+%%
+%load(fullfile(ResultPath,'ConnectivityExampleResults.mat'));
 
 ModeNames= {'connect','unconnect'};
-ConMeasures = {'OCOH','RCOH','OWPLI','RWPLI'};
+ConMeasures = {'RCOH','RWPLI'};
 
 % Frequencies
 LF = 9;HF = 22;
@@ -100,58 +127,36 @@ Labels{29} = '\color[rgb]{0,0,1}\rightarrow V1d';
 Labels{41} = '\color[rgb]{1,0,0}\rightarrow V3d';
 INDs = [1:2:25 29:2:50];
 
-for L = 1:numel(Lambda)
-    % load and organize data
-    load(fullfile(ResultPath,['ConnectExampleData_' ModeNames{1} '_Lambda' num2str(Lambda(L))  '.mat']));
-    for sub = 1:numel(subIDs)
-        disp(['Subject #' subIDs{sub}]);
-        % Original simulated signal
-        Data = OrigROIData(:,sub);
-        Data = cat(3,Data{:});
-        [OrigCSD{sub,L},OrigCOH{sub,L},F] = mrC.Connectivity.EEGcpsd(Data,'SF',SF,'Type','fft','winLen',300,'Nov',150);
-        % Reconstructed signal
-        Data = ReconsROIData(:,sub);
-        Data = cat(3,Data{:});
-        [ReconsCSD{sub,L},ReconsCOH{sub,L}] = mrC.Connectivity.EEGcpsd(Data,'SF',SF,'Type','fft','winLen',300,'Nov',150);
-    end
-    %% subsampling
-    R_coh = ReconsCOH(:,L,1);
+ 
+for L = 1:numel(Lambda_list)
+
+    % subsampling
+    R_coh = COH_C(:,L);
     NTS = numel(R_coh);% number of total samples
     BS = nchoosek(1:NTS,5);
-    Nboots = 100;%size(BS,1)/2;
+    Nboots = 80;%size(BS,1)/2;
     BS = BS(randperm(size(BS,1),Nboots),:);
     
-    %% Prepare ICOH and WPLI for plotting
+    % Prepare ICOH and WPLI for plotting
     for boots = 1:Nboots
         display(['Bootstrapping #' num2str(boots)]);
-        R_coh = ReconsCOH(:,L);
+        R_coh = COH_C(:,L);
         R_coh = R_coh(BS(boots,:));
         R_coh = cat(4,R_coh{:}); % Recons
         RCOH(:,:,:,L) = squeeze(mean(imag(R_coh),4));
 
-        O_coh = OrigCOH(:,L);
-        O_coh = O_coh(BS(boots,:));
-        O_coh = cat(4,O_coh{:}); % Orig
-        OCOH(:,:,:,L) = squeeze(mean(imag(O_coh),4)); 
-
         % wPLI
         % Prepare spectrum inputs
-        RCSD = ReconsCSD(:,L);
+        RCSD = CSD_C(:,L);
         RCSD = RCSD(BS(boots,:));
         RCSD = cat(4,RCSD{:}); %  Recons
         RCSD = permute(RCSD,[4 2 3 1]);
 
-        OCSD = OrigCSD(:,L);
-        OCSD = OCSD(BS(boots,:));
-        OCSD = cat(4,OCSD{:}); % Orig
-        OCSD = permute(OCSD,[4 2 3 1]);
 
         % fieldtrip is needed
-        O_wpli = ft_connectivity_wpli(OCSD,'dojack',true);
-        OWPLI(:,:,:,L) = permute(O_wpli,[3 1 2]);
         R_wpli = ft_connectivity_wpli(RCSD,'dojack',true);
         RWPLI(:,:,:,L) = permute(R_wpli,[3 1 2]);
-        %% calculate TP and FPs
+        % calculate TP and FPs
         th = 0:.0001:1; % Thresholds for PR and ROC curves
         %th = 1-th.^3;
 
@@ -171,10 +176,10 @@ for L = 1:numel(Lambda)
     end
 end
 
-save(fullfile(ResultPath,'Connectivity_Bootstrap_TPFP2.mat'),'TP','FP');
+save(fullfile(ResultPath,'Connectivity_Bootstrap_TPFP2.mat'),'TP','FP','RCOH','RWPLI');
 
 %%
-load(fullfile(ResultPath,'Connectivity_Bootstrap_TPFP.mat'));
+%load(fullfile(ResultPath,'Connectivity_Bootstrap_TPFP2.mat'));
 FontS = 20;
 TPM = squeeze(mean(TP,2));
 FPM = squeeze(mean(FP,2));
@@ -182,94 +187,101 @@ FPM = squeeze(mean(FP,2));
 FIG = figure;
 Cs = colormap(cool(10));%[ones(10,1)*.3 ones(10,1)*.3 (0.1:0.1:1)'];
 N = 2:2:10;
-CondNames = {'Original','Reconstructed','Original','Reconstructed'};
+%CondNames = {'Original','Reconstructed','Original','Reconstructed'};
 S1 = subplot(3,2,3);
 FOI = 1;
 %
-for l =1:10
-    for cond = 1:4
-        perc = squeeze(TPM(:,cond,FOI,l))./(squeeze(TPM(:,cond,FOI,l))+squeeze(FPM(:,cond,FOI,l)));
-        perc(isnan(perc))=0;
-        rec = squeeze(TPM(:,cond,FOI,l))/3;
-        AUC(cond,l) = trapz(rec,perc);
+% for l =1:numel(dB_list)
+%     for cond = 1:2
+%         perc = squeeze(TPM(:,cond,FOI,l))./(squeeze(TPM(:,cond,FOI,l))+squeeze(FPM(:,cond,FOI,l)));
+%         perc(isnan(perc))=0;
+%         rec = squeeze(TPM(:,cond,FOI,l))/3;
+%         AUC(cond,l) = trapz(rec,perc);
+% 
+%     end
+% end
+% S = subplot(2,1,2);
+% B = bar(abs(AUC)','grouped');
+%%%%%%
+for l =1:numel(dB_list)
+    for cond = 1:2
+        for b = 1:Nboots
+            perc = squeeze(TP(:,b,cond,FOI,l))./(squeeze(TP(:,b,cond,FOI,l))+squeeze(FP(:,b,cond,FOI,l)));
+            perc(isnan(perc))=0;
+            rec = squeeze(TP(:,b,cond,FOI,l))/3;
+            AUC(cond,l,b) = trapz(rec,perc);
+        end
+    end
+    [~,p_AUC(l)]= ttest(AUC(1,l,:),AUC(2,l,:));
+end
 
+AUCM = mean(AUC,3);AUCM = abs(AUCM([1 2],:))';
+AUCS = std(AUC,[],3)./sqrt(Nboots);AUCS = abs(AUCS([1 2],:))';
+XT = [(1:size(AUC,2))-.15;(1:size(AUC,2))+.15];
+S = subplot(2,1,2);
+B = bar(AUCM,'grouped');hold on; 
+errorbar(reshape(XT,1,numel(XT)),reshape(AUCM',1,numel(AUCM)),reshape(AUCS',1,numel(AUCS)),'.k')
+
+for r = 1:size(XT,2)
+    if p_AUC(r)<0.05
+        line(XT(:,r),[max(AUCM(r,:)+AUCS(r,:)) max(AUCM(r,:)+AUCS(r,:))]+0.02,'color','k','linewidth',2)
+        text(r-.05,max(AUCM(r,:)+AUCS(r,:))+.03,'*','fontsize',FontS-4)
     end
 end
 
-S = subplot(2,1,2);
-B = bar(abs(AUC([2 4],:))','grouped');
 set(B(1),'FaceColor',[0.3,.3,.3])
 set(B(2),'FaceColor',[.7,.7,.7])
-xlim([0 11])
-ylim([0 .25])
+xlim([0 numel(dB_list)+1])
+ylim([0 .55])
 legend('ICoh','WPLI')
-set(gca,'xticklabel',arrayfun(@(x) [num2str(Lambda(x))],1:10,'uni',false))
+set(gca,'xticklabel',arrayfun(@(x) [num2str(dB_list(x))],1:numel(dB_list),'uni',false))
 ylabel('AUCPR','fontsize',FontS-4)
 xlabel('SNR','fontsize',FontS-4);
 set(gca,'fontsize',FontS-4)
-set(S,'position',get(S,'position')+[-.0 -.045 .0 -.035]);
+set(S,'position',get(S,'position')+[-.0 -.01 .0 -.035]);
 
 
-% load the results from ConnectivityExample_Poster
-load(fullfile(ResultPath,'Connectivity_noBootstrap.mat'));
+
+
 % Plotting connectivity matrices
-CondNames = {'Original','Reconstructed','Original','Reconstructed'};
-ConMeasures = {'OCOH','RCOH','OWPLI','RWPLI'};
+CondNames = {'ICoh','WPLI'};
+ConMeasures = {'RCOH','RWPLI'};
 
-SNRs = [1 10];
+SNRs = [3];
 for i = 1:numel(SNRs)
     for j = 1:numel(ConMeasures)
         eval(['P =  abs(squeeze(' ConMeasures{j} '(Freqs(FOI),INDs,INDs,SNRs(i))));']);
-        S(i,j) = subplot(3,4,j+(i-1)*4);
-        imagesc(P)
-        set(gca,'xtick',1:numel(INDs),'xticklabels',[],'ytick',1:numel(INDs),'yticklabels',[]);
-        caxis([min(P(:)) max(P(:))]);
-        colormap(jmaColors('hotcortex'));
-        if (i == numel(SNRs)) && (j==1)
-            ylabel('ROIs','fontsize',FontS-8);
-            xlabel('ROIs','fontsize',FontS-8);
-        end
-        if i==1
-            title(CondNames{j},'fontsize',FontS-4);
-            switch j
-                case 2
-                    set(S(i,j),'position',get(S(i,j),'position')+[ -.015 -.03 .02 .02]);
-                case 1
-                    set(S(i,j),'position',get(S(i,j),'position')+[ 0 -.03 .02 .02])
-                case 3
-                    set(S(i,j),'position',get(S(i,j),'position')+[ -.0 -.03 .02 .02]);
-                case 4
-                    set(S(i,j),'position',get(S(i,j),'position')+[ -.015 -.03 .02 .02]);
-            end
+        S(i,j) = subplot(2,2,j);
+        imagesc(P.^2)
+        if j==1
+            set(gca,'xtick',1:numel(INDs),'xticklabels',Labels(INDs),'ytick',1:numel(INDs),'yticklabels',Labels(INDs));
+            ylabel('SNR = -15 dB','fontsize',FontS-4);
         else
-            switch j
-                case 2
-                    set(S(i,j),'position',get(S(i,j),'position')+[ -.015 .02 .02 .02]);
-                case 1
-                    set(S(i,j),'position',get(S(i,j),'position')+[ 0 .02 .02 .02])
-                case 3
-                    set(S(i,j),'position',get(S(i,j),'position')+[ -.0 .02 .02 .02]);
-                case 4
-                    set(S(i,j),'position',get(S(i,j),'position')+[ -.015 .02 .02 .02]);
-            end
+            set(gca,'xtick',1:numel(INDs),'xticklabels',Labels(INDs),'ytick',1:numel(INDs),'yticklabels',Labels(INDs));
+        end
+        xtickangle(90)
+        set(gca,'fontsize',12)
+        caxis([0 max(P(:).^2)]);
+        colormap(jmaColors('hotcortex'));
+%         if (i == numel(SNRs)) && (j==1)
+%             ylabel('ROIs','fontsize',FontS-8);
+%             xlabel('ROIs','fontsize',FontS-8);
+%         end
+        title(CondNames{j},'fontsize',FontS-4);
+        switch j
+            case 2
+                colorbar;
+                set(S(i,j),'position',get(S(i,j),'position')+[ -.025 -.1 .02 .12]);
+            case 1
+                set(S(i,j),'position',get(S(i,j),'position')+[ 0 -.1 .02 .12])
         end
     end
 end
 
-axes('NextPlot','add','position',[.28 .93 .2 .1]);
-text(.0,.5,'ICoh','fontsize',FontS); axis off
-
-axes('NextPlot','add','position',[.71 .93 .2 .1]);
-text(.0,.5,'WPLI','fontsize',FontS); axis off
-
-axes('NextPlot','add','position',[.08 .68 .2 .1]);
-h=text(.0,.5,'SNR = 0.1','fontsize',FontS-4); axis off
-set(h,'Rotation',90);
-
-axes('NextPlot','add','position',[.08 .45 .2 .1]);
-h=text(.0,.5,'SNR = 1','fontsize',FontS-4); axis off
-set(h,'Rotation',90);
-
 
 set(FIG,'paperposition',[1 1 11 8.5]);
-%print(fullfile('Figures','ConnectivityExample_AUCPR2_high.tif'),'-r300','-dtiff');
+set(FIG,'Unit','Inch','position',[1 1 11 8.5],'color','w');
+
+print(fullfile('Figures','ConnectivityExample_AUCPR2_high.tif'),'-r300','-dtiff');
+export_fig(FIG,fullfile('Figures','ConnectivityExample_AUCPR2_high'),'-pdf');
+

@@ -17,8 +17,7 @@ ProjectPath = fullfile(DestPath,'FwdProject');
 % Pre-select ROIs
 [RoiList,subIDs] = mrC.Simulate.GetRoiClass(ProjectPath,AnatomyPath);% 13 subjects with Wang atlab 
 Wang_RoiList = cellfun(@(x) {x.getAtlasROIs('wang')},RoiList);
-IPS_RoiList = cellfun(@(x) {x.searchROIs('IPS0')},RoiList);
-Inds = 1:50;Inds([1:14 17:24 27:28])= [];%Inds([1:2 5:24 27:28])= [];
+Inds = 1:50;Inds([1:14 17:24 27:28])= [];
 Wang_RoiList = cellfun(@(x) {x.selectROIs(Inds)},Wang_RoiList);
 Ind2 = [5:18 1:4 19:22 25:26];
 Wang_RoiList = cellfun(@(x) {x.selectROIs(Ind2)},Wang_RoiList);
@@ -106,12 +105,10 @@ for i = 1:2
                     if abs(mean(CT1(r1,r2,:)))<abs(mean(CT2(r1,r2,:)))
                         text(r2-.2,r1+.2,'*','fontsize',15,'color','r')
                     end
-                    %[~,p_CT(r1,r2)]=ttest(CT1(r1,r2,:));%,CT2(r1,r2,:),'Tail','right');
                 else
                     if abs(mean(CT1(r1,r2,:)))>abs(mean(CT2(r1,r2,:)))
                         text(r2-.2,r1+.2,'*','fontsize',15,'color','r')
                     end
-                    %[~,p_CT(r1,r2)]=ttest(CT2(r1,r2,:));%,CT1(r1,r2,:),'Tail','right');
                 end
             end
         end
@@ -133,7 +130,6 @@ for i = 1:2
     
     
 end
-
 
 %
 set(FIG1,'PaperPosition',[1 1 5 7]);
@@ -173,7 +169,6 @@ for r = 1:size(Relative2,1)
     [~,p_Relative(r)] = ttest(Relative2(r,:,1),Relative2(r,:,2));
     [~,p_Focal(r)] = ttest(Focal2(r,:,1),Focal2(r,:,2));
 end
-
 
 FS = 11;
 FIG3 = figure;
