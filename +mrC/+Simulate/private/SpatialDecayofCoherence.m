@@ -95,7 +95,7 @@ save('spatial_decay_models_coherence','model_fun','model_params','best_model','b
 %%
 % plot best model
 if true
-    addpath('../../functionPool/BrewerMap/')
+    addpath('../../../External/tools/BrewerMap/')
     set(0,'defaultfigurecolor',[1 1 1])
 
     plot_dir = fullfile('/Users/bosse/dev/matlab/mrC/Examples/plots') ;
