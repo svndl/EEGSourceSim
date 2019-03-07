@@ -9,7 +9,7 @@ SimFolder = fileparts(pwd);
 addpath(genpath(SimFolder));
 
 %% To be modified later
-if false % SBs setup
+if true % SBs setup
     addpath('../External/tools/BrewerMap/')
     %
     DataPath = '/export/data/';
@@ -24,7 +24,7 @@ end
 
 %% Prepare the results folders
 FigPath = fullfile(SimFolder,'Examples','Figures');
-ResultPath = fullfile(SimFolder,'Examples','ResultData');
+ResultPath = fullfile(SimFolder,'Examples','ResultData_fromDesktop');
 if ~exist(fullfile(FigPath),'dir'),mkdir(FigPath);end
 if ~exist(fullfile(ResultPath),'dir'),mkdir(ResultPath);end
 
@@ -51,9 +51,9 @@ generated_date_filename = 'data_for_spatial_filter_test2_2source_allSubj.mat';
 %generated_date_filename = 'data_for_spatial_filter_test_2source_all_subjects.mat';
 %if ~exist('data_for_spatial_filter_test_2source.mat','file') || do_new_data_generation
 if ~exist(generated_date_filename,'file') || do_new_data_generation
-    n_trials = 200;
+    n_trials = 20;
     Noise.lambda = 0 ; % noise only
-    [outSignal, FundFreq, SF]= mrC.Simulate.ModelSeedSignal('signalType','SSVEP','ns',200,'signalFreq',[2 2],'HarmonicAmp',{[2,0,1.5,0],[1,0, 1,0]},'HarmonicPhase',{[0,0,0,0],[pi/2,0,pi/2,0]},'reliableAmp',[1,0],'nTrials',n_trials);
+    [outSignal, FundFreq, SF]= mrC.Simulate.ModelSeedSignal('signalType','SSVEP','ns',200,'signalFreq',[2 2],'harmonicAmps',{[2,0,1.5,0],[1,0, 1,0]},'harmonicPhases',{[0,0,0,0],[pi/2,0,pi/2,0]},'reliableAmps',[1,0],'nTrials',n_trials);
     [EEGData_noise,EEGAxx_noise,EEGData_signal,EEGAxx_signal,~,masterList,subIDs,allSubjFwdMatrices,allSubjRois] = mrC.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,'signalArray',outSignal,'signalFF',FundFreq,'signalsf',SF,'NoiseParams',Noise,'rois',RoisI,'Save',false,'cndNum',1,'nTrials',n_trials);%,'RedoMixingMatrices',true);
     save(fullfile(ResultPath,generated_date_filename),'-v7.3');
 else
@@ -85,7 +85,7 @@ Lambda_list = 10.^(Db_list/10) ;
 % spatial filter test parameters
 fund_freq_idx = 1 ;            
 nTrials = 20;
-nDraws = 20 ;
+nDraws = 40 ;
 n_comps = 3 ;
 thisFundFreq = FundFreq(fund_freq_idx) ;
 
@@ -140,7 +140,7 @@ decomp_methods = {'pca','ssd','csp','rca'} ;
 for decomp_method_idx = 1:length(decomp_methods)
     this_decomp_method = decomp_methods{decomp_method_idx};
     for s = 1:numel(subs)
-        err_angles.(this_decomp_method){s} = zeros(2,128,numel(Lambda_list),nDraws) ;
+        ang_errs.(this_decomp_method){s} = zeros(2,128,numel(Lambda_list),nDraws) ;
         residuals.(this_decomp_method){s} = zeros(2,128,numel(Lambda_list),nDraws) ;
     end
 end
@@ -159,6 +159,7 @@ for nLambda_idx = 1:numel(Lambda_list)
     % test spatial filters  
     for s = 1:numel(subs)
         display(['Calculating spatial filters for subject:' subNames{s}]);
+        % TODO: what is this?
         subj_idx = subs{s};
         
         source_pattern = Source_pattern(:,:,subj_idx );
@@ -208,34 +209,50 @@ for nLambda_idx = 1:numel(Lambda_list)
                     [theseDecompAxxs,thisW,thisA,thisD] = mrC.SpatialFilters.CSP({thisAxx,thisNoiseAxx},'freq_range',thisFundFreq*considered_harms,'do_whitening',true);
                     thisDecompAxx=theseDecompAxxs{1};
                 end
-                for i = 1:size(thisA,2)
-                    if source_pattern(:,1)'*thisA(:,i)<0
-                        thisA(:,i) = thisA(:,i)*-1 ;
+                
+                % reduce size of decomposition result to save memory,
+                % otherwise matlab seems to crash
+                
+                thisW = thisW(:,1:5) ;
+                thisA = thisA(:,1:5) ;
+                thisD = thisD(1:5) ;
+                thisDecompAxx.Amp = thisDecompAxx.Cos(:,1:5,:) ;
+                thisDecompAxx.Cos = thisDecompAxx.Cos(:,1:5,:) ;
+                thisDecompAxx.Sin = thisDecompAxx.Sin(:,1:5,:) ;
+                thisDecompAxx.Wave = thisDecompAxx.Wave(:,1:5,:) ;
+                
+                
+                % calcualte angular error and turn activations, filters and
+                % signals if approriate
+
+                these_ang_errs = 180/pi* acos((source_pattern'*thisA)./sqrt(repmat(sum(source_pattern.^2)',[1 size(thisA,2)]).*repmat(sum(thisA.^2),[size(source_pattern,2) 1]))) ;
+                for cand_idx =  find(these_ang_errs>90)' % candidates for turning topopgraphies
+                    [source_idx,comp_idx] =ind2sub(size(these_ang_errs), cand_idx) ;
+                    if (180-these_ang_errs(source_idx,comp_idx)) <= min([these_ang_errs(:,comp_idx);180-these_ang_errs(:,comp_idx)])
+ % turn activation, filters and signal if turned angular error is the smallest
+                        these_ang_errs(source_idx,comp_idx) = 180-these_ang_errs(source_idx,comp_idx) ;
+                        thisW(:,comp_idx) = -1*thisW(:,comp_idx) ;
+                        thisA(:,comp_idx) = -1*thisA(:,comp_idx) ;
+                        thisDecompAxx.Cos(:,comp_idx,:) = -1*thisDecompAxx.Cos(:,comp_idx,:) ;
+                        thisDecompAxx.Sin(:,comp_idx,:) = -1*thisDecompAxx.Sin(:,comp_idx,:) ;
+                        thisDecompAxx.Wave(:,comp_idx,:) = -1*thisDecompAxx.Wave(:,comp_idx,:) ;
                     end
                 end
+                
                 Axx_compspace.(this_decomp_method){s}{nLambda_idx}{draw_idx} = thisDecompAxx ;
                 W.(this_decomp_method){s}{nLambda_idx}{draw_idx} = thisW ;
                 A.(this_decomp_method){s}{nLambda_idx}{draw_idx} = thisA ;
                 D.(this_decomp_method){s}{nLambda_idx}{draw_idx} = thisD ;
+                
+                
+                ang_errs.(this_decomp_method){s}(:,1:size(these_ang_errs,2),nLambda_idx,draw_idx) = these_ang_errs ;
+                
 
-                % metrics for first n_comps components
-                % calculate error angles
+                %calculate snrs assuming ssveps, mean over all trials
                 freqs = [0:thisDecompAxx.nFr]*thisDecompAxx.dFHz;
                 signal_freq_idxs = find(ismember(freqs,thisFundFreq*considered_harms));
                 noise_freq_idxs = reshape([signal_freq_idxs-1;signal_freq_idxs+1],1,[]) ;
 
-                %err_angles.(this_decomp_method)(comp_idx,nTrial_idx,draw_idx) = 180/pi* acos(abs(source_pattern(:,1)'*thisA(:,comp_idx))/sqrt(sum(source_pattern(:,1).^2)*sum(thisA(:,comp_idx).^2))) ;
-                ERAngle = 180/pi* acos(abs(source_pattern'*thisA)./sqrt(repmat(sum(source_pattern.^2)',[1 size(thisA,2)]).*repmat(sum(thisA.^2),[size(source_pattern,2) 1]))) ;
-%                 ERAngle = ERAngle(1:2,1:2);
-% %                 if ERAngle (1,1)> ERAngle (1,2)% if the order of components is flipped
-% %                         ERAngle = ERAngle(1:2,2:-1:1);
-% %                 end
-                err_angles.(this_decomp_method){s}(:,1:size(ERAngle,2),nLambda_idx,draw_idx) = ERAngle;
-%                 err_angles.(this_decomp_method){s}(:,:,nLambda_idx,draw_idx)=...
-%                         real(err_angles.(this_decomp_method){s}(:,:,nLambda_idx,draw_idx));
-
-
-                %calculate snrs assuming ssveps, mean over all trials
                 snrs.(this_decomp_method){s}(1:size(thisA,2),nLambda_idx,draw_idx)=mean(mean(thisDecompAxx.Amp(signal_freq_idxs,:,:).^2)./mean(thisDecompAxx.Amp(noise_freq_idxs,:,:).^2),3);
                   % residual (mse over sampmles averaged and trials)
                 % calculate residuals as mse over samples and trials
@@ -257,7 +274,7 @@ for nLambda_idx = 1:numel(Lambda_list)
     EEGAxx = {} ;
 end
 
-do_save_plots = false ;
+do_save_plots = true ;
 
 %% scalp plots
 % settings for data
@@ -287,7 +304,7 @@ for source_idx = 1:2
     ax = axes('parent',fig_scalp_plots,    'Units','Inches','Position',[x,y,sbpl_width,sbpl_height]) ;
 
     Topo = source_pattern(:,source_idx);
-    if abs(min(Topo))>max(Topo), Topo = -1*Topo;end
+    %if abs(min(Topo))>max(Topo), Topo = -1*Topo;end
     
     this_title = sprintf('%s %i','Source ',source_idx) ;
     mrC.Simulate.PlotScalp(Topo,this_title);
@@ -302,7 +319,6 @@ for this_decomp_method_idx = 1:length(decomp_methods)
             y = fig_height - (top_margin+text_height + nLambda_idx*sbpl_height) ;
             ax = axes('parent',fig_scalp_plots,    'Units','Inches','Position',[x,y,sbpl_width,sbpl_height]) ;
             Topo = A.(this_decomp_method){Subject_idx}{nLambda_idx}{1}(:,this_comp_idx);
-            if abs(min(Topo))>max(Topo), Topo = -1*Topo;end
             if nLambda_idx == 1
                 this_title = sprintf('%s %i','Comp ',this_comp_idx) ;
                 mrC.Simulate.PlotScalp(Topo,this_title);
@@ -324,12 +340,12 @@ for this_decomp_method_idx = 1:length(decomp_methods)
 end
 
 if do_save_plots
-    export_fig(fig_scalp_plots,fullfile(FigPath,'SpatialFilters_topographies_SNR_average'),'-pdf');
+    export_fig(fig_scalp_plots,fullfile(FigPath,'SpatialFilters_topographies'),'-pdf','-nocrop');
     close(fig_scalp_plots);
 end
 
-
-%%  plots angular error of topographies
+%
+%  plots angular error of topographies
 fig_width = 8.5 ;
 fig_height = fig_width*5/8/2 ;
 
@@ -353,7 +369,7 @@ for source_idx = 1:2 ;
 subplot(1,2,source_idx)
 for decomp_method_idx=1:length(decomp_methods)
     this_decomp_method = decomp_methods{decomp_method_idx};
-    combined_err_angles.(this_decomp_method) = cat(5, err_angles.(this_decomp_method){:}) ;
+    combined_err_angles.(this_decomp_method) = cat(5, ang_errs.(this_decomp_method){:}) ;
     for comp_idx = 1:2
         this_decomp_method = decomp_methods{decomp_method_idx};
         this_avg_err_angles = squeeze(mean(mean(combined_err_angles.(this_decomp_method)(source_idx,comp_idx,:,:,:),4),5)) ;
@@ -364,9 +380,10 @@ end
 
 title(sprintf('Relative to source %i', source_idx))
 xlabel('SNR [dB]')
-ylabel('Error Angle [Degrees]')
+ylabel('Angular Error [Degrees]')
 end
 
+subplot(1,2,2)
 [~, hobj, ~, ~] = legend(legend_entries,'Location','southwest');
 
 if do_save_plots
@@ -376,8 +393,8 @@ end
 
 
 
-
-%% plot residual
+%%
+% plot residual
 fig_width = 8.5 ;
 fig_height = fig_width*5/8/2 ;
 
@@ -392,14 +409,15 @@ for decomp_method_idx=1:length(decomp_methods)
     for comp_idx = 1:2
         
         this_avg_residuals = squeeze(mean(mean(combined_residuals.(this_decomp_method)(source_idx,comp_idx,:,:,:),4),5)) ;
-        plot(Db_list,this_avg_residuals ,markers{comp_idx},'LineWidth',2,'MarkerSize',10,'color',colors(decomp_method_idx,:));
+        plot(Db_list,1-this_avg_residuals ,markers{comp_idx},'LineWidth',2,'MarkerSize',10,'color',colors(decomp_method_idx,:));
     hold on
 end
 end
 
 title(sprintf('Relative to source %i', source_idx))
 xlabel('SNR [dB]')
-ylabel('Residual [1-R^2]')
+ylim([0,1])
+ylabel('Normalized residual [1-R^2]')
 end
 
 [~, hobj, ~, ~] = legend(legend_entries,'Location','southwest');
@@ -409,85 +427,49 @@ if do_save_plots
     close(fig_res);
 end
 
-return
-
 %%
-
- %%  plots angular error of topographies
-snrs_orig = cellfun(@(x) x(1:10,:,:),snrs_orig,'uni',false);
-snrs_all = squeeze(mean(cat(4,snrs_orig{:}),3)); 
-if false
-    snrs_inp = 10*log10(squeeze(mean(mean(snrs_all(:,:,:),1),3)));
-else    
-    snrs_inp = 10*log10(Lambda_list);
-end
- FS = 14;
-FIG2 = figure;
-subplot(1,3,1)
-colors = brewermap(4,'Set2') ;
-markers = {'-o',':o'};
-for comp_idx = 1:2
-for decomp_method_idx=1:2%length(decomp_methods)
-    this_decomp_method = decomp_methods{decomp_method_idx};
-    err_angles.(this_decomp_method) = cellfun(@(x) x(:,1:2,:,:),err_angles.(this_decomp_method),'uni',false);
-    errAng_all = squeeze(mean(cat(5,err_angles.(this_decomp_method){:}),4));
-    plot(snrs_inp,squeeze(mean(errAng_all(comp_idx,comp_idx,:,:),4)),markers{comp_idx},'LineWidth',2,'MarkerSize',10,'color',colors(decomp_method_idx,:));
-
-    hold on
-end
-end
-
-
-%set(gca,'xtick',10*log10(Lambda_list),'xticklabel',arrayfun(@num2str,round(log10(Lambda_list)*10),'uni',false));
-xlim([min(snrs_inp)-.2*(abs(min(snrs_inp))) max(snrs_inp)*1.2]);
-
-xlabel('SNR (dB)')
-ylabel('Error Angle')
-
-set(gca,'fontsize',FS)
-
 % plot snrs
-subplot(1,3,2)
-comp_idx =1;
+fig_width = 8.5 ;
+fig_height = fig_width*5/8/2 ;
 
-for comp_idx = 1:2
-    for decomp_method_idx=1:2%length(decomp_methods)
+fig_snr = figure ;
+set(fig_snr,'Units','Inches','position',[40, 30, fig_width, fig_height],'color','w');
+
+
+
+for decomp_method_idx=1:length(decomp_methods)
     this_decomp_method = decomp_methods{decomp_method_idx};
-    snrs.(this_decomp_method) = cellfun(@(x) x(1:2,:,:),snrs.(this_decomp_method),'uni',false);
-    snrs_all = squeeze(mean(cat(4,snrs.(this_decomp_method){:}),3));
-    plot(snrs_inp,10*log10(squeeze(mean(snrs_all(comp_idx,:,:),3))),markers{comp_idx},'LineWidth',2,'MarkerSize',10,'color',colors(decomp_method_idx,:));
-    hold on
-    end
-end
-xlabel('SNR (dB)')
-ylabel('Output SNR (dB)')
-%set(gca,'xtick',10*log10(Lambda_list),'xticklabel',arrayfun(@num2str,round(log10(Lambda_list)*10),'uni',false));
-xlim([min(snrs_inp)-.2*(abs(min(snrs_inp))) max(snrs_inp)*1.2]);
-set(gca,'fontsize',FS)
+    combined_snrs.(this_decomp_method)  =cat(4,snrs.(this_decomp_method){:}) ;
 
-% plot residual
-subplot(1,3,3)
-for comp_idx = 1:2
-    for decomp_method_idx=1:2%length(decomp_methods)
-        this_decomp_method = decomp_methods{decomp_method_idx};
-        residuals.(this_decomp_method) = cellfun(@(x) x(:,1:2,:,:),residuals.(this_decomp_method),'uni',false);
-        residuals_all = squeeze(mean(cat(5,residuals.(this_decomp_method){:}),4));
-        plot(snrs_inp,squeeze(mean(residuals_all(comp_idx,comp_idx,:,:),4)),markers{comp_idx},'LineWidth',2,'MarkerSize',10,'color',colors(decomp_method_idx,:));
+    this_avg_snrs = mean(mean(10*log10(combined_snrs.(this_decomp_method)),3),4);
+    for comp_idx = 1:2
+        %this_avg_snrs = squeeze(mean(mean(combined_snrs.(this_decomp_method)(comp_idx,:,:,:),3),4)) ;
+        plot(Db_list,this_avg_snrs(comp_idx,:) ,markers{comp_idx},'LineWidth',2,'MarkerSize',10,'color',colors(decomp_method_idx,:));
+        
         hold on
     end
+
+
+    xlabel('SNR [dB]')
+    ylabel('Reconstruction SNR [dB]')
 end
-%[~, hobj, ~, ~] = legend(decomp_methods(1:2));
-[~, hobj, ~, ~] = legend({'pca - comp1','ssd - comp1','pca - comp2','ssd - comp2'},'Location','northwest');
-legend('boxoff')
-hl = findobj(hobj,'type','line');
-set(hl,'LineWidth',1.5);
-ht = findobj(hobj,'type','text');
-set(ht,'FontSize',11);
-xlabel('SNR (dB)')
-ylabel('R2')
-set(gca,'fontsize',FS)
-%set(gca,'xtick',10*log10(Lambda_list),'xticklabel',arrayfun(@num2str,round(log10(Lambda_list)*10),'uni',false));
-xlim([min(snrs_inp)-.2*(abs(min(snrs_inp))) max(snrs_inp)*1.2]);
-set(FIG2,'Unit','Inch','position',[5, 5, 18, 5],'color','w');
-%export_fig(FIG2,fullfile(FigPath,'SpatialFilters_ErrorPlots_Averaged'),'-pdf');
+
+[~, hobj, ~, ~] = legend(legend_entries,'Location','northwest');
+
+if do_save_plots
+    export_fig(fig_snr,fullfile(FigPath,'snrs_averaged'),'-pdf');
+    close(fig_snr);
+end
+
+
+
+
+
+
+
+
+
+
+
+
 
