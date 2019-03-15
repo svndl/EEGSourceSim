@@ -8,8 +8,8 @@ function [signalOut, FundFreq, SF] = ModelSeedSignal(varargin)
         % sf: - Sampling frequency
         % ns: Number of time samples
         % signalFreq: seedNum x 1 vector - fundamental frequencies of the sources, where srcNum is number of seed sources with different signals
-        % signalHarmonic: - cell array of seedNum x 1, each of cell arrays should be a vector indicating amplitude for harmonics in one source 
-        % signalPhase: - cell array of seedNum x 1, each of cell arrays should be a vector indicating phase for harmonics in one source 
+        % HarmonicAmp: - cell array of seedNum x 1, each of cell arrays should be a vector indicating amplitude for harmonics in one source 
+        % HarmonicPhase: - cell array of seedNum x 1, each of cell arrays should be a vector indicating phase for harmonics in one source 
     
 % OUTPUTS    
     % signalOut: - ns x srcNum maxtrix,
@@ -45,10 +45,10 @@ if strcmp(opt.signalType,'Simple')% just for test, sinusoidal signal
    
 elseif strcmp(opt.signalType,'SSVEP')% number of harmonics for SSVEP sources, default: 6
     
-   if ~(isempty(opt.signalHarmonic)) 
-       NH = cellfun('length',opt.signalHarmonic);
-   elseif ~(isempty(opt.signalPhase)) 
-       NH = cellfun('length',opt.signalPhase); 
+   if ~(isempty(opt.HarmonicAmp)) 
+       NH = cellfun('length',opt.HarmonicAmp);
+   elseif ~(isempty(opt.HarmonicPhase)) 
+       NH = cellfun('length',opt.HarmonicPhase); 
    else
     NH = ones(seedNum,1)*6; 
    end
@@ -56,11 +56,11 @@ elseif strcmp(opt.signalType,'SSVEP')% number of harmonics for SSVEP sources, de
 end
 
 % If harmonics amplitudes and phases are not defined, they are initialized here randomly!!!
-if isempty(opt.signalHarmonic)
-    for s = 1:seedNum, opt.signalHarmonic{s} = (rand(1,NH(s))*5); end% random amplitude of harmonics between [0 5]
+if isempty(opt.HarmonicAmp)
+    for s = 1:seedNum, opt.HarmonicAmp{s} = (rand(1,NH(s))*5); end% random amplitude of harmonics between [0 5]
 end
-if isempty(opt.signalPhase)
-    for s = 1:seedNum, opt.signalPhase{s} = ((rand(1,NH(s))*2-1)*pi); end % random phase of harmonics between [-pi pi]
+if isempty(opt.HarmonicPhase)
+    for s = 1:seedNum, opt.HarmonicPhase{s} = ((rand(1,NH(s))*2-1)*pi); end % random phase of harmonics between [-pi pi]
 end  
 
 if isempty(opt.reliableAmp)% all sources are reliable in amplitude
@@ -72,11 +72,11 @@ if isempty(opt.reliablePhase)% all sources are reliable in phase
 end
 
 % Checks if the input parameters match
-if (seedNum~=numel(opt.signalHarmonic)) || (seedNum~=numel(opt.signalPhase))
+if (seedNum~=numel(opt.HarmonicAmp)) || (seedNum~=numel(opt.HarmonicPhase))
     error('Source parameters do not match');
 end
-for h = 1: numel(opt.signalHarmonic)
-    if length(opt.signalHarmonic{h})~=length(opt.signalPhase{h})
+for h = 1: numel(opt.HarmonicAmp)
+    if length(opt.HarmonicAmp{h})~=length(opt.HarmonicPhase{h})
         error('Harmonic parameters do not match')
     end
 end
@@ -88,20 +88,20 @@ t = (0:opt.ns-1)/opt.sf ;
 
 for source_idx = 1:seedNum 
     if opt.reliableAmp(source_idx) && opt.reliablePhase(source_idx) % model reliable sourse
-        signalOut(:,:,source_idx) = repmat(sum(opt.signalHarmonic{source_idx}'.*cos(2*pi*opt.signalFreq(source_idx)*[1:length(opt.signalHarmonic{source_idx})]'*t+opt.signalPhase{source_idx}')),[opt.nTrials,1])';
+        signalOut(:,:,source_idx) = repmat(sum(opt.HarmonicAmp{source_idx}'.*cos(2*pi*opt.signalFreq(source_idx)*[1:length(opt.HarmonicAmp{source_idx})]'*t+opt.HarmonicPhase{source_idx}')),[opt.nTrials,1])';
     else % model unreliable sourse
         if opt.reliableAmp(source_idx)
-            amps = repmat(opt.signalHarmonic{source_idx},opt.nTrials,1); 
+            amps = repmat(opt.HarmonicAmp{source_idx},opt.nTrials,1); 
         else
-            amps = rand(1,opt.nTrials)' *opt.signalHarmonic{source_idx};
+            amps = rand(1,opt.nTrials)' *opt.HarmonicAmp{source_idx};
         end
         if opt.reliablePhase(source_idx)
-            phs = repmat(opt.signalPhase{source_idx},opt.nTrials,1);
+            phs = repmat(opt.HarmonicPhase{source_idx},opt.nTrials,1);
         else
-            phs = 2*pi*rand(opt.nTrials,length(opt.signalPhase{source_idx})) ;
+            phs = 2*pi*rand(opt.nTrials,length(opt.HarmonicPhase{source_idx})) ;
         end
         for trial_idx = 1:opt.nTrials
-            signalOut(:,trial_idx,source_idx) = sum(amps(trial_idx,:)'.*cos(2*pi*opt.signalFreq(source_idx)*[1:length(opt.signalHarmonic{source_idx})]'*t+phs(trial_idx)')) ;
+            signalOut(:,trial_idx,source_idx) = sum(amps(trial_idx,:)'.*cos(2*pi*opt.signalFreq(source_idx)*[1:length(opt.HarmonicAmp{source_idx})]'*t+phs(trial_idx)')) ;
         end
     end
 end

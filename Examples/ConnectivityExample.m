@@ -15,7 +15,7 @@ if ~exist(fullfile(pwd,FigPath),'dir'),mkdir(FigPath);end
 if ~exist(fullfile(pwd,ResultPath),'dir'),mkdir(ResultPath);end
 
 %% Redo Simulation?
-simulateEEG = 1; % if simulateEEG = 0, then it loads in the data otherwise do the simulation using Simulate functions
+simulateEEG = 0; % if simulateEEG = 0, then it loads in the data otherwise do the simulation using Simulate functions
 
 %% Prepare Project path and ROIs
 DestPath = fullfile(SimFolder,'Examples','ExampleData_Inverse');
@@ -180,7 +180,7 @@ save(fullfile(ResultPath,'Connectivity_Bootstrap_TPFP2.mat'),'TP','FP','RCOH','R
 
 %%
 %load(fullfile(ResultPath,'Connectivity_Bootstrap_TPFP2.mat'));
-FontS = 20;
+FontS = 12;
 TPM = squeeze(mean(TP,2));
 FPM = squeeze(mean(FP,2));
 
@@ -225,20 +225,20 @@ errorbar(reshape(XT,1,numel(XT)),reshape(AUCM',1,numel(AUCM)),reshape(AUCS',1,nu
 for r = 1:size(XT,2)
     if p_AUC(r)<0.05
         line(XT(:,r),[max(AUCM(r,:)+AUCS(r,:)) max(AUCM(r,:)+AUCS(r,:))]+0.02,'color','k','linewidth',2)
-        text(r-.05,max(AUCM(r,:)+AUCS(r,:))+.03,'*','fontsize',FontS-4)
+        text(r-.05,max(AUCM(r,:)+AUCS(r,:))+.03,'*','fontsize',FontS)
     end
 end
 
 set(B(1),'FaceColor',[0.3,.3,.3])
 set(B(2),'FaceColor',[.7,.7,.7])
 xlim([0 numel(dB_list)+1])
-ylim([0 .55])
+ylim([0 .52])
 legend('ICoh','WPLI')
 set(gca,'xticklabel',arrayfun(@(x) [num2str(dB_list(x))],1:numel(dB_list),'uni',false))
-ylabel('AUCPR','fontsize',FontS-4)
-xlabel('SNR','fontsize',FontS-4);
-set(gca,'fontsize',FontS-4)
-set(S,'position',get(S,'position')+[-.0 -.01 .0 -.035]);
+ylabel('AUCPR','fontsize',FontS)
+xlabel('SNR [dB]','fontsize',FontS);
+set(gca,'fontsize',FontS)
+set(S,'position',get(S,'position')+[-.0 -.02 .0 -.045]);
 
 
 
@@ -255,7 +255,7 @@ for i = 1:numel(SNRs)
         imagesc(P.^2)
         if j==1
             set(gca,'xtick',1:numel(INDs),'xticklabels',Labels(INDs),'ytick',1:numel(INDs),'yticklabels',Labels(INDs));
-            ylabel('SNR = -15 dB','fontsize',FontS-4);
+            ylabel('SNR = -15 dB','fontsize',FontS);
         else
             set(gca,'xtick',1:numel(INDs),'xticklabels',Labels(INDs),'ytick',1:numel(INDs),'yticklabels',Labels(INDs));
         end
@@ -267,7 +267,7 @@ for i = 1:numel(SNRs)
 %             ylabel('ROIs','fontsize',FontS-8);
 %             xlabel('ROIs','fontsize',FontS-8);
 %         end
-        title(CondNames{j},'fontsize',FontS-4);
+        title(CondNames{j},'fontsize',FontS);
         switch j
             case 2
                 colorbar;
@@ -279,9 +279,9 @@ for i = 1:numel(SNRs)
 end
 
 
-set(FIG,'paperposition',[1 1 11 8.5]);
-set(FIG,'Unit','Inch','position',[1 1 11 8.5],'color','w');
+set(FIG,'paperposition',[1 1 9 7.2]);
+set(FIG,'Unit','Inch','position',[1 1 9 7.2],'color','w');
 
-print(fullfile('Figures','ConnectivityExample_AUCPR2_high.tif'),'-r300','-dtiff');
-export_fig(FIG,fullfile('Figures','ConnectivityExample_AUCPR2_high'),'-pdf');
+ print(fullfile('Figures','ConnectivityExample_AUCPR2_high.tif'),'-r300','-dtiff');
+ export_fig(FIG,fullfile('Figures','ConnectivityExample_AUCPR2_high'),'-pdf');
 
