@@ -38,11 +38,12 @@ band_freqs.theta = [4,8];
 band_freqs.alpha = [8,12];
 band_freqs.beta = [12,30];
 band_freqs.gamma = [30,80];
-%
+%%
+FigPath = '../../../Examples/Figures';
 fig_all_fits=figure ;
 freq_band_names = fieldnames(y) ;
 model_names = fieldnames(model_fun) ;
-
+FS = 12; % fontsize
 x_temp = [0:0.5:70];
 
 colors = {'r','g','b','k','c','m','y'};
@@ -55,7 +56,7 @@ for i = 1:length(freq_band_names)
     for this_model_idx = 1:length(model_names)
         subplot(1,length(model_names),this_model_idx );
         this_model_name = model_names{this_model_idx} ;
-        scatter(x,y.(freq_band_names{i}),colors{i})
+       % scatter(x,y.(freq_band_names{i}),colors{i})
         hold on 
         if strcmp(this_model_name,'power_law')
              if strfind(version,'R2011')
@@ -72,7 +73,7 @@ for i = 1:length(freq_band_names)
         end
         sprintf('band: %s, model: %s, MSE=%f, mean(R)= %f',this_band_name,this_model_name, MSE,mean(R.^2))
         model_params.(this_band_name).(this_model_name) = this_p;
-        h=plot(x_temp,model_fun.(this_model_name)( model_params.(this_band_name).(this_model_name) ,x_temp),colors{i});
+        h=plot(x_temp,model_fun.(this_model_name)( model_params.(this_band_name).(this_model_name) ,x_temp),colors{i},'linewidth',2);
         xlim([0,50])
         if this_model_idx==1
             handles = [handles,h];
@@ -86,15 +87,25 @@ for i = 1:length(freq_band_names)
         end
         
         
-        title(this_model_name)
+        %title(this_model_name)
     end
 
 end
-legend(handles,freq_band_names)
+set(gca,'fontsize',FS,'ytick',0:.2:1);
+xlabel('Spatial Distance [mm]','fontsize',FS);
+ylabel('Coherence','fontsize',FS);
+legend(handles,freq_band_names,'fontsize',FS);
+
+set(fig_all_fits,'paperposition',[10 10 5 4.2]);
+set(fig_all_fits,'Unit','Inch','position',[10 10 5 4.2],'color','w');
+
+print(fullfile(FigPath,'CoherenceFitFunction.tif'),'-r300','-dtiff');
+export_fig(fig_all_fits,fullfile(FigPath,'CoherenceFitFunction'),'-pdf');
+
 save('spatial_decay_models_coherence','model_fun','model_params','best_model','band_freqs')
 %%
 % plot best model
-if true
+if false
     addpath('../../../External/tools/BrewerMap/')
     set(0,'defaultfigurecolor',[1 1 1])
 
