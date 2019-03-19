@@ -274,7 +274,7 @@ for nLambda_idx = 1:numel(Lambda_list)
     EEGAxx = {} ;
 end
 %%
-do_save_plots = true;
+do_save_plots = false;
 
 %% scalp plots
 % settings for data
@@ -363,7 +363,7 @@ for comp_idx = 1:2
         this_decomp_method = decomp_methods{decomp_method_idx};
         combined_err_angles.(this_decomp_method) = cat(5, ang_errs.(this_decomp_method){:});
         this_avg_err_angles = squeeze(mean(mean(combined_err_angles.(this_decomp_method)(comp_idx,comp_idx,:,:,:),4),5)) ;
-        plot(Db_list,this_avg_err_angles ,markers{comp_idx},'LineWidth',2,'MarkerSize',10,'color',colors(decomp_method_idx,:));
+        plot(Db_list,this_avg_err_angles ,markers{comp_idx},'LineWidth',2,'MarkerSize',7,'color',colors(decomp_method_idx,:),'markerfacecolor',colors(decomp_method_idx,:));
         hold on
     end
     title(sprintf('Comp %i ( Relative to source %i )', comp_idx, comp_idx),'FontSize',FS)
@@ -384,13 +384,13 @@ for comp_idx = 1:2
         this_decomp_method = decomp_methods{decomp_method_idx};
         combined_residuals.(this_decomp_method) = cat(5, residuals.(this_decomp_method){:}) ;
         this_avg_residuals = squeeze(mean(mean(combined_residuals.(this_decomp_method)(comp_idx,comp_idx,:,:,:),4),5)) ;
-        plot(Db_list,this_avg_residuals ,markers{comp_idx},'LineWidth',2,'MarkerSize',10,'color',colors(decomp_method_idx,:));
+        plot(Db_list,this_avg_residuals ,markers{comp_idx},'LineWidth',2,'MarkerSize',7,'color',colors(decomp_method_idx,:),'markerfacecolor',colors(decomp_method_idx,:));
         hold on
     end
     title(sprintf('Comp %i ( Relative to source %i )', comp_idx, comp_idx),'FontSize',FS)
     ylim([0,1])
     if comp_idx == 1
-        ylabel('Normalized residual [1-R^2]','FontSize',FS);
+        ylabel('Normalized Residual [1-R^2]','FontSize',FS);
     else
         set(gca,'position', get(gca,'position')+[-.03 0 0 0]);
     end
@@ -405,7 +405,7 @@ for comp_idx = 1:2
         combined_snrs.(this_decomp_method)  =cat(4,snrs.(this_decomp_method){:}) ;
         %this_avg_snrs = mean(mean(10*log10(combined_snrs.(this_decomp_method)),3),4);
         this_avg_snrs = squeeze(mean(mean(10*log10(combined_snrs.(this_decomp_method)(comp_idx,:,:,:)),3),4));
-        plot(Db_list,this_avg_snrs ,markers{comp_idx},'LineWidth',2,'MarkerSize',10,'color',colors(decomp_method_idx,:));
+        plot(Db_list,this_avg_snrs ,markers{comp_idx},'LineWidth',2,'MarkerSize',7,'color',colors(decomp_method_idx,:),'markerfacecolor',colors(decomp_method_idx,:));
         hold on
     end
     title(sprintf('Comp %i', comp_idx),'FontSize',FS)
@@ -423,7 +423,7 @@ end
 set(fig_err_all,'Units','Inches','position',[10, 10, 9, 9],'color','w');
 set(fig_err_all,'paperposition',[10, 10, 9, 9]);
 
-if do_save_plots
+if 1%do_save_plots
     print(fullfile(FigPath,'Spatial_Filters_ErrorPlots'),'-r300','-dtiff');
     export_fig(fig_err_all,fullfile(FigPath,'Spatial_Filters_ErrorPlots'),'-pdf');
     close(fig_err_all);

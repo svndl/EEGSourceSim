@@ -96,8 +96,8 @@ xlabel('Spatial Distance [mm]','fontsize',FS);
 ylabel('Coherence','fontsize',FS);
 legend(handles,freq_band_names,'fontsize',FS);
 
-set(fig_all_fits,'paperposition',[10 10 5 4.2]);
-set(fig_all_fits,'Unit','Inch','position',[10 10 5 4.2],'color','w');
+set(fig_all_fits,'paperposition',[10 10 4 3]);
+set(fig_all_fits,'Unit','Inch','position',[10 10 4 3],'color','w');
 
 print(fullfile(FigPath,'CoherenceFitFunction.tif'),'-r300','-dtiff');
 export_fig(fig_all_fits,fullfile(FigPath,'CoherenceFitFunction'),'-pdf');
