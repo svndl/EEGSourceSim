@@ -45,13 +45,13 @@ Noise.mu.sensor=2;
 Rois1 = cellfun(@(x) x.searchROIs('V2d','wang','R'),RoiList,'UniformOutput',false);% % wang ROI
 Rois2 = cellfun(@(x) x.searchROIs('LO1','wang','L'),RoiList,'UniformOutput',false);
 RoisI = cellfun(@(x,y) x.mergROIs(y),Rois1,Rois2,'UniformOutput',false);
-do_new_data_generation = false;
+do_new_data_generation = true;
 % generate or read from disk
 generated_date_filename = 'data_for_spatial_filter_test2_2source_allSubj.mat';
 %generated_date_filename = 'data_for_spatial_filter_test_2source_all_subjects.mat';
 %if ~exist('data_for_spatial_filter_test_2source.mat','file') || do_new_data_generation
 if ~exist(generated_date_filename,'file') || do_new_data_generation
-    n_trials = 20;
+    n_trials = 200;
     Noise.lambda = 0 ; % noise only
     [outSignal, FundFreq, SF]= mrC.Simulate.ModelSeedSignal('signalType','SSVEP','ns',200,'signalFreq',[2 2],'harmonicAmps',{[2,0,1.5,0],[1,0, 1,0]},'harmonicPhases',{[0,0,0,0],[pi/2,0,pi/2,0]},'reliableAmps',[1,0],'nTrials',n_trials,'reliableAmp',[1 0]);
     [EEGData_noise,EEGAxx_noise,EEGData_signal,EEGAxx_signal,~,masterList,subIDs,allSubjFwdMatrices,allSubjRois] = mrC.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,'signalArray',outSignal,'signalFF',FundFreq,'signalsf',SF,'NoiseParams',Noise,'rois',RoisI,'Save',false,'cndNum',1,'nTrials',n_trials);%,'RedoMixingMatrices',true);
@@ -262,7 +262,7 @@ for nLambda_idx = 1:numel(Lambda_list)
                 for trial_idx = 1:thisDecompAxx.nTrl
                     corr_per_trial(:,:,trial_idx) = corr(ref_signals, est_signal(:,:,trial_idx)) ;
                 end
-                residuals.(this_decomp_method){s}(:,1:thisDecompAxx.nCh,nLambda_idx,draw_idx) = mean(corr_per_trial.^2,3); % average residual over trials
+                residuals.(this_decomp_method){s}(:,1:thisDecompAxx.nCh,nLambda_idx,draw_idx) = 1-mean(corr_per_trial.^2,3); % average residual over trials
                 
             end
             snrs_orig{s}(:,nLambda_idx,draw_idx)=mean(mean(thisAxx.Amp(signal_freq_idxs,:,:).^2)./mean(thisAxx.Amp(noise_freq_idxs,:,:).^2),3);
