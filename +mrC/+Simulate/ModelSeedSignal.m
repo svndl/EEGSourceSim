@@ -1,15 +1,19 @@
 function [signalOut, FundFreq, SF] = ModelSeedSignal(varargin)
-% This is a trial version, later different source signals will be added (NARMAX,...)
-% For now only generates SSVEP like signal
+% For generating SSEP like signal
 
 % INPUTS:
     % <options>:
-        % signalType: - the model for source signal: [Simple], SSVEP, (NARMAX... for later)
-        % sf: - Sampling frequency
-        % ns: Number of time samples
+        % signalType: - the model for source signal: [Simple], SSVEP,
         % signalFreq: seedNum x 1 vector - fundamental frequencies of the sources, where srcNum is number of seed sources with different signals
         % HarmonicAmp: - cell array of seedNum x 1, each of cell arrays should be a vector indicating amplitude for harmonics in one source 
-        % HarmonicPhase: - cell array of seedNum x 1, each of cell arrays should be a vector indicating phase for harmonics in one source 
+        % HarmonicPhase: - cell array of seedNum x 1, each of cell arrays should be a vector indicating phase for harmonics in one source
+        % reliableAmp: array of seedNum x 1, with logical values in each element of the vector, if set to false, it will draw the amplitude
+                       % randomly from a uniform distribution between 0 and 1
+        % reliablePhase: array of seedNum x 1, with logical values in each element of the vector, if set to false, it will draw the amplitude
+                       % randomly from a uniform distribution between 0 and 2*pi
+        % nTrials: Numebr of trials
+        % sf: - Sampling frequency
+        % ns: Number of time samples
     
 % OUTPUTS    
     % signalOut: - ns x srcNum maxtrix,
