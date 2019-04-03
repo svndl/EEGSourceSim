@@ -9,7 +9,7 @@ SimFolder = fileparts(pwd);
 addpath(genpath(SimFolder));
 
 %% To be modified later
-if true % SBs setup
+if false % SBs setup
     addpath('../External/tools/BrewerMap/')
     %
     DataPath = '/export/data/';
