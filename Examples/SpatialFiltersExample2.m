@@ -132,9 +132,13 @@ clear spec_noise spec_signal fwdMatrix RoiList allSubjFwdMatrices allSubjRois Ro
 if size(EEGData_signal{subj_idx},3)>= nDraws*nTrials % enough trials for disjoint draws
     trial_idxs = 1:nDraws*nTrials ;
 else
-    trial_idxs = randi( size(EEGData_signal{subj_idx},3), 1,nDraws*nTrials) ; % not enough trials
+    warning('not enough trials for disjoint draws')
+    temp_idxs = repmat(1:size(EEGData_signal{subj_idx},3),1,ceil(nDraws*nTrials/size(EEGData_signal{subj_idx},3))) ;
+    trial_idxs = temp_idxs(1:nDraws*nTrials);
+    
+    %trial_idxs = randi( size(EEGData_signal{subj_idx},3), 1,nDraws*nTrials) ; % not enough trials
 end
-trial_idxs_per_draw = reshape(trial_idxs,nDraws,[]) ;
+trial_idxs_per_draw = reshape(trial_idxs,[],nDraws) ;
 
 decomp_methods = {'pca','ssd','csp','rca'} ;
 for decomp_method_idx = 1:length(decomp_methods)
@@ -166,7 +170,7 @@ for nLambda_idx = 1:numel(Lambda_list)
         considered_harms = power_norm_harmonics ;
 
         for draw_idx = 1:nDraws
-            trial_idxs = trial_idxs_per_draw(draw_idx,:);
+            trial_idxs = trial_idxs_per_draw(:,draw_idx);
 
             thisAxx = cellfun(@(x) x.SelectTrials(trial_idxs),EEGAxx(subj_idx),'uni',false);
             T = thisAxx{1};
@@ -178,7 +182,7 @@ for nLambda_idx = 1:numel(Lambda_list)
 
             % make sure the no-stimulation condition does not see the same
             % noise component
-            noise_trial_idxs = trial_idxs_per_draw(mod(draw_idx,nDraws)+1,:);
+            noise_trial_idxs = trial_idxs_per_draw(:,mod(draw_idx,nDraws)+1);
             
             thisNoiseAxx = cellfun(@(x) x.SelectTrials(trial_idxs),EEGAxx_noise(subj_idx),'uni',false);
             T = thisNoiseAxx{1};
