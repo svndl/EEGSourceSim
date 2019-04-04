@@ -14,8 +14,6 @@ ResultPath = 'ResultData';
 if ~exist(fullfile(pwd,FigPath),'dir'),mkdir(FigPath);end
 if ~exist(fullfile(pwd,ResultPath),'dir'),mkdir(ResultPath);end
 
-%% Redo Simulation?
-simulateEEG = 1; % if simulateEEG = 0, then it loads in the data otherwise it does the simulation using mrC.SimulateProject functions
 
 %% Prepare Project path 
 DestPath = fullfile(SimFolder,'Examples','ExampleData');
@@ -53,9 +51,11 @@ TS_all_UC = TS_unconnect(1:3,1:epNum*eplength);
 
 %% Simulating network
 
+RedoSimulateEEG = 1; % if simulateEEG = 0, then it loads in the data otherwise it does the simulation using mrC.SimulateProject functions
+
 ModeNames= {'connect','unconnect'};
 Noise.lambda = 0;
-if ~exist(fullfile(ResultPath,'ConnectitvityExampleData.mat'),'file') || simulateEEG
+if ~exist(fullfile(ResultPath,'ConnectitvityExampleData.mat'),'file') || RedoSimulateEEG
         SignalArray = reshape(TS_all(:,1:epNum*eplength)',eplength,15,size(TS_all,1));
         
         [EEGData_noise,~,EEGData_signal_connect,~,~,masterList,subIDs] = mrC.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,...

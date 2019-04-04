@@ -10,12 +10,15 @@ if ~exist(fullfile(pwd,FigPath),'dir'),mkdir(FigPath);end
 if ~exist(fullfile(pwd,ResultPath),'dir'),mkdir(ResultPath);end
 
 %% Prepare Project path and ROIs
-DestPath = fullfile(SimFolder,'Examples','ExampleData_Inverse');
+DestPath = fullfile(SimFolder,'Examples','ExampleData');
 AnatomyPath = fullfile(DestPath,'anatomy');
 ProjectPath = fullfile(DestPath,'FwdProject');
+[Inverse,subIDs_Inverse] = mrC.Simulate.ReadInverses(ProjectPath,'mneInv_bem_gcv_regu_TWindow_0_1334_wangROIsCorr.inv');
+subIDs_Inverse = subIDs_Inverse(cellfun(@(x) ~isempty(x),Inverse));
+clear Inverse;
 
 % Pre-select ROIs
-[RoiList,subIDs] = mrC.Simulate.GetRoiClass(ProjectPath,AnatomyPath);% 13 subjects with Wang atlab 
+[RoiList,subIDs] = mrC.Simulate.GetRoiClass(ProjectPath,AnatomyPath,subIDs_Inverse);% 13 subjects with Wang atlab 
 Wang_RoiList = cellfun(@(x) {x.getAtlasROIs('wang')},RoiList);
 Inds = 1:50;Inds([1:14 17:24 27:28])= [];
 Wang_RoiList = cellfun(@(x) {x.selectROIs(Inds)},Wang_RoiList);
@@ -24,9 +27,14 @@ Wang_RoiList = cellfun(@(x) {x.selectROIs(Ind2)},Wang_RoiList);
 
 %% Generate Resolution matrices
 FilePath = fullfile(ResultPath,'LocalizationExampleData_Paper.mat');
-if ~exist(FilePath,'file')
-    [CrossTalk1,Error1,ROISource1,~,~,~] = mrC.Simulate.ResolutionMatrices(ProjectPath,'rois',Wang_RoiList,'roiType','wang','anatomyPath',AnatomyPath,'doAUC',true,'inverse','mneInv_bem_snr_100.inv');
-    [CrossTalk2,Error2,ROISource2,ScalpData,LIST,subIDs] = mrC.Simulate.ResolutionMatrices(ProjectPath,'rois',Wang_RoiList,'roiType','wang','anatomyPath',AnatomyPath,'doAUC',true,'inverse','mneInv_bem_gcv_regu_TWindow_0_1334_wangROIsCorr.inv');
+do_new_data_generation = true;
+
+if ~exist(FilePath,'file') || do_new_data_generation
+    [CrossTalk1,Error1,ROISource1,~,~,~] = mrC.Simulate.ResolutionMatrices(ProjectPath,'subSelect',subIDs,...
+        'rois',Wang_RoiList,'roiType','wang','anatomyPath',AnatomyPath,'doAUC',true,'inverse','mneInv_bem_snr_100.inv');
+    
+    [CrossTalk2,Error2,ROISource2,ScalpData,LIST,subIDs] = mrC.Simulate.ResolutionMatrices(ProjectPath,'subSelect',subIDs,...
+        'rois',Wang_RoiList,'roiType','wang','anatomyPath',AnatomyPath,'doAUC',true,'inverse','mneInv_bem_gcv_regu_TWindow_0_1334_wangROIsCorr.inv');
     save(FilePath,'CrossTalk1','Error1','ROISource1','CrossTalk2','Error2','ROISource2','ScalpData','LIST','subIDs');
 else
     load(FilePath);

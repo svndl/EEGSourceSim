@@ -26,6 +26,7 @@ function [CrossTalk,Errors,ROISource,ScalpData,LIST,subIDs] = ResolutionMatrices
 %--------------------------set up default values---------------------------
 opt	= ParseArgs(varargin,...
     'inverse'		, [], ...
+    'subSelect'     ,[],...
     'rois'          , [], ...
     'roiType'       , 'wang',...
     'eccRange'      , [],...
@@ -82,6 +83,13 @@ end
 %% ===========================GENERATE EEG signal==========================
 projectPathfold = projectPath;
 projectPath = subfolders(projectPath,1); % find subjects in the main folder
+subIDs = subfolders(projectPathfold,0); 
+if ~isempty(opt.subSelect)
+    Inds = ismember(subIDs,opt.subSelect);
+    subIDs = subIDs(Inds);
+    projectPath = cellfun(@(x) fullfile(projectPathfold,x),subIDs,'uni',false);
+end
+
 if isempty(opt.rois)
     Rois = mrC.Simulate.GetRoiClass(projectPathfold);
 else
