@@ -10,9 +10,11 @@ if ~exist(fullfile(pwd,FigPath),'dir'),mkdir(FigPath);end
 if ~exist(fullfile(pwd,ResultPath),'dir'),mkdir(ResultPath);end
 
 %% Prepare Project path and ROIs
-DestPath = fullfile(SimFolder,'Examples','ExampleData');
+DestPath = fullfile(SimFolder,'Examples','Dataset');
 AnatomyPath = fullfile(DestPath,'anatomy');
 ProjectPath = fullfile(DestPath,'FwdProject');
+
+%% Select subjects with inverses
 [Inverse,subIDs_Inverse] = mrC.Simulate.ReadInverses(ProjectPath,'mneInv_bem_gcv_regu_TWindow_0_1334_wangROIsCorr.inv');
 subIDs_Inverse = subIDs_Inverse(cellfun(@(x) ~isempty(x),Inverse));
 clear Inverse;

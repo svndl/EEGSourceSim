@@ -17,7 +17,7 @@ if false % SBs setup
     AnatomyPath = fullfile(DestPath,'anatomy');
     ProjectPath = fullfile(DestPath,'FwdProject');
 else
-    DestPath = fullfile(SimFolder,'Examples','ExampleData_Inverse');
+    DestPath = fullfile(SimFolder,'Examples','Dataset');
     AnatomyPath = fullfile(DestPath,'anatomy');
     ProjectPath = fullfile(DestPath,'FwdProject');
 end
@@ -28,9 +28,12 @@ ResultPath = fullfile(SimFolder,'Examples','ResultData');
 if ~exist(fullfile(FigPath),'dir'),mkdir(FigPath);end
 if ~exist(fullfile(ResultPath),'dir'),mkdir(ResultPath);end
 
+%% Select a subset of subjects
+SubIDs = {'nl-0011','nl-0014','nl-0037','nl-0043','nl-0045','nl-0046','nl-0047','nl-0048','skeri0003','skeri0004'};
+
 %%
 % Pre-select ROIs
-[RoiList,subIDs] = mrC.Simulate.GetRoiClass(ProjectPath,AnatomyPath);% 13 subjects with Wang atlab 
+[RoiList,subIDs] = mrC.Simulate.GetRoiClass(ProjectPath,AnatomyPath,SubIDs);% 13 subjects with Wang atlab 
 Wangs = cellfun(@(x) {x.getAtlasROIs('wang')},RoiList);
 Wangnums = cellfun(@(x) x.ROINum,Wangs)>0;
 
@@ -54,7 +57,8 @@ if ~exist(generated_date_filename,'file') || do_new_data_generation
     n_trials = 200;
     Noise.lambda = 0 ; % noise only
     [outSignal, FundFreq, SF]= mrC.Simulate.ModelSeedSignal('signalType','SSVEP','ns',200,'signalFreq',[2 2],'harmonicAmps',{[2,0,1.5,0],[1,0, 1,0]},'harmonicPhases',{[0,0,0,0],[pi/2,0,pi/2,0]},'reliableAmps',[1,0],'nTrials',n_trials,'reliableAmp',[1 0]);
-    [EEGData_noise,EEGAxx_noise,EEGData_signal,EEGAxx_signal,~,masterList,subIDs,allSubjFwdMatrices,allSubjRois] = mrC.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,'signalArray',outSignal,'signalFF',FundFreq,'signalsf',SF,'NoiseParams',Noise,'rois',RoisI,'Save',false,'cndNum',1,'nTrials',n_trials);%,'RedoMixingMatrices',true);
+    [EEGData_noise,EEGAxx_noise,EEGData_signal,EEGAxx_signal,~,masterList,subIDs,allSubjFwdMatrices,allSubjRois] = mrC.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,...
+        'subSelect',subIDs,'signalArray',outSignal,'signalFF',FundFreq,'signalsf',SF,'NoiseParams',Noise,'rois',RoisI,'Save',false,'cndNum',1,'nTrials',n_trials);%,'RedoMixingMatrices',true);
     save(fullfile(ResultPath,generated_date_filename),'-v7.3');
 else
     load(fullfile(ResultPath,generated_date_filename))

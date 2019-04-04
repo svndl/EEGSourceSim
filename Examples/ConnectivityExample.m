@@ -16,7 +16,7 @@ if ~exist(fullfile(pwd,ResultPath),'dir'),mkdir(ResultPath);end
 
 
 %% Prepare Project path 
-DestPath = fullfile(SimFolder,'Examples','ExampleData');
+DestPath = fullfile(SimFolder,'Examples','Dataset');
 AnatomyPath = fullfile(DestPath,'anatomy');
 ProjectPath = fullfile(DestPath,'FwdProject');
 
