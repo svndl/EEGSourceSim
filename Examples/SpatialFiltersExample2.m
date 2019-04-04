@@ -48,7 +48,7 @@ Noise.mu.sensor=2;
 Rois1 = cellfun(@(x) x.searchROIs('V2d','wang','R'),RoiList,'UniformOutput',false);% % wang ROI
 Rois2 = cellfun(@(x) x.searchROIs('LO1','wang','L'),RoiList,'UniformOutput',false);
 RoisI = cellfun(@(x,y) x.mergROIs(y),Rois1,Rois2,'UniformOutput',false);
-do_new_data_generation = true;
+do_new_data_generation = false;
 % generate or read from disk
 generated_date_filename = 'data_for_spatial_filter_test2_2source_allSubj.mat';
 %generated_date_filename = 'data_for_spatial_filter_test_2source_all_subjects.mat';
@@ -135,14 +135,19 @@ clear spec_noise spec_signal fwdMatrix RoiList allSubjFwdMatrices allSubjRois Ro
 
 if size(EEGData_signal{subj_idx},3)>= nDraws*nTrials % enough trials for disjoint draws
     trial_idxs = 1:nDraws*nTrials ;
+    trial_idxs_per_draw = reshape(trial_idxs,[],nDraws) ;
 else
     warning('not enough trials for disjoint draws')
-    temp_idxs = repmat(1:size(EEGData_signal{subj_idx},3),1,ceil(nDraws*nTrials/size(EEGData_signal{subj_idx},3))) ;
-    trial_idxs = temp_idxs(1:nDraws*nTrials);
-    
-    %trial_idxs = randi( size(EEGData_signal{subj_idx},3), 1,nDraws*nTrials) ; % not enough trials
+%      temp_idxs = repmat(1:size(EEGData_signal{subj_idx},3),1,ceil(nDraws*nTrials/size(EEGData_signal{subj_idx},3))) ;
+%      trial_idxs = temp_idxs(1:nDraws*nTrials);
+%           
+   % trial_idxs = randi( size(EEGData_signal{subj_idx},3), 1,nDraws*nTrials) ; % not enough trials
+     for draw_idx = 1:nDraws
+        trial_idxs_per_draw(:,draw_idx) = randperm(size(EEGData_signal{subj_idx},3),nTrials);
+    end
+
 end
-trial_idxs_per_draw = reshape(trial_idxs,[],nDraws) ;
+
 
 decomp_methods = {'pca','ssd','csp','rca'} ;
 for decomp_method_idx = 1:length(decomp_methods)
@@ -237,7 +242,7 @@ for nLambda_idx = 1:numel(Lambda_list)
                 for cand_idx =  find(these_ang_errs>90)' % candidates for turning topopgraphies
                     [source_idx,comp_idx] =ind2sub(size(these_ang_errs), cand_idx) ;
                     if (180-these_ang_errs(source_idx,comp_idx)) <= min([these_ang_errs(:,comp_idx);180-these_ang_errs(:,comp_idx)])
- % turn activation, filters and signal if turned angular error is the smallest
+                % turn activation, filters and signal if turned angular error is the smallest
                         these_ang_errs(source_idx,comp_idx) = 180-these_ang_errs(source_idx,comp_idx) ;
                         thisW(:,comp_idx) = -1*thisW(:,comp_idx) ;
                         thisA(:,comp_idx) = -1*thisA(:,comp_idx) ;
@@ -282,15 +287,15 @@ for nLambda_idx = 1:numel(Lambda_list)
     EEGAxx = {} ;
 end
 %%
-do_save_plots = false;
+do_save_plots = true;
 
 %% scalp plots
 % settings for data
-Subject_idx = 1;
-source_pattern = Source_pattern(:,:,Subject_idx);
+Subject_idx = 1:10;
+source_pattern = mean(Source_pattern(:,:,Subject_idx),3);
 n_comps = 2;
 decomp_methods = {'pca','rca','ssd'};
-
+clear MAs;
 % settings for plot
 fig_width = 8.5 ;
 top_margin = 0.5 ;
@@ -326,7 +331,18 @@ for this_decomp_method_idx = 1:length(decomp_methods)
         for nLambda_idx = 1:length(Lambda_list)
             y = fig_height - (top_margin+text_height + nLambda_idx*sbpl_height) ;
             ax = axes('parent',fig_scalp_plots,    'Units','Inches','Position',[x,y,sbpl_width,sbpl_height]) ;
-            Topo = A.(this_decomp_method){Subject_idx}{nLambda_idx}{1}(:,this_comp_idx);
+            if length(Subject_idx)==1
+                MAs = mean(cat(3,A.(this_decomp_method){Subject_idx}{nLambda_idx}{:}),3);
+            else
+                for subj = 1: numel(Subject_idx)
+                   As{subj} = mean(cat(3,A.(this_decomp_method){Subject_idx(subj)}{nLambda_idx}{:}),3);
+                   MAs = mean(cat(3,As{:}),3);
+                end               
+                 %= arrayfun(@(x) cat(3,A.(this_decomp_method){x}{nLambda_idx}{:}),Subject_idx,'uni','false');
+             end
+            
+            Topo = MAs(:,this_comp_idx);
+            %Topo = A.(this_decomp_method){Subject_idx}{nLambda_idx}{1}(:,this_comp_idx);
             if nLambda_idx == 1
                 this_title = sprintf('%s %i','Comp ',this_comp_idx) ;
                 mrC.Simulate.PlotScalp(Topo,this_title);
@@ -348,7 +364,11 @@ for this_decomp_method_idx = 1:length(decomp_methods)
 end
 
 if do_save_plots
+
     export_fig(fig_scalp_plots,fullfile(FigPath,'SpatialFilters_topographies'),'-pdf','-nocrop');
+    
+    %set(fig_scalp_plots,'paperposition',[10, 10, fig_width, fig_height]);
+    print(fullfile(FigPath,'Spatial_Filters_topographies'),'-r300','-dtiff');
     close(fig_scalp_plots);
 end
 
@@ -431,7 +451,7 @@ end
 set(fig_err_all,'Units','Inches','position',[10, 10, 9, 9],'color','w');
 set(fig_err_all,'paperposition',[10, 10, 9, 9]);
 
-if 1%do_save_plots
+if do_save_plots
     print(fullfile(FigPath,'Spatial_Filters_ErrorPlots'),'-r300','-dtiff');
     export_fig(fig_err_all,fullfile(FigPath,'Spatial_Filters_ErrorPlots'),'-pdf');
     close(fig_err_all);
