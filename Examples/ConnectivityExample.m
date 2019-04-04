@@ -15,29 +15,31 @@ if ~exist(fullfile(pwd,FigPath),'dir'),mkdir(FigPath);end
 if ~exist(fullfile(pwd,ResultPath),'dir'),mkdir(ResultPath);end
 
 %% Redo Simulation?
-simulateEEG = 0; % if simulateEEG = 0, then it loads in the data otherwise do the simulation using Simulate functions
+simulateEEG = 1; % if simulateEEG = 0, then it loads in the data otherwise it does the simulation using mrC.SimulateProject functions
 
-%% Prepare Project path and ROIs
-DestPath = fullfile(SimFolder,'Examples','ExampleData_Inverse');
+%% Prepare Project path 
+DestPath = fullfile(SimFolder,'Examples','ExampleData');
 AnatomyPath = fullfile(DestPath,'anatomy');
 ProjectPath = fullfile(DestPath,'FwdProject');
 
-[RoiList,subIDs] = mrC.Simulate.GetRoiClass(ProjectPath,AnatomyPath);% 13 subjects with Wang atlab 
+
+%% Load in inverses
+% Select subjects with the same inverse solution available % here we have 10 subjects
+[Inverse,subIDs_Inverse] = mrC.Simulate.ReadInverses(ProjectPath,'mneInv_bem_gcv_regu_TWindow_0_1334_wangROIsCorr.inv');
+subIDs_Inverse = subIDs_Inverse(cellfun(@(x) ~isempty(x),Inverse));
+Inverse = Inverse(cellfun(@(x) ~isempty(x),Inverse));
+
+%% Load in ROIs
+[RoiList,subIDs] = mrC.Simulate.GetRoiClass(ProjectPath,AnatomyPath,subIDs_Inverse);% 13 subjects with Wang atlab 
 V1_RoiList = cellfun(@(x) {x.searchROIs('V1d','wang','L')},RoiList);
 V3_RoiList = cellfun(@(x) {x.searchROIs('V3d','wang','L')},RoiList);
 TO1_RoiList = cellfun(@(x) {x.searchROIs('TO1','wang','L')},RoiList);
 Net_RoiList = cellfun(@(x,y,z) {mergROIs(mergROIs(x,y),z)},V1_RoiList,V3_RoiList,TO1_RoiList);
 
 All_RoiList = Net_RoiList;
-
-%% Load in wang ROIs and inverses
 % load(fullfile(ResultPath,'ROI_colors_Paper.mat'));
-
 Wang_RoiList = cellfun(@(x) {x.getAtlasROIs('wang')},RoiList);
 Wang_Chunks = cellfun(@(x) x.ROI2mat(20484),Wang_RoiList,'uni',false);
-
-Inverse = mrC.Simulate.ReadInverses(ProjectPath,'mneInv_bem_gcv_regu_TWindow_0_1334_wangROIsCorr.inv');
-
 %% Prepare background activity
 
 % load simulation signal
@@ -57,15 +59,15 @@ if ~exist(fullfile(ResultPath,'ConnectitvityExampleData.mat'),'file') || simulat
         SignalArray = reshape(TS_all(:,1:epNum*eplength)',eplength,15,size(TS_all,1));
         
         [EEGData_noise,~,EEGData_signal_connect,~,~,masterList,subIDs] = mrC.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,...
-            'signalArray',SignalArray,'signalsf',SF,'NoiseParams',Noise,'rois',All_RoiList,...
+            'subSelect',subIDs,'signalArray',SignalArray,'signalsf',SF,'NoiseParams',Noise,'rois',All_RoiList,...
             'Save',false,'cndNum',1,'doSource' ,true,'signalSNRFreqBand',[5 15],...
             'doFwdProjectNoise',true,'RedoMixingMatrices',false,'nTrials',epNum);
 
-        SignalArray = reshape(TS_all_UC(:,1:15*eplength)',eplength,15,size(TS_all_UC,1));
-        [~,~,EEGData_signal_unconnect] = mrC.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,...
-            'signalArray',SignalArray,'signalsf',SF,'NoiseParams',Noise,'rois',All_RoiList,...
-            'Save',false,'cndNum',1,'doSource' ,true,'signalSNRFreqBand',[5 15],...
-            'doFwdProjectNoise',true,'RedoMixingMatrices',false,'nTrials',epNum);
+%         SignalArray = reshape(TS_all_UC(:,1:15*eplength)',eplength,15,size(TS_all_UC,1));
+%         [~,~,EEGData_signal_unconnect] = mrC.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,...
+%             'subSelect',subIDs,'signalArray',SignalArray,'signalsf',SF,'NoiseParams',Noise,'rois',All_RoiList,...
+%             'Save',false,'cndNum',1,'doSource' ,true,'signalSNRFreqBand',[5 15],...
+%             'doFwdProjectNoise',true,'RedoMixingMatrices',false,'nTrials',epNum);
         
     save(fullfile(ResultPath,'ConnectitvityExampleData.mat'),'EEGData_noise','EEGData_signal_connect','EEGData_signal_unconnect','subIDs','masterList');
 else
@@ -82,13 +84,13 @@ if true
         %
         spec_noise = fft(EEGData_noise{subj_idx},[],1);
         spec_signalC = fft(EEGData_signal_connect{subj_idx},[],1);
-        spec_signalNC = fft(EEGData_signal_unconnect{subj_idx},[],1);
+%         spec_signalNC = fft(EEGData_signal_unconnect{subj_idx},[],1);
         power_noise = mean(mean(abs(spec_noise(SNR_freq_idxs,:,:)).^2)) ; % mean noise power per trial
         power_signalC= mean(mean(abs(spec_signalC(SNR_freq_idxs,:,:)).^2)) ;
-        power_signalNC= mean(mean(abs(spec_signalNC(SNR_freq_idxs,:,:)).^2)) ; 
+%         power_signalNC= mean(mean(abs(spec_signalNC(SNR_freq_idxs,:,:)).^2)) ; 
         EEGData_noise{subj_idx} = EEGData_noise{subj_idx}./sqrt(power_noise);
         EEGData_signal_connect{subj_idx} = EEGData_signal_connect{subj_idx}./sqrt(power_signalC);
-        EEGData_signal_unconnect{subj_idx} = EEGData_signal_unconnect{subj_idx}./sqrt(power_signalNC);
+%         EEGData_signal_unconnect{subj_idx} = EEGData_signal_unconnect{subj_idx}./sqrt(power_signalNC);
     end
 
     % Generate EEG, calculate sources and then power spectra
