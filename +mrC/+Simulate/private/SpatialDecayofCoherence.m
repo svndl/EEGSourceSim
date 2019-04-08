@@ -30,7 +30,7 @@ x       = [ 0., 0.5,  1.,   1.5,  2.,   2.5,  3.,  3.5,  4.] ;
 y.delta = [ 1., 0.96, 0.94, 0.9,  0.88, 0.84, 0.8, 0.78, 0.76 ];
 y.theta = [ 1., 0.96, 0.94, 0.9,  0.88, 0.84, 0.82, 0.8, 0.78 ];
 y.alpha = [ 1., 0.95, 0.91, 0.86, 0.84, 0.78, 0.72, 0.67, 0.61];
-y.beta  = [ 1., 0.92, 0.84, 0.76, 0.68, 0.61, 0.69, 0.56, 0.48] ;
+y.beta  = [ 1., 0.92, 0.84, 0.76, 0.68, 0.61, 0.59, 0.56, 0.48] ;
 y.gamma = [ 1., 0.84, 0.7,  0.68, 0.48, 0.4, 0.36, 0.32, 0.28];
 
 band_freqs.delta = [0,4];
@@ -56,7 +56,7 @@ for i = 1:length(freq_band_names)
     for this_model_idx = 1:length(model_names)
         subplot(1,length(model_names),this_model_idx );
         this_model_name = model_names{this_model_idx} ;
-       % scatter(x,y.(freq_band_names{i}),colors{i})
+        scatter(x,y.(freq_band_names{i}),colors{i})
         hold on 
         if strcmp(this_model_name,'power_law')
              if strfind(version,'R2011')
