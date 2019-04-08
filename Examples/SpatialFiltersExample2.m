@@ -56,7 +56,7 @@ generated_date_filename = 'data_for_spatial_filter_test2_2source_allSubj.mat';
 if ~exist(generated_date_filename,'file') || do_new_data_generation
     n_trials = 200;
     Noise.lambda = 0 ; % noise only
-    [outSignal, FundFreq, SF]= mrC.Simulate.ModelSeedSignal('signalType','SSVEP','ns',200,'signalFreq',[2 2],'harmonicAmps',{[2,0,1.5,0],[1,0, 1,0]},'harmonicPhases',{[0,0,0,0],[pi/2,0,pi/2,0]},'reliableAmps',[1,0],'nTrials',n_trials,'reliableAmp',[1 0]);
+    [outSignal, FundFreq, SF]= mrC.Simulate.ModelSeedSignal('signalType','SSVEP','ns',200,'signalFreq',[2 2],'harmonicAmps',{[2,0,1.5,0],[1,0, 1,0]},'harmonicPhases',{[0,0,0,0],[pi/2,0,pi/2,0]},'reliableAmps',[1,0],'nTrials',n_trials);
     [EEGData_noise,EEGAxx_noise,EEGData_signal,EEGAxx_signal,~,masterList,subIDs,allSubjFwdMatrices,allSubjRois] = mrC.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,...
         'subSelect',subIDs,'signalArray',outSignal,'signalFF',FundFreq,'signalsf',SF,'NoiseParams',Noise,'rois',RoisI,'Save',false,'cndNum',1,'nTrials',n_trials);%,'RedoMixingMatrices',true);
     save(fullfile(ResultPath,generated_date_filename),'-v7.3');
@@ -314,13 +314,19 @@ set(fig_scalp_plots,'Units','Inches','position',[10, 10, fig_width, fig_height],
 for source_idx = 1:2
     x = left_margin ;
     y = fig_height - (top_margin+text_height + 0.5*length(Lambda_list)*sbpl_height + (source_idx-1)* (sbpl_height+text_height) ) ;
-    ax = axes('parent',fig_scalp_plots,    'Units','Inches','Position',[x,y,sbpl_width,sbpl_height]) ;
+    ax = axes('parent',fig_scalp_plots,    'Units','Inches','Position',[x,y,sbpl_width+.1,sbpl_height]) ;
 
     Topo = source_pattern(:,source_idx);
+    Topo = (Topo - min(Topo(:)))/(max(Topo)-min(Topo));
     %if abs(min(Topo))>max(Topo), Topo = -1*Topo;end
     
     this_title = sprintf('%s %i','Source ',source_idx) ;
     mrC.Simulate.PlotScalp(Topo,this_title);
+    if source_idx ==2
+        C = colorbar;
+        set(C,'position',get(C,'position')+[-.027 -.27 0.01 0.12],'fontsize',12)
+    end
+
 end
 
 for this_decomp_method_idx = 1:length(decomp_methods)
@@ -365,10 +371,12 @@ end
 
 if do_save_plots
 
-    export_fig(fig_scalp_plots,fullfile(FigPath,'SpatialFilters_topographies'),'-pdf','-nocrop');
+    %export_fig(fig_scalp_plots,fullfile(FigPath,'SpatialFilters_topographies'),'-pdf','-nocrop');
     
     %set(fig_scalp_plots,'paperposition',[10, 10, fig_width, fig_height]);
-    print(fullfile(FigPath,'Spatial_Filters_topographies'),'-r300','-dtiff');
+    
+    %print(fullfile(FigPath,'Spatial_Filters_topographies'),'-r300','-dtiff');
+    export_fig(fig_scalp_plots,fullfile(FigPath,'SpatialFilters_topographies'),'-pdf','-nocrop');
     close(fig_scalp_plots);
 end
 

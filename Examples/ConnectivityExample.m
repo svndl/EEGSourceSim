@@ -51,7 +51,7 @@ TS_all_UC = TS_unconnect(1:3,1:epNum*eplength);
 
 %% Simulating network
 
-RedoSimulateEEG = 1; % if simulateEEG = 0, then it loads in the data otherwise it does the simulation using mrC.SimulateProject functions
+RedoSimulateEEG = 0; % if simulateEEG = 0, then it loads in the data otherwise it does the simulation using mrC.SimulateProject functions
 
 ModeNames= {'connect','unconnect'};
 Noise.lambda = 0;
