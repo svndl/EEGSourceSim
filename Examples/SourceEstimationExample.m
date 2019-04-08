@@ -29,7 +29,7 @@ Wang_RoiList = cellfun(@(x) {x.selectROIs(Ind2)},Wang_RoiList);
 
 %% Generate Resolution matrices
 FilePath = fullfile(ResultPath,'LocalizationExampleData_Paper.mat');
-do_new_data_generation = true;
+do_new_data_generation = false;
 
 if ~exist(FilePath,'file') || do_new_data_generation
     [CrossTalk1,Error1,ROISource1,~,~,~] = mrC.Simulate.ResolutionMatrices(ProjectPath,'subSelect',subIDs,...
@@ -74,19 +74,21 @@ if ~BrainFromSuma
     set(S1,'position',get(S1,'position')+[-.025 -.05 .05 .05]);
     subplot(2,3,4), mrC.Simulate.VisualizeSourceRoi2('nl-0048',[AnatomyPath '/'],'wang',INDs,'ventral','B',CC,1:2:numel(INDs));
 else
+    xr = .1;xo = 0.05;
+    yr = .1;yo = 0.04;
     im1 = imread(fullfile('private','SumaBrain','eb_dorsolateral_pial_crop.png'));
     im2 = imread(fullfile('private','SumaBrain','eb_ventromedial_pial_crop.png'));
-    S1 = subplot(3,2,1);imagesc(im1(:,:,1:3),'AlphaData',squeeze(sum(im1,3)~=0));axis off %equal   
-    S2 = subplot(3,2,2);imagesc(im2(:,:,1:3),'AlphaData',squeeze(sum(im2,3)~=0));axis off %equal
-    set(S1,'position',get(S1,'position')+[-.04 -.02 .05 .04]);
-    set(S2,'position',get(S2,'position')+[-.04 -.02 .05 .04]);
+    S1 = subplot(3,2,1);imagesc(im1(:,:,1:3),'AlphaData',squeeze(sum(im1,3)~=0));axis off equal tight  
+    S2 = subplot(3,2,2);imagesc(im2(:,:,1:3),'AlphaData',squeeze(sum(im2,3)~=0));axis off equal tight
+    set(S1,'position',get(S1,'position')+[-xo -yo xr-.03 yr]);
+    set(S2,'position',get(S2,'position')+[-xo -yo xr+.03 yr]);
     
     im1 = imread(fullfile('private','SumaBrain','eb_dorsolateral_inf_crop.png'));
     im2 = imread(fullfile('private','SumaBrain','eb_ventromedial_inf_crop.png'));
-    S1 = subplot(3,2,3);imagesc(im1(:,:,1:3),'AlphaData',squeeze(sum(im1,3)~=0));axis off %equal   
-    S2 = subplot(3,2,4);imagesc(im2(:,:,1:3),'AlphaData',squeeze(sum(im2,3)~=0));axis off %equal
-    set(S1,'position',get(S1,'position')+[-.04 -.02 .05 .04]);
-    set(S2,'position',get(S2,'position')+[-.04 -.02 .05 .04]);
+    S1 = subplot(3,2,3);imagesc(im1(:,:,1:3),'AlphaData',squeeze(sum(im1,3)~=0));axis off equal tight
+    S2 = subplot(3,2,4);imagesc(im2(:,:,1:3),'AlphaData',squeeze(sum(im2,3)~=0));axis off equal tight
+    set(S1,'position',get(S1,'position')+[-xo -yo xr-.03 yr]);
+    set(S2,'position',get(S2,'position')+[-xo -yo xr+.03 yr]);
 end
 
 % Plot Cross Talk Matrices
