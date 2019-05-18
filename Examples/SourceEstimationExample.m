@@ -1,4 +1,4 @@
-% This script generates an example of simulation for evaluation of EEG
+% This script generates an example simulation for evaluation of EEG
 % source estimation.
 % Make sure that 
 
@@ -275,4 +275,4 @@ print(fullfile(FigPath,'SourceEstimation2'),'-r300','-dtiff')
 set(gcf, 'Color', 'w');
 set(FIG3,'Units','Inch')
 set(FIG3,'Position',[1 1 6 6]);
-export_fig(FIG3,fullfile(FigPath,'SourceEstimation2'),'-pdf')
+%export_fig(FIG3,fullfile(FigPath,'SourceEstimation2'),'-pdf')
