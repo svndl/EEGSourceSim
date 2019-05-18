@@ -1,20 +1,30 @@
-% ADD required toolboxes
+% This script generates an example of simulation for evaluation of EEG
+% source estimation.
+% Make sure that 
+
+%ADD required toolboxes
 clear; clc;
 
-SimFolder = fileparts(pwd);
+SimFolder = fileparts(mfilename('fullpath'));
 addpath(genpath(SimFolder));
+
 %% Prepare the results folders
-FigPath = 'Figures';
-ResultPath = 'ResultData';
-if ~exist(fullfile(pwd,FigPath),'dir'),mkdir(FigPath);end
-if ~exist(fullfile(pwd,ResultPath),'dir'),mkdir(ResultPath);end
+FigPath = fullfile(SimFolder,'Figures');
+ResultPath = fullfile(SimFolder,'ResultData');
+if ~exist(FigPath,'dir'),mkdir(FigPath);end
+if ~exist(ResultPath,'dir'),mkdir(ResultPath);end
 
 %% Prepare Project path and ROIs
-DestPath = fullfile(SimFolder,'Examples','Dataset');
+if ~isempty(getenv('DatasetPath')) && exist(getenv('DatasetPath'),'dir')
+    DestPath = getenv('DatasetPath');
+else
+    DestPath = uigetdir('.','Pick the Dataset directory');
+    setenv('DatasetPath',DestPath);
+end
 AnatomyPath = fullfile(DestPath,'anatomy');
 ProjectPath = fullfile(DestPath,'FwdProject');
 
-%% Select subjects with inverses
+%% Select subjects with inverses matrices
 [Inverse,subIDs_Inverse] = mrC.Simulate.ReadInverses(ProjectPath,'mneInv_bem_gcv_regu_TWindow_0_1334_wangROIsCorr.inv');
 subIDs_Inverse = subIDs_Inverse(cellfun(@(x) ~isempty(x),Inverse));
 clear Inverse;
@@ -76,8 +86,8 @@ if ~BrainFromSuma
 else
     xr = .1;xo = 0.05;
     yr = .1;yo = 0.04;
-    im1 = imread(fullfile('private','SumaBrain','eb_dorsolateral_pial_crop.png'));
-    im2 = imread(fullfile('private','SumaBrain','eb_ventromedial_pial_crop.png'));
+    im1 = imread(fullfile(SimFolder,'private','SumaBrain','eb_dorsolateral_pial_crop.png'));
+    im2 = imread(fullfile(SimFolder,'private','SumaBrain','eb_ventromedial_pial_crop.png'));
     S1 = subplot(3,2,1);imagesc(im1(:,:,1:3),'AlphaData',squeeze(sum(im1,3)~=0));axis off equal tight  
     S2 = subplot(3,2,2);imagesc(im2(:,:,1:3),'AlphaData',squeeze(sum(im2,3)~=0));axis off equal tight
     set(S1,'position',get(S1,'position')+[-xo -yo xr-.03 yr]);
