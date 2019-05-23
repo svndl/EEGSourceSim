@@ -6,8 +6,11 @@
 clear; clc;
 
 SimFolder = fileparts(mfilename('fullpath'));
-addpath(genpath(SimFolder));
+addpath(genpath(fileparts(SimFolder)));
 
+if isempty(getpref('EEGSSim'))
+    EEGSourceSimSetUp();
+end
 %% Prepare the results folders
 FigPath = fullfile(SimFolder,'Figures');
 ResultPath = fullfile(SimFolder,'ResultData');
@@ -15,11 +18,11 @@ if ~exist(FigPath,'dir'),mkdir(FigPath);end
 if ~exist(ResultPath,'dir'),mkdir(ResultPath);end
 
 %% Prepare Project path and ROIs
-if ~isempty(getenv('DatasetPath')) && exist(getenv('DatasetPath'),'dir')
-    DestPath = getenv('DatasetPath');
+if ~isempty(getpref('EEGSSim','DatasetPath')) && exist(getpref('EEGSSim','DatasetPath'),'dir')
+    DestPath = getpref('EEGSSim','DatasetPath');
 else
     DestPath = uigetdir('.','Pick the Dataset directory');
-    setenv('DatasetPath',DestPath);
+    setenv('EEGSSim','DatasetPath',DestPath);
 end
 AnatomyPath = fullfile(DestPath,'anatomy');
 ProjectPath = fullfile(DestPath,'FwdProject');
