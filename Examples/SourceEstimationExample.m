@@ -8,9 +8,12 @@ clear; clc;
 SimFolder = fileparts(mfilename('fullpath'));
 addpath(genpath(fileparts(SimFolder)));
 
-if isempty(getpref('EEGSSim'))
+if isempty(getpref('EEGSSim')) % if the Setup function hasn't been run yet
     EEGSourceSimSetUp();
+elseif ~exist('+mrC','dir') || isempty(getpref('EEGSSim','EEGSSimPath')) % if the EEGSourceSim hasn't been added to the path
+    EEGSourceSimSetUp('EEGSourceSim',true);
 end
+
 %% Prepare the results folders
 FigPath = fullfile(SimFolder,'Figures');
 ResultPath = fullfile(SimFolder,'ResultData');
@@ -18,14 +21,11 @@ if ~exist(FigPath,'dir'),mkdir(FigPath);end
 if ~exist(ResultPath,'dir'),mkdir(ResultPath);end
 
 %% Prepare Project path and ROIs
-if ~isempty(getpref('EEGSSim','DatasetPath')) && exist(getpref('EEGSSim','DatasetPath'),'dir')
-    DestPath = getpref('EEGSSim','DatasetPath');
-else
-    DestPath = uigetdir('.','Pick the Dataset directory');
-    setenv('EEGSSim','DatasetPath',DestPath);
+if isempty(getpref('EEGSSim','AnatomyPath')) || isempty(getpref('EEGSSim','ProjectPath'))
+    EEGSourceSimSetUp('EEGSourceSim',false,'Dataset',true);
 end
-AnatomyPath = fullfile(DestPath,'anatomy');
-ProjectPath = fullfile(DestPath,'FwdProject');
+AnatomyPath = getpref('EEGSSim','AnatomyPath');
+ProjectPath = getpref('EEGSSim','ProjectPath');
 
 %% Select subjects with inverses matrices
 [Inverse,subIDs_Inverse] = mrC.Simulate.ReadInverses(ProjectPath,'mneInv_bem_gcv_regu_TWindow_0_1334_wangROIsCorr.inv');
@@ -278,4 +278,4 @@ print(fullfile(FigPath,'SourceEstimation2'),'-r300','-dtiff')
 set(gcf, 'Color', 'w');
 set(FIG3,'Units','Inch')
 set(FIG3,'Position',[1 1 6 6]);
-%export_fig(FIG3,fullfile(FigPath,'SourceEstimation2'),'-pdf')
+% export_fig(FIG3,fullfile(FigPath,'SourceEstimation2'),'-pdf')
