@@ -3,30 +3,30 @@
 % Modfied: Elham Barzegaran, 1/2019
 
 
-%% Add latest mrC
-clear;clc
-SimFolder = fileparts(pwd);
-addpath(genpath(SimFolder));
+%ADD required toolboxes
+clear; clc;
 
-%% To be modified later
-if false % SBs setup
-    addpath('../External/tools/BrewerMap/')
-    %
-    DataPath = '/export/data/';
-    DestPath = fullfile(DataPath,'eeg_simulation');
-    AnatomyPath = fullfile(DestPath,'anatomy');
-    ProjectPath = fullfile(DestPath,'FwdProject');
-else
-    DestPath = fullfile(SimFolder,'Examples','Dataset');
-    AnatomyPath = fullfile(DestPath,'anatomy');
-    ProjectPath = fullfile(DestPath,'FwdProject');
+SimFolder = fileparts(mfilename('fullpath'));
+addpath(genpath(fileparts(SimFolder)));
+
+if isempty(getpref('EEGSSim')) % if the Setup function hasn't been run yet
+    EEGSourceSimSetUp();
+elseif  isempty(getpref('EEGSSim','EEGSSimPath')) % if the EEGSourceSim hasn't been added to the path
+    EEGSourceSimSetUp('EEGSourceSim',true);
 end
 
 %% Prepare the results folders
-FigPath = fullfile(SimFolder,'Examples','Figures');
-ResultPath = fullfile(SimFolder,'Examples','ResultData');
-if ~exist(fullfile(FigPath),'dir'),mkdir(FigPath);end
-if ~exist(fullfile(ResultPath),'dir'),mkdir(ResultPath);end
+FigPath = fullfile(SimFolder,'Figures');
+ResultPath = fullfile(SimFolder,'ResultData');
+if ~exist(FigPath,'dir'),mkdir(FigPath);end
+if ~exist(ResultPath,'dir'),mkdir(ResultPath);end
+
+%% Prepare Project path and ROIs
+if isempty(getpref('EEGSSim','AnatomyPath')) || isempty(getpref('EEGSSim','ProjectPath'))
+    EEGSourceSimSetUp('EEGSourceSim',false,'Dataset',true);
+end
+AnatomyPath = getpref('EEGSSim','AnatomyPath');
+ProjectPath = getpref('EEGSSim','ProjectPath');
 
 %% Select a subset of subjects
 SubIDs = {'nl-0011','nl-0014','nl-0037','nl-0043','nl-0045','nl-0046','nl-0047','nl-0048','skeri0003','skeri0004'};

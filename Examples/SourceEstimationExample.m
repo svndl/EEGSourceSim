@@ -10,7 +10,7 @@ addpath(genpath(fileparts(SimFolder)));
 
 if isempty(getpref('EEGSSim')) % if the Setup function hasn't been run yet
     EEGSourceSimSetUp();
-elseif ~exist('+mrC','dir') || isempty(getpref('EEGSSim','EEGSSimPath')) % if the EEGSourceSim hasn't been added to the path
+elseif  isempty(getpref('EEGSSim','EEGSSimPath')) % if the EEGSourceSim hasn't been added to the path
     EEGSourceSimSetUp('EEGSourceSim',true);
 end
 
