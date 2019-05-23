@@ -39,7 +39,7 @@ opt	= ParseArgs(varargin,...
     );
 
 % Roi Type, the names should be according to folders in (svdnl/anatomy/...)
-if ~strcmp(opt.roiType,'main')% THIS SHOUDL BE CORRECTED
+if ~strcmp(opt.roiType,'all')% THIS SHOUDL BE CORRECTED
     switch(opt.roiType)
         case{'func','functional'} 
             opt.roiType = 'functional';
@@ -55,6 +55,7 @@ if ~strcmp(opt.roiType,'main')% THIS SHOUDL BE CORRECTED
             error('unknown ROI type: %s',opt.roiType);
     end
 else
+    
 end
 
 
@@ -158,6 +159,8 @@ for s = 1:length(projectPath)
         SROICent = SROI.getAtlasROIs('benson',[0 opt.eccRange(1)]);
         SROISurr = SROI.getAtlasROIs('benson',opt.eccRange);
         SROICS = SROICent.mergROIs(SROISurr);
+    elseif strcmpi(opt.roiType,'all')
+        SROICS = SROI;
     else
         SROICS = SROI.getAtlasROIs(opt.roiType);
     end
