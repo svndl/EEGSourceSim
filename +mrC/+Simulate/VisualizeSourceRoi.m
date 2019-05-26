@@ -50,7 +50,7 @@ end
 %Fhandler= figure;
 
 patch('faces',faces,'vertices',vertices,'edgecolor','none','facecolor','interp','facevertexcdata',repmat([.7,.7,.7],size(vertices,1),1),...
-     'Diffusestrength',.45,'AmbientStrength',.3,'specularstrength',.1,'FaceAlpha',.50,'facelighting','gouraud');
+     'Diffusestrength',.45,'AmbientStrength',.3,'specularstrength',.1,'FaceAlpha',.10,'facelighting','gouraud');
 
 %colormap(cmap);
 
@@ -118,7 +118,7 @@ for i = 1:numel(RoiIdx)
     end
 end
 if exist('leg','var') && ~isempty(leg)
-    l = legend(leg,RoiList(RoiIdx(RoiLeg)),'location','west');
+    l = legend(leg,RoiList(RoiIdx(RoiLeg(isem~=1))),'location','west');
     set(gca,'fontsize',10)
     lp = get(l,'position');
     set(l,'position',[0.0134    0.2423    0.1384    0.5504])

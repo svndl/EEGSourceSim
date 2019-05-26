@@ -189,46 +189,22 @@ for s = 1:length(projectPath)
         
         %AUC
         if opt.doAUC
-            % load or calculate distance matrix
-%             if ~exist(fullfile(anatDir,subIDs{s},'Standard','meshes' ,'Distance_Euclidean.mat'),'file')
-%                 load(fullfile(anatDir,subIDs{s},'Standard','meshes','defaultCortex.mat'));
-%                 surfData = msh.data; surfData.VertexLR = msh.nVertexLR;
-%                 clear msh;
-%                 spat_dists = mrC.Simulate.CalculateSourceDistance(surfData,'Euclidean');
-%                 %save(fullfile(anatDir,subIDs{s},'Standard','meshes' ,'Distance_Euclidean.mat'),'spat_dists','-v7.3');
-%             else
-%                 load(fullfile(anatDir,subIDs{s},'Standard','meshes' ,'Distance_Euclidean.mat'))
-%             end
+
             for r = 1:size(roiChunk,2) % find far and close neighbors and compute AUC
                 Roi_verts = find(roiChunk(:,r)>0);
-%                 roisize = numel(Roi_verts);
-%                 rdists = min(spat_dists(Roi_verts,:));
-%                 [~, rdist_ind] = sort(rdists);
-%                 
-%                 Neibor_c = rdist_ind(roisize+1:2*roisize); % close neibours
-%                 Vals = ROISource{s}(r,:);Vals(1:2*roisize)=0;
-%                 [Val,Neibor_f] = sort(abs(Vals),'descend');% far neibors
-%                 N = 5;
-%                 Neibor_f = Neibor_f(1:roisize*N);
-%                 
+                
                 th = 1:-0.001:0;
                 for t = 1:numel(th)
                     TP(r,t) = sum(abs(ROISource{s}(r,Roi_verts))>=th(t));
                     FN(r,t) = sum(abs(ROISource{s}(r,Roi_verts))<th(t));
                     
-%                     FP_c = sum(abs(ROISource{s}(r,Neibor_c))>=th(t));
-%                     FP_f = sum(abs(ROISource{s}(r,Neibor_f))>=th(t));
                     FP(r,t) = sum(abs(ROISource{s}(r,roiChunk(:,r)==0))>=th(t));
                     TN(r,t) = sum(abs(ROISource{s}(r,roiChunk(:,r)==0))<th(t));
                     
-%                     TPR(r,t) = TP(r,t)./roisize;
-%                     FPR_c(r,t) = FP_c ./roisize;
-%                     FPR_f(r,t) = FP_f ./(roisize*N);
+
                 end
             end
-%             Errors{s}.TPR = TPR;
-%             Errors{s}.FPR_c = FPR_c;
-%             Errors{s}.FPR_f = FPR_f;
+
             Errors{s}.TP = TP;
             Errors{s}.FN = FN;
             Errors{s}.FP = FP;
