@@ -2,29 +2,21 @@
 % including three ROIs: V1d, V3d and TO1
 % Author: Elham Barzegaran, 1/2019
 
+%ADD required toolboxes
 clear; clc;
+
 SimFolder = fileparts(mfilename('fullpath'));
 addpath(genpath(fileparts(SimFolder)));
 
-if isempty(getpref('EEGSSim'))
+if isempty(getpref('EEGSSim')) % if the Setup function hasn't been run yet
     EEGSourceSimSetUp();
+elseif isempty(getpref('EEGSSim','EEGSSimPath')) % if the EEGSourceSim hasn't been added to the path
+    EEGSourceSimSetUp('EEGSourceSim',true,'Dataset',false);
 end
 
-% requires fieldtrip for WPLI calculation
-% If fieldtrip is missing give an error
-if ~isempty(getpref('EEGSSim','FTPath'))
-    addpath(genpath(getpref('EEGSSim','FTPath')));
-end
 
-if ~exist('ft_connectivity_wpli','file')
-    FTPath = uigetdir('.','Pick the Fieldtrip directory');
-    addpath(genpath(FTPath));
-    if ~exist('ft_connectivity_wpli','file')
-        disp('Download fieldtrip from here <a href="matlab:web(''http://www.fieldtriptoolbox.org/download.php'')">http://www.fieldtriptoolbox.org/download.php</a>')
-        error('You need FrieldTrip to run this script')
-    else
-        setpref('EEGSSim','FTPath',FTPath);
-    end
+if ~exist('ft_connectivity_wpli','file') % ask for the fieldtrip directory and save its path as preference
+    EEGSourceSimSetUp('EEGSourceSim',false,'Dataset',false,'FieldTrip',true);
 end
 
 %% Prepare the results folders
@@ -34,14 +26,11 @@ if ~exist(FigPath,'dir'),mkdir(FigPath);end
 if ~exist(ResultPath,'dir'),mkdir(ResultPath);end
 
 %% Prepare Project path and ROIs
-if ~isempty(getpref('EEGSSim','DatasetPath')) && exist(getpref('EEGSSim','DatasetPath'),'dir')
-    DestPath = getpref('EEGSSim','DatasetPath');
-else
-    DestPath = uigetdir('.','Pick the Dataset directory');
-    setenv('EEGSSim','DatasetPath',DestPath);
+if (~ispref('EEGSSim','AnatomyPath') || isempty(getpref('EEGSSim','AnatomyPath'))) || (~ispref('EEGSSim','ProjectPath') || isempty(getpref('EEGSSim','ProjectPath')))
+    EEGSourceSimSetUp('EEGSourceSim',false,'Dataset',true);
 end
-AnatomyPath = fullfile(DestPath,'anatomy');
-ProjectPath = fullfile(DestPath,'FwdProject');
+AnatomyPath = getpref('EEGSSim','AnatomyPath');
+ProjectPath = getpref('EEGSSim','ProjectPath');
 
 %% Load in inverses
 % Select subjects with the same inverse solution available % here we have 10 subjects
@@ -91,7 +80,7 @@ if ~exist(fullfile(ResultPath,'ConnectitvityExampleData.mat'),'file') || RedoSim
 %             'Save',false,'cndNum',1,'doSource' ,true,'signalSNRFreqBand',[5 15],...
 %             'doFwdProjectNoise',true,'RedoMixingMatrices',false,'nTrials',epNum);
         
-    save(fullfile(ResultPath,'ConnectitvityExampleData.mat'),'EEGData_noise','EEGData_signal_connect','EEGData_signal_unconnect','subIDs','masterList');
+    save(fullfile(ResultPath,'ConnectitvityExampleData.mat'),'EEGData_noise','EEGData_signal_connect','subIDs','masterList');
 else
     load(fullfile(ResultPath,'ConnectitvityExampleData.mat'));
 end
@@ -214,18 +203,7 @@ N = 2:2:10;
 %CondNames = {'Original','Reconstructed','Original','Reconstructed'};
 S1 = subplot(3,2,3);
 FOI = 1;
-%
-% for l =1:numel(dB_list)
-%     for cond = 1:2
-%         perc = squeeze(TPM(:,cond,FOI,l))./(squeeze(TPM(:,cond,FOI,l))+squeeze(FPM(:,cond,FOI,l)));
-%         perc(isnan(perc))=0;
-%         rec = squeeze(TPM(:,cond,FOI,l))/3;
-%         AUC(cond,l) = trapz(rec,perc);
-% 
-%     end
-% end
-% S = subplot(2,1,2);
-% B = bar(abs(AUC)','grouped');
+
 %%%%%%
 for l =1:numel(dB_list)
     for cond = 1:2
