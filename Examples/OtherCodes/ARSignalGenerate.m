@@ -12,6 +12,7 @@ function ARSignalGenerate(dorun,dosave)
     %% design connected network
     if dorun
         Net1 = BrainNetSim(3,300,.98);
+        tic
         % define net dynamics
         NS = 100000; % length of simulation: time points
         Net1 = Net1.AddNodeFreqs([1],{[8 20]});
@@ -28,7 +29,7 @@ function ARSignalGenerate(dorun,dosave)
         Name = 'SimSignals_connect_3Nodes-v2';
         plot_net_sig(Net1,TS_connect,0,[],Name);
         Net_connect = Net1;
-
+        toc
         %% design unconnected network
         Net2 = BrainNetSim(3,300,.98);
         % define net dynamics
@@ -76,8 +77,9 @@ function plot_net_sig(Net,TS,issave, FigPath,Name)
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     Fig1 = figure;
-    load(fullfile('ExampleData','ROI_colors_Poster.mat'));
+    %load(fullfile('ExampleData','ROI_colors_Poster.mat'));
     FS = 22;
+    Colors = brewermap(5,'dark2');
     for node = 1:Net.NodeNum
         % 
         TSP = TS(node,1:Net.SF*2);
