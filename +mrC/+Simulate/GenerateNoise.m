@@ -1,4 +1,4 @@
-function [pink_noise, alpha_noise,sensor_noise] = GenerateNoise(f_sampling, n_samples, n_nodes, NoiseParams, noise_mixing_data, spatial_normalization_type,fwdMatrix,doFwdProjection)
+function [pink_noise, alpha_noise,sensor_noise,noiset] = GenerateNoise(f_sampling, n_samples, n_nodes, NoiseParams, noise_mixing_data, spatial_normalization_type,fwdMatrix,doFwdProjection)
 % Syntax: [noise, pink_noise, pink_noise_uncoh, alpha_noise] = GenerateNoise(f_sampling, n_samples, n_nodes, mu, alpha_nodes, noise_mixing_data, spatial_normalization_type,fwdMatrix)
 % Desciption: GENERATE_NOISE Returns noise of unit variance as a combination of alpha
 %               activity (bandpass filtered white noise) and spatially coherent pink
@@ -22,13 +22,15 @@ function [pink_noise, alpha_noise,sensor_noise] = GenerateNoise(f_sampling, n_sa
 % OUTPUT:
     % noise: returns a matrix of size [n_samples,n_nodes]
     % pink_noise
-    % ..
+    % noiset: Time of generating each compoenent of noise
 
 % Author: Sebastian Bosse
 % Latest Modification: EB, 07/17/2018
 
 %% ---------------------------- generate alpha noise------------------------
     %  
+    %disp('Generating alpha noise')
+    alphat1 = clock;
     if ~exist('doFwdProjection','var')|| isempty(doFwdProjection)
         doFwdProjection = true;
     end
@@ -53,9 +55,12 @@ function [pink_noise, alpha_noise,sensor_noise] = GenerateNoise(f_sampling, n_sa
         error('%s is not implemented as spatial normalization method', spatial_normalization_type)
     end
     
-    
+    alphat2 = clock;
+    noiset.alpha = etime(alphat2,alphat1);
     
 %% -----------------------------generate pink noise------------------------
+    pinkt1 = clock;
+    %disp('generating pink noise')
     pink_noise = GetPinkNoise(n_samples, n_nodes);
     % impose coherence on pink noise
     if strcmp(noise_mixing_data.mixing_type,'coh') % just in case we want to add other mixing mechanisms
@@ -119,11 +124,17 @@ function [pink_noise, alpha_noise,sensor_noise] = GenerateNoise(f_sampling, n_sa
     else
         error('%s is not implemented as spatial normalization method', spatial_normalization_type)
     end
-
+    pinkt2 = clock;
+    noiset.pink = etime(pinkt2,pinkt1);
+%% Generating sensor noise
+   % disp('Generating sensor noise')
+    whitet1 = clock;
     sensor_noise = randn(n_samples, size(fwdMatrix,1)) ;
     sensor_noise = sensor_noise/norm(sensor_noise,'fro'); 
+    whitet2 = clock;
     
-
+    noiset.white = etime(whitet2,whitet1);
+    
 %% ---------------------------show resulting noise-------------------------
     if false % just to take a look at the noise components, averaged over all channels for power spectrum
         f = [-0.5:1/n_samples:0.5-1/n_samples]*f_sampling; % frequncy range

@@ -1,4 +1,4 @@
-function [EEGData,EEGAxx,EEGData_signal,EEGAxx_signal,sourceDataOrigin,masterList,subIDs,allSubjFwdMatrices,allSubjRois] = SimulateProject(projectPath,varargin)
+function [EEGData,EEGAxx,EEGData_signal,EEGAxx_signal,sourceDataOrigin,masterList,subIDs,allSubjFwdMatrices,allSubjRois,Times] = SimulateProject(projectPath,varargin)
     
     % Syntax: [EEGData,EEGAxx,sourceDataOrigin,masterList,subIDs] = SimulateProject(projectPath,varargin)
     % Description:	This function gets the path for a mrc project and simulate
@@ -276,7 +276,6 @@ for s = 1:length(projectPath)
     if isempty(opt.rois)
         % Initialized only for the first subject, then use the same for the rest
         RROI = randperm(Roi{1}.ROINum,seedNum);
-        %BE careful about this part %%!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         opt.rois = cellfun(@(x) x.selectROIs(RROI),Roi,'UniformOutput',false);% Control for consistency
         [~,M] = max(cellfun(@(x) x.ROINum,opt.rois));
         disp (['Number of ROIs :' num2str(opt.rois{M}.ROINum)]);
@@ -287,7 +286,7 @@ for s = 1:length(projectPath)
 
 %-------------------Generate noise: based on Sebastian's code------------------
     
-    % -----Noise default parameters-----
+    % -----------------------Noise default parameters-----------------------
     NS = size(opt.signalArray,1); % Number of time samples
     Noise = opt.NoiseParams;
     Noisefield = fieldnames(Noise);
@@ -299,20 +298,20 @@ for s = 1:length(projectPath)
     if ~any(strcmp(Noisefield, 'Noise.mixing_type_pink_noise')), Noise.mixing_type_pink_noise = 'coh' ;end % coherent mixing of pink noise
     if ~any(strcmp(Noisefield, 'alpha_nodes')), Noise.alpha_nodes = 'all';end % for now I set it to all visual areas, later I can define ROIs for it
 
-    % -----Determine alpha nodes: This is temporary?-----
+    % --------------Determine alpha nodes: This is temporary?---------------
     %alphaRoiDir = fullfile(anatDir,subIDs{s},'Standard','meshes','wang_ROIs');% alpha noise is always placed in wang ROIs
         alpharoiChunk = alphaRoi.ROI2mat(length(fwdMatrix));
     if strcmp(Noise.alpha_nodes,'all'), Noise.AlphaSrc = find(sum(alpharoiChunk,2)); end % for now: all nodes will show the same alpha power over whole visual cortex  
 
     disp ('Generating noise signal ...');
-    
-    % -----Calculate source distance matrix-----
+    tcoh1 = clock;
+    % ------------------Calculate source distance matrix--------------------
     load(fullfile(anatDir,subIDs{s},'Standard','meshes','defaultCortex.mat'));
     surfData = msh.data; surfData.VertexLR = msh.nVertexLR;
     clear msh;
     
     
-    % -----This part calculate mixing matrix for coherent noise-----
+    % ---------This part calculate mixing matrix for coherent noise---------
     if strcmp(Noise.mixing_type_pink_noise,'coh')
         mixDir = fullfile(anatDir,subIDs{s},'Standard','meshes',['noise_mixing_data_' Noise.distanceType '.mat']);
         
@@ -326,10 +325,9 @@ for s = 1:length(projectPath)
             load(mixDir,'noise_mixing_data');
         end
     end
-    
     band_names = fieldnames(noise_mixing_data.matrices) ;
     nSources = size(noise_mixing_data.matrices.(band_names{1}),2);
-    % ----- Generate noise-----
+    % ---------------------Generate decay func of Coherence------------------
     % calculate coherence in channel space to reduced computational effort
     % in every trial
     for band_idx = 1:length(band_names)
@@ -348,23 +346,32 @@ for s = 1:length(projectPath)
         end
         noise_mixing_data.matrices_chanSpace.(this_band_name) = C_chan;
     end
+    tcoh2 = clock;
+    Times.Coh = etime(tcoh2,tcoh1);
     
+%------------------------Generate Noises-------------------------------------
     %noise = zeros(NS, size(fwdMatrix,1), opt.nTrials) ;
     for trial_id =1:opt.nTrials 
         disp(['Trial # ' num2str(trial_id)])
-        [PinkNoise(:,:,trial_id),AlphaNoise(:,:,trial_id),SensorNoise(:,:,trial_id)] = mrC.Simulate.GenerateNoise(opt.signalsf, NS, nSources, Noise, noise_mixing_data,Noise.spatial_normalization_type,fwdMatrix,opt.doFwdProjectNoise);   
+        [PinkNoise(:,:,trial_id),AlphaNoise(:,:,trial_id),SensorNoise(:,:,trial_id),noiset] = mrC.Simulate.GenerateNoise(opt.signalsf, NS, nSources, Noise, noise_mixing_data,Noise.spatial_normalization_type,fwdMatrix,opt.doFwdProjectNoise);   
+        Times.noiset{trial_id} = noiset;
     end
-
-[noise_sig,Noise,SensorNoise] = mrC.Simulate.FitNoise(opt.signalsf, NS, Noise, PinkNoise,AlphaNoise, SensorNoise,fwdMatrix,opt.doFwdProjectNoise,opt.OptimizeNoiseParam);   
-
+%-----------------------Fit noise params to REC and REO----------------------
+        tfit1 = clock;
+    [noise_sig,Noise,SensorNoise] = mrC.Simulate.FitNoise(opt.signalsf, NS, Noise, PinkNoise,AlphaNoise, SensorNoise,fwdMatrix,opt.doFwdProjectNoise,opt.OptimizeNoiseParam);   
+        tfit2 = clock;
+    Times.FitNoise= etime(tfit2,tfit1);
+    
 %------------------------ADD THE SIGNAL IN THE ROIs--------------------------
     
     disp('Generating EEG signal ...'); 
- 
+        tproj1= clock;
     subInd = strcmp(cellfun(@(x) x.subID,opt.rois,'UniformOutput',false),subIDs{s});
     allSubjRois{s} = opt.rois{find(subInd)} ;
     [EEGData{s},EEGData_signal{s},sourceData] = mrC.Simulate.SrcSigMtx(opt.rois{find(subInd)},fwdMatrix,surfData,opt,noise_sig,SensorNoise,Noise.lambda,'active_nodes');%Noise.spatial_normalization_type);% ROIsig % NoiseParams
-       
+        tproj2 = clock; 
+    Times.Projection = etime(tproj2,tproj1);
+    
     if (opt.nTrials==1) || (opt.originsource) % this is to avoid memory problem
         sourceDataOrigin{s} = sourceData;
     else
@@ -373,11 +380,13 @@ for s = 1:length(projectPath)
     
     %visualizeSource(sourceDataOrigin{s}, surfData,opt.signalsf,0)
     %% convert EEG to axx format
+    tAxx1 = clock;
     if strcmp(opt.signalType,'SSVEP')
         EEGAxx{s}= mrC.Simulate.CreateAxx(EEGData{s},opt);% Converts the simulated signal to Axx format  
         EEGAxx_signal{s}= mrC.Simulate.CreateAxx(EEGData_signal{s},opt);% Converts the simulated signal to Axx format  
     end
-    
+    tAxx2 = clock;
+    Times.Axx = etime(tAxx2,tAxx1);
 %% write output to file 
     
     if (opt.Save)

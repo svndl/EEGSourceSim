@@ -37,11 +37,6 @@ SubIDs = {'nl-0011','nl-0014','nl-0037','nl-0043','nl-0045','nl-0046','nl-0047',
 Wangs = cellfun(@(x) {x.getAtlasROIs('wang')},RoiList);
 Wangnums = cellfun(@(x) x.ROINum,Wangs)>0;
 
-% define noise properties
-Noise.mu.pink=2;
-Noise.mu.alpha=2;
-Noise.mu.sensor=2;
-%Noise.distanceType = 'geodesic';
 
 % define locations of sources
 %--------------------------Cond1: V2d_R -----------------------------

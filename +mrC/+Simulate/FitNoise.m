@@ -1,10 +1,11 @@
 function [noise, NoiseParams,sensor_noise] = FitNoise(f_sampling, n_samples,NoiseParams, pink_noise,alpha_noise, sensor_noise,fwdMatrix,doFwdProjection,optimizeParam)
 % Fit the Noise-to-Noise ratio accroding to the real resting EEG data
-
+% tic
+disp('Fitting the noise parameters')
 %% --------------------combine different types of noise--------------------
 if optimizeParam
     
-    % I do not know why spatial coherent function destroys the shape of 1/f
+    % 
     % spectrum
     if (n_samples/f_sampling)>1
         load('REC_REO_Averagre_Specs_2sec');
@@ -93,7 +94,7 @@ end
 for tr = 1:size(noise,3)
     noise(:,:,tr) = noise(:,:,tr)/norm(noise(:,:,tr),'fro') ; % in this case be careful about adding sensor noise later %%%%%%%%%%%%%
 end    
-    
+%toc    
 %% plot the noises
 
 if false
