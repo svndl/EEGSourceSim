@@ -4,8 +4,7 @@ function [CrossTalk,Errors,ROISource,ScalpData,LIST,subIDs] = ResolutionMatrices
     % EEG with activity (seed signal as input) in specific ROIs (input),
     % and pink and alpha noises (noise parameters can be set as input)
     %
-    % Syntax:	[EEGData,EEGAxx,sourceDataOrigin,masterList,subIDs] = mrC.RoiDemo(projectPath,varargin)
-    % 
+    
 %--------------------------------------------------------------------------    
 % INPUT:
   % projectPath: a cell string, indicating a  path to mrCurrent project
@@ -19,7 +18,7 @@ function [CrossTalk,Errors,ROISource,ScalpData,LIST,subIDs] = ResolutionMatrices
     %
 %--------------------------------------------------------------------------
  % Latest modification: Elham Barzegaran, 06.13.2018
- % NOTE: This function is a part of mrC toolboxs
+ % NOTE: This function is a part of ESSim toolboxs
 
 %% =====================Prepare input variables============================
  
@@ -92,7 +91,7 @@ if ~isempty(opt.subSelect)
 end
 
 if isempty(opt.rois)
-    Rois = mrC.Simulate.GetRoiClass(projectPathfold);
+    Rois = ESSim.Simulate.GetRoiClass(projectPathfold);
 else
     Rois = opt.rois;
 end
@@ -216,15 +215,15 @@ for s = 1:length(projectPath)
         INVname = opt.inverse; ind = strfind(INVname,'_');
         if opt.plotting ==1
             figure,
-            subplot(2,2,1),mrC.Simulate.VisualizeSourceData(subIDs{s},roiChunk(:,1),anatDir,jmaColors('coolhot')); 
+            subplot(2,2,1),ESSim.Simulate.VisualizeSourceData(subIDs{s},roiChunk(:,1),anatDir,jmaColors('coolhot')); 
             caxis([-1 1]);title(['V1d 0-2 ' subIDs{s} ' Original']);
-            subplot(2,2,2), mrC.Simulate.VisualizeSourceData(subIDs{s},ROISource{s}(1,:),anatDir,jmaColors('coolhot')); 
+            subplot(2,2,2), ESSim.Simulate.VisualizeSourceData(subIDs{s},ROISource{s}(1,:),anatDir,jmaColors('coolhot')); 
             Data = ROISource{s}(1,:);
             caxis([-max(Data) max(Data)]);title(['V1d 0-2 ' subIDs{s} ' ' INVname(ind(end)+1:end)]);
 
-            subplot(2,2,3),mrC.Simulate.VisualizeSourceData(subIDs{s},roiChunk(:,13),anatDir,jmaColors('coolhot')); 
+            subplot(2,2,3),ESSim.Simulate.VisualizeSourceData(subIDs{s},roiChunk(:,13),anatDir,jmaColors('coolhot')); 
             caxis([-1 1]);title(['V1d 2-10 ' subIDs{s} ' Original']);
-            subplot(2,2,4), mrC.Simulate.VisualizeSourceData(subIDs{s},ROISource{s}(13,:),anatDir,jmaColors('coolhot')); 
+            subplot(2,2,4), ESSim.Simulate.VisualizeSourceData(subIDs{s},ROISource{s}(13,:),anatDir,jmaColors('coolhot')); 
             Data = ROISource{s}(13,:);
             caxis([-max(Data) max(Data)]);title(['V1d 2-10 ' subIDs{s} ' ' INVname(ind(end)+1:end)]);
         end

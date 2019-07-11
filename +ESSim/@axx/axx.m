@@ -183,7 +183,7 @@ classdef axx
   methods(Static)
       function obj = loadobj(s)
             if isstruct(s)
-                newObj = mrC.axx() ;
+                newObj = ESSim.axx() ;
                 newObj.cndNmb = s.cndNmb ;
                 newObj.nTrl = s.nTrl ;
 %                 newObj.set.nT(s.nT) ;

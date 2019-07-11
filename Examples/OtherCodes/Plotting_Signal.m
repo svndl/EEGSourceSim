@@ -2,7 +2,7 @@ clear; clc;
 fs = 22;
 %%
 % SSVEP signal can be simulated using ModelSourceSignal with defined parameters, otherwise Roisignal function will generate a default two source SSVEP signal 
-[outSignal, FundFreq, SF]= mrC.Simulate.ModelSeedSignal('signalType','SSVEP','signalFreq',[8 20],'signalHarmonic',{[2,0,0],[1,0,0]},'signalPhase',{[.1,0,0],[0,.3,0]});
+[outSignal, FundFreq, SF]= ESSim.Simulate.ModelSeedSignal('signalType','SSVEP','signalFreq',[8 20],'signalHarmonic',{[2,0,0],[1,0,0]},'signalPhase',{[.1,0,0],[0,.3,0]});
 FIG1 = figure;
 [Z,f] = pwelch(mean(outSignal,2),SF,[],[],SF);
 subplot(1,2,1),plot(mean(outSignal(1:100,:),2),'linewidth',2,'color','k');

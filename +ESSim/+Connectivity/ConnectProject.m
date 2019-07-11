@@ -1,8 +1,7 @@
 function [WPLI] = ConnectProject(ProjectPath,varargin)
 
 % INPUTS
-    % projectPath: Cell array of strings, indicating a list of paths to
-    % mrCurrent project folders of individual subjects, these projects
+    % pforward project folders of individual subjects, these projects
     % should include "AXX TRIALS" matlab exported files
 
 %% Set default values and folders
@@ -24,8 +23,8 @@ for s = 1:length(AxxPaths)
     disp(['Reading Subject #' num2str(s) ' data']);
     for cond = 1:nCnd
         AxxStrct = load(fullfile(AxxPaths{s},['Axx_c0' sprintf('%02d',cond) '_trials']));
-        EEGAxx{s,cond} = mrC.axx(AxxStrct,0);
-        [wpli{s,cond}, csd{s,cond}] = mrC.Connectivity.ConnectAxx(EEGAxx{s,cond});
+        EEGAxx{s,cond} = ESSim.axx(AxxStrct,0);
+        [wpli{s,cond}, csd{s,cond}] = ESSim.Connectivity.ConnectAxx(EEGAxx{s,cond});
     end
 end
 

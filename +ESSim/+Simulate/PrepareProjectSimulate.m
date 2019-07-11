@@ -131,7 +131,7 @@ for s = 1:length(projectPath)
     if opt.CopyROIClass % copies only the ROI Class for the subjects
         roiDirClass = fullfile(roiDir,'ROIsClass.mat');
         if ~exist(roiDirClass,'file')
-            Roitemp = mrC.ROIs();
+            Roitemp = ESSim.ROIs();
             Roitemp = Roitemp.loadROIs(subIDs{s});
         end
         copyfile(roiDirClass,roiDirDest);

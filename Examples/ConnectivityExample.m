@@ -34,12 +34,12 @@ ProjectPath = getpref('EEGSSim','ProjectPath');
 
 %% Load in inverses
 % Select subjects with the same inverse solution available % here we have 10 subjects
-[Inverse,subIDs_Inverse] = mrC.Simulate.ReadInverses(ProjectPath,'mneInv_bem_gcv_regu_TWindow_0_1334_wangROIsCorr.inv');
+[Inverse,subIDs_Inverse] = ESSim.Simulate.ReadInverses(ProjectPath,'mneInv_bem_gcv_regu_TWindow_0_1334_wangROIsCorr.inv');
 subIDs_Inverse = subIDs_Inverse(cellfun(@(x) ~isempty(x),Inverse));
 Inverse = Inverse(cellfun(@(x) ~isempty(x),Inverse));
 
 %% Load in ROIs
-[RoiList,subIDs] = mrC.Simulate.GetRoiClass(ProjectPath,AnatomyPath,subIDs_Inverse);% 13 subjects with Wang atlab 
+[RoiList,subIDs] = ESSim.Simulate.GetRoiClass(ProjectPath,AnatomyPath,subIDs_Inverse);% 13 subjects with Wang atlab 
 V1_RoiList = cellfun(@(x) {x.searchROIs('V1d','wang','L')},RoiList);
 V3_RoiList = cellfun(@(x) {x.searchROIs('V3d','wang','L')},RoiList);
 TO1_RoiList = cellfun(@(x) {x.searchROIs('TO1','wang','L')},RoiList);
@@ -62,14 +62,14 @@ TS_all_UC = TS_unconnect(1:3,1:epNum*eplength);
 
 %% Simulating network
 
-RedoSimulateEEG = 0; % if simulateEEG = 0, then it loads in the data otherwise it does the simulation using mrC.SimulateProject functions
+RedoSimulateEEG = 0; % if simulateEEG = 0, then it loads in the data otherwise it does the simulation using ESSim.SimulateProject functions
 
 ModeNames= {'connect','unconnect'};
 Noise.lambda = 0;
 if ~exist(fullfile(ResultPath,'ConnectitvityExampleData.mat'),'file') || RedoSimulateEEG
         SignalArray = reshape(TS_all(:,1:epNum*eplength)',eplength,15,size(TS_all,1));
         
-        [EEGData_noise,~,EEGData_signal_connect,~,~,masterList,subIDs] = mrC.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,...
+        [EEGData_noise,~,EEGData_signal_connect,~,~,masterList,subIDs] = ESSim.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,...
             'subSelect',subIDs,'signalArray',SignalArray,'signalsf',SF,'NoiseParams',Noise,'rois',All_RoiList,...
             'Save',false,'cndNum',1,'doSource' ,true,'signalSNRFreqBand',[5 15],...
             'doFwdProjectNoise',true,'RedoMixingMatrices',false,'nTrials',epNum);
@@ -107,7 +107,7 @@ if true
             for tr = 1:epNum
                 ROIData{subj_idx}(:,:,tr) = EEGData_C{subj_idx}(:,:,tr)*Inverse{subj_idx}*Wang_Chunks{subj_idx}./repmat(sum(Wang_Chunks{subj_idx}), [eplength 1]);
             end
-            [CSD_C{subj_idx,nLambda_idx},COH_C{subj_idx,nLambda_idx}] = mrC.Connectivity.EEGcpsd(ROIData{subj_idx} ,'SF',SF,'Type','fft','winLen',300,'Nov',150);
+            [CSD_C{subj_idx,nLambda_idx},COH_C{subj_idx,nLambda_idx}] = ESSim.Connectivity.EEGcpsd(ROIData{subj_idx} ,'SF',SF,'Type','fft','winLen',300,'Nov',150);
             %EEGData_NC{subj_idx} = sqrt(lambda/(1+lambda))*EEGData_signal_unconnect{subj_idx} + sqrt(1/(1+lambda)) * EEGData_noise{subj_idx} ;
         end
     end

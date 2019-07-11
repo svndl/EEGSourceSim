@@ -2,7 +2,7 @@ function PlotSSVEPonEGI(EEGAxx, SignalType, SavePath, SaveName,signalFF,RoiList,
 
 
 % INPUT:
-    % EEGAXX: is the data that mrC.Simulate.SimulateProject returns
+    % EEGAXX: is the data that ESSim.Simulate.SimulateProject returns
     % SignalType: Determines if the plots are in phase or amplitude
                 % [Amplitude]/Phase
                 
@@ -36,9 +36,9 @@ end
             SDEEG{s} = EEGAxx{s}.Cos+(EEGAxx{s}.Sin*1i);%EEGAxx{s}.Amp;% it is important which n is considered for fft
             if strcmp(subjects,'Individuals'),
                 if strcmp(SignalType,'Amplitude')
-                    H = mrC.Simulate.PlotEEG(abs(SDEEG{s}),freq,SavePath,subIDs{s},RoiList,signalFF,SignalType,[],Mode);% Plot individuals
+                    H = ESSim.Simulate.PlotEEG(abs(SDEEG{s}),freq,SavePath,subIDs{s},RoiList,signalFF,SignalType,[],Mode);% Plot individuals
                 elseif strcmp(SignalType,'Phase')
-                    H = mrC.Simulate.PlotEEG(wrapTo2Pi(angle(SDEEG{s})),freq,SavePath,subIDs{s},RoiList,signalFF,SignalType,[],Mode);% Plot individuals
+                    H = ESSim.Simulate.PlotEEG(wrapTo2Pi(angle(SDEEG{s})),freq,SavePath,subIDs{s},RoiList,signalFF,SignalType,[],Mode);% Plot individuals
                 end
                 if ~isempty(H)
                     set(H,'PaperPositionMode','manual');
@@ -54,10 +54,10 @@ end
     MSDEEG = mean(cat(4,SDEEG{:}),4);
     
     if strcmp(SignalType,'Amplitude')
-        h = mrC.Simulate.PlotEEG(abs(MSDEEG),freq,SavePath,'average over all  ',RoiList,signalFF,SignalType,[],Mode);
+        h = ESSim.Simulate.PlotEEG(abs(MSDEEG),freq,SavePath,'average over all  ',RoiList,signalFF,SignalType,[],Mode);
     
     elseif strcmp(SignalType,'Phase')    
-        h = mrC.Simulate.PlotEEG(wrapTo2Pi(angle(MSDEEG)),freq,SavePath,'average over all  ',RoiList,signalFF,SignalType,[],Mode);
+        h = ESSim.Simulate.PlotEEG(wrapTo2Pi(angle(MSDEEG)),freq,SavePath,'average over all  ',RoiList,signalFF,SignalType,[],Mode);
         
     end
     if ~isempty(h)

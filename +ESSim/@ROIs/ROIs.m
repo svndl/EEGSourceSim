@@ -1,5 +1,5 @@
 classdef ROIs
-    % This class defines a data type for storing and retrieving ROIs in mrC. 
+    % This class defines a data type for storing and retrieving ROIs. 
     
     %----------------------------------------------------------------------
     % Author: Elham Barzegaran, 06/14/2018
@@ -158,7 +158,7 @@ classdef ROIs
                         warning('Benson ROIs with eccentricity [0 80] is not found');
                         display('Generating Benson ROIs with  eccentricity [0 80]');
                         mrC.RoiFromSuma(obj.subID,'mode','benson','plotting',false,'ecc_range',[0 80]);
-                        obj = mrC.ROIs(obj.subID);
+                        obj = ESSim.ROIs(obj.subID);
                         obj = obj.getAtlasROIs('benson');
 
                     end
@@ -358,7 +358,7 @@ classdef ROIs
             if exist(fullfile(roiDir,'ROIsClass.mat'),'file')
                 load(fullfile(roiDir,'ROIsClass.mat'),'obj');
             else
-                obj = mrC.ROIs(subID,anatDir);
+                obj = ESSim.ROIs(subID,anatDir);
                 obj.saveROIs(anatDir);
             end
         end
@@ -371,7 +371,7 @@ classdef ROIs
     methods(Static)
       function obj = loadobj(s)
             if isstruct(s)
-                newObj = mrC.ROIs() ;
+                newObj = ESSim.ROIs() ;
                 newObj.ROIList = s.ROIList ;
                 newObj.subID = s.subID ;
                 obj = newObj ;

@@ -64,7 +64,7 @@ if size(data,1) == 128
     tEpos = load('defaultFlatNet.mat');
     tEpos = [ tEpos.xy, zeros(128,1) ];
     
-    tEGIfaces = mrC.Simulate.EGInetFaces( false );
+    tEGIfaces = ESSim.Simulate.EGInetFaces( false );
     
     nChan = 128;
 elseif size(data,1) == 256
@@ -72,13 +72,13 @@ elseif size(data,1) == 256
     tEpos = load('defaultFlatNet256.mat');
     tEpos = [ tEpos.xy, zeros(256,1) ];
     
-    tEGIfaces = mrC.EGInetFaces256( false );
+    tEGIfaces = ESSim.EGInetFaces256( false );
     nChan = 256;
 elseif size(data,1) == 32
     tEpos = load('defaultFlatNet32.mat');
     tEpos = [ tEpos.xy, zeros(32,1) ];
     
-    tEGIfaces = mrC.EGInetFaces32( false );
+    tEGIfaces = ESSim.EGInetFaces32( false );
     
     nChan = 32;
     

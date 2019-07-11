@@ -28,12 +28,12 @@ AnatomyPath = getpref('EEGSSim','AnatomyPath');
 ProjectPath = getpref('EEGSSim','ProjectPath');
 
 %% Select subjects with inverses matrices
-[Inverse,subIDs_Inverse] = mrC.Simulate.ReadInverses(ProjectPath,'mneInv_bem_gcv_regu_TWindow_0_1334_wangROIsCorr.inv');
+[Inverse,subIDs_Inverse] = ESSim.Simulate.ReadInverses(ProjectPath,'mneInv_bem_gcv_regu_TWindow_0_1334_wangROIsCorr.inv');
 subIDs_Inverse = subIDs_Inverse(cellfun(@(x) ~isempty(x),Inverse));
 clear Inverse;
 
 % Pre-select ROIs
-[RoiList,subIDs] = mrC.Simulate.GetRoiClass(ProjectPath,AnatomyPath,subIDs_Inverse);% 13 subjects with Wang atlab 
+[RoiList,subIDs] = ESSim.Simulate.GetRoiClass(ProjectPath,AnatomyPath,subIDs_Inverse);% 13 subjects with Wang atlab 
 Wang_RoiList = cellfun(@(x) {x.getAtlasROIs('wang')},RoiList);
 Inds = 1:50;Inds([1:14 17:24 27:28])= [];
 Wang_RoiList = cellfun(@(x) {x.selectROIs(Inds)},Wang_RoiList);
@@ -45,10 +45,10 @@ FilePath = fullfile(ResultPath,'LocalizationExampleData_Paper.mat');
 do_new_data_generation = false;
 
 if ~exist(FilePath,'file') || do_new_data_generation
-    [CrossTalk1,Error1,ROISource1,~,~,~] = mrC.Simulate.ResolutionMatrices(ProjectPath,'subSelect',subIDs,...
+    [CrossTalk1,Error1,ROISource1,~,~,~] = ESSim.Simulate.ResolutionMatrices(ProjectPath,'subSelect',subIDs,...
         'rois',Wang_RoiList,'roiType','wang','anatomyPath',AnatomyPath,'doAUC',true,'inverse','mneInv_bem_snr_100.inv');
     
-    [CrossTalk2,Error2,ROISource2,ScalpData,LIST,subIDs] = mrC.Simulate.ResolutionMatrices(ProjectPath,'subSelect',subIDs,...
+    [CrossTalk2,Error2,ROISource2,ScalpData,LIST,subIDs] = ESSim.Simulate.ResolutionMatrices(ProjectPath,'subSelect',subIDs,...
         'rois',Wang_RoiList,'roiType','wang','anatomyPath',AnatomyPath,'doAUC',true,'inverse','mneInv_bem_gcv_regu_TWindow_0_1334_wangROIsCorr.inv');
     save(FilePath,'CrossTalk1','Error1','ROISource1','CrossTalk2','Error2','ROISource2','ScalpData','LIST','subIDs');
 else
@@ -83,9 +83,9 @@ FS = 11;
 INDs = Inds(Ind2);
 
 if ~BrainFromSuma
-    S1 = subplot(2,3,1); mrC.Simulate.VisualizeSourceRoi2('nl-0048',[AnatomyPath '/'],'wang',INDs,'anterior','B',CC,[]);
+    S1 = subplot(2,3,1); ESSim.Simulate.VisualizeSourceRoi2('nl-0048',[AnatomyPath '/'],'wang',INDs,'anterior','B',CC,[]);
     set(S1,'position',get(S1,'position')+[-.025 -.05 .05 .05]);
-    subplot(2,3,4), mrC.Simulate.VisualizeSourceRoi2('nl-0048',[AnatomyPath '/'],'wang',INDs,'ventral','B',CC,1:2:numel(INDs));
+    subplot(2,3,4), ESSim.Simulate.VisualizeSourceRoi2('nl-0048',[AnatomyPath '/'],'wang',INDs,'ventral','B',CC,1:2:numel(INDs));
 else
     xr = .1;xo = 0.05;
     yr = .1;yo = 0.04;

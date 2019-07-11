@@ -262,19 +262,19 @@ end
         sp1 = subplot(1,2,1);delete(sp1);
         sp1 = subplot(1,2,1);
         if strcmpi(Mode,'Interact') && ~strcmpi(space,'comp'),
-            mrC.plotOnEgi(ASDEEG(FOI,:)',colorbarLimits,false,EOI,false,Probs); 
+            ESSim.Simulate.plotOnEgi(ASDEEG(FOI,:)',colorbarLimits,false,EOI,false,Probs); 
         else
             if strcmpi(space,'comp') 
                 if weight==1
                     conMap = jmaColors('hotcortex');
-                    mrC.plotOnEgi(A(:,EOI)*ASDEEG(FOI,EOI)',colorbarLimits,false,[],false,Probs); 
+                    ESSim.Simulate.plotOnEgi(A(:,EOI)*ASDEEG(FOI,EOI)',colorbarLimits,false,[],false,Probs); 
 
                 else
-                    mrC.plotOnEgi(W(:,EOI),[-max(abs(W(:,EOI))) max(abs(W(:,EOI)))],false,[],false,Probs);
+                    ESSim.Simulate.plotOnEgi(W(:,EOI),[-max(abs(W(:,EOI))) max(abs(W(:,EOI)))],false,[],false,Probs);
                     conMap = jmaColors('coolhotcortex');
                 end
             else
-                mrC.plotOnEgi(ASDEEG(FOI,:)',colorbarLimits,false,[],false,Probs); 
+                ESSim.Simulate.plotOnEgi(ASDEEG(FOI,:)',colorbarLimits,false,[],false,Probs); 
             end
         end
         title(['Frequency = ' num2str(Freq(FOI)) 'Hz'],'fontsize',FS);

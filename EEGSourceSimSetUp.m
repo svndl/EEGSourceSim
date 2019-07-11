@@ -15,7 +15,7 @@ opt	= ParseArgs(varargin,...
     
     %% EEGSourceSim, path
     if opt.EEGSourceSim
-        if ~exist('+mrC','dir') || isempty(getpref('EEGSSim','EEGSSimPath'))
+        if ~exist('+ESSim','dir') || isempty(getpref('EEGSSim','EEGSSimPath'))
             disp('Pick the EEGSourceSim directory');
             EEGSourceSimPath = uigetdir(fileparts(mfilename('fullpath')),'Pick the EEGSourceSim directory');
             if EEGSourceSimPath~=0

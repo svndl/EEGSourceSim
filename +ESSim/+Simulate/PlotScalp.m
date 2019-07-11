@@ -10,7 +10,7 @@ function PlotScalp(pattern,title_text)
     conMap = jmaColors('coolhotcortex');
     Probs{1} = {'facecolor','none','edgecolor','none','markersize',10,'marker','o','markerfacecolor','g' ,'MarkerEdgeColor','k','LineWidth',.5};% plotting parameters
 
-    mrC.Simulate.plotOnEgi(pattern,colorbarLimits,false,[],false,Probs); 
+    ESSim.Simulate.plotOnEgi(pattern,colorbarLimits,false,[],false,Probs); 
 
     if ~isempty(title_text)
         title(title_text)

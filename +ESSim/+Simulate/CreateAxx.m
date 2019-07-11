@@ -5,14 +5,14 @@ function EEGAxx= CreateAxx(EEGData,opt)
     % EEGDATA: the output of SrcSigMtx function
     
 % OUTPUTS:
-    % EEGAxx: a mrC.Axx structure containing EEGData
+    % EEGAxx: a ESSim.Axx structure containing EEGData
 %==========================================================
 
 % Author: Elham Barzegaran, 3/26/2018
 % modified by sebastian bosse 8/4/2018
 
 %%
-EEGAxx = mrC.axx();
+EEGAxx = ESSim.axx();
 
 % Determine the window length for FFT (WLF), and window length in time domain (WLT)
 if ~isempty(opt.signalFF)

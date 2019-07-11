@@ -33,7 +33,7 @@ SubIDs = {'nl-0011','nl-0014','nl-0037','nl-0043','nl-0045','nl-0046','nl-0047',
 
 %%
 % Pre-select ROIs
-[RoiList,subIDs] = mrC.Simulate.GetRoiClass(ProjectPath,AnatomyPath,SubIDs);% 13 subjects with Wang atlab 
+[RoiList,subIDs] = ESSim.Simulate.GetRoiClass(ProjectPath,AnatomyPath,SubIDs);% 13 subjects with Wang atlab 
 Wangs = cellfun(@(x) {x.getAtlasROIs('wang')},RoiList);
 Wangnums = cellfun(@(x) x.ROINum,Wangs)>0;
 
@@ -51,8 +51,8 @@ generated_date_filename = 'data_for_spatial_filter_test2_2source_allSubj.mat';
 if ~exist(generated_date_filename,'file') || do_new_data_generation
     n_trials = 200;
     Noise.lambda = 0 ; % noise only
-    [outSignal, FundFreq, SF]= mrC.Simulate.ModelSeedSignal('signalType','SSVEP','ns',200,'signalFreq',[2 2],'harmonicAmps',{[2,0,1.5,0],[1,0, 1,0]},'harmonicPhases',{[0,0,0,0],[pi/2,0,pi/2,0]},'reliableAmps',[1,0],'nTrials',n_trials);
-    [EEGData_noise,EEGAxx_noise,EEGData_signal,EEGAxx_signal,~,masterList,subIDs,allSubjFwdMatrices,allSubjRois] = mrC.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,...
+    [outSignal, FundFreq, SF]= ESSim.Simulate.ModelSeedSignal('signalType','SSVEP','ns',200,'signalFreq',[2 2],'harmonicAmps',{[2,0,1.5,0],[1,0, 1,0]},'harmonicPhases',{[0,0,0,0],[pi/2,0,pi/2,0]},'reliableAmps',[1,0],'nTrials',n_trials);
+    [EEGData_noise,EEGAxx_noise,EEGData_signal,EEGAxx_signal,~,masterList,subIDs,allSubjFwdMatrices,allSubjRois] = ESSim.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,...
         'subSelect',subIDs,'signalArray',outSignal,'signalFF',FundFreq,'signalsf',SF,'NoiseParams',Noise,'rois',RoisI,'Save',false,'cndNum',1,'nTrials',n_trials);%,'RedoMixingMatrices',true);
     save(fullfile(ResultPath,generated_date_filename),'-v7.3');
 else
@@ -161,7 +161,7 @@ for nLambda_idx = 1:numel(Lambda_list)
     disp(['Generating EEG by adding signal and noise: SNR = ' num2str(lambda)]);
     for subj_idx = 1:length(subIDs)
         EEGData{subj_idx} = sqrt(lambda/(1+lambda))*EEGData_signal{subj_idx} + sqrt(1/(1+lambda)) * EEGData_noise{subj_idx} ;
-        EEGAxx{subj_idx} = mrC.Simulate.CreateAxx(EEGData{subj_idx},opt) ;
+        EEGAxx{subj_idx} = ESSim.Simulate.CreateAxx(EEGData{subj_idx},opt) ;
     end
 
     % test spatial filters  
@@ -199,22 +199,22 @@ for nLambda_idx = 1:numel(Lambda_list)
                 this_decomp_method = decomp_methods{decomp_method_idx};
 
                 if strcmpi(this_decomp_method,'pca')
-                    [thisDecompAxx,thisW,thisA,thisD] = mrC.SpatialFilters.PCA(thisAxx,'freq_range',thisFundFreq*considered_harms);
+                    [thisDecompAxx,thisW,thisA,thisD] = ESSim.SpatialFilters.PCA(thisAxx,'freq_range',thisFundFreq*considered_harms);
                 elseif strcmpi(this_decomp_method,'pca_cart')
-                    [thisDecompAxx,thisW,thisA,thisD] = mrC.SpatialFilters.PCA(thisAxx,'freq_range',thisFundFreq*considered_harms,'model_type','cartesian');
+                    [thisDecompAxx,thisW,thisA,thisD] = ESSim.SpatialFilters.PCA(thisAxx,'freq_range',thisFundFreq*considered_harms,'model_type','cartesian');
                 elseif strcmpi(this_decomp_method,'fullfreqPca')
-                    [thisDecompAxx,thisW,thisA,thisD] = mrC.SpatialFilters.PCA(thisAxx);
+                    [thisDecompAxx,thisW,thisA,thisD] = ESSim.SpatialFilters.PCA(thisAxx);
                 elseif strcmpi(this_decomp_method,'fullfreqPca')
-                    [thisDecompAxx,thisW,thisA,thisD] = mrC.SpatialFilters.PCA(thisAxx,'freq_range',[1:50]);
+                    [thisDecompAxx,thisW,thisA,thisD] = ESSim.SpatialFilters.PCA(thisAxx,'freq_range',[1:50]);
                 elseif strcmpi(this_decomp_method,'tpca')
-                    [thisDecompAxx,thisW,thisA,thisD] = mrC.SpatialFilters.tPCA(thisAxx);
+                    [thisDecompAxx,thisW,thisA,thisD] = ESSim.SpatialFilters.tPCA(thisAxx);
                 elseif strcmpi(this_decomp_method,'ssd')
-                    [thisDecompAxx,thisW,thisA,thisD]= mrC.SpatialFilters.SSD(thisAxx,thisFundFreq*considered_harms,'do_whitening',true);
+                    [thisDecompAxx,thisW,thisA,thisD]= ESSim.SpatialFilters.SSD(thisAxx,thisFundFreq*considered_harms,'do_whitening',true);
                 elseif strcmpi(this_decomp_method,'rca')
-                    [thisDecompAxx,thisW,thisA,thisD] = mrC.SpatialFilters.RCA(thisAxx,'freq_range',thisFundFreq*considered_harms,'do_whitening',true);
+                    [thisDecompAxx,thisW,thisA,thisD] = ESSim.SpatialFilters.RCA(thisAxx,'freq_range',thisFundFreq*considered_harms,'do_whitening',true);
 
                 elseif strcmpi(this_decomp_method,'csp')
-                    [theseDecompAxxs,thisW,thisA,thisD] = mrC.SpatialFilters.CSP({thisAxx,thisNoiseAxx},'freq_range',thisFundFreq*considered_harms,'do_whitening',true);
+                    [theseDecompAxxs,thisW,thisA,thisD] = ESSim.SpatialFilters.CSP({thisAxx,thisNoiseAxx},'freq_range',thisFundFreq*considered_harms,'do_whitening',true);
                     thisDecompAxx=theseDecompAxxs{1};
                 end
                 
@@ -316,7 +316,7 @@ for source_idx = 1:2
     %if abs(min(Topo))>max(Topo), Topo = -1*Topo;end
     
     this_title = sprintf('%s %i','Source ',source_idx) ;
-    mrC.Simulate.PlotScalp(Topo,this_title);
+    ESSim.Simulate.PlotScalp(Topo,this_title);
     if source_idx ==2
         C = colorbar;
         set(C,'position',get(C,'position')+[-.027 -.27 0.01 0.12],'fontsize',12)
@@ -346,13 +346,13 @@ for this_decomp_method_idx = 1:length(decomp_methods)
             %Topo = A.(this_decomp_method){Subject_idx}{nLambda_idx}{1}(:,this_comp_idx);
             if nLambda_idx == 1
                 this_title = sprintf('%s %i','Comp ',this_comp_idx) ;
-                mrC.Simulate.PlotScalp(Topo,this_title);
+                ESSim.Simulate.PlotScalp(Topo,this_title);
                 if this_comp_idx == 1
                     ax = axes('parent',fig_scalp_plots,    'Units','Inches','Position',[x+sbpl_width,y+sbpl_height+text_height,0,0]) ;
                     text(0,0,upper(this_decomp_method),'Units','Inches', 'HorizontalAlignment','center','VerticalAlignment','bottom','FontSize',12,'FontWeight', 'bold');axis off
                 end
             else
-                mrC.Simulate.PlotScalp(Topo);
+                ESSim.Simulate.PlotScalp(Topo);
             end
             if (this_decomp_method_idx==length(decomp_methods)) && (this_comp_idx==2)
                 ax = axes('parent',fig_scalp_plots,    'Units','Inches','Position',[x+sbpl_width+hor_comp_dist,y+0.5*sbpl_height,0,0]) ;

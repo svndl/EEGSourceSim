@@ -35,7 +35,7 @@ function [EEGData,EEGAxx,EEGData_signal,EEGAxx_signal,sourceDataOrigin,masterLis
   
   % (ROI Parameters)
     %       rois            a cell array of roi structure that can be
-    %                       extracted from mrC.Simulate.GetRoiList for any
+    %                       extracted from ESSim.Simulate.GetRoiList for any
     %                       atlas. The roi structure contain .Type field
     %                       which is the type of atlas used:
     %                       (['func']/'wang'/'glass','kgs','benson')
@@ -192,16 +192,16 @@ if ~isempty(opt.rois)
         EEGData=[];EEGAxx=[];sourceDataOrigin=[];masterList=[];subIDs=[];
     end
 else
-    [Roi] = mrC.Simulate.GetRoiClass(projectPathfold,anatDir);
+    [Roi] = ESSim.Simulate.GetRoiClass(projectPathfold,anatDir);
     Roi = cellfun(@(x) x.getAtlasROIs(opt.roiType),Roi,'UniformOutput',false);
 end
 % -----------------Generate default source signal if not given-------------
 % Generate signal of interest
 if isempty(opt.signalArray) 
     if isempty(opt.rois)
-        [opt.signalArray, opt.signalFF, opt.signalsf]= mrC.Simulate.ModelSeedSignal('signalType',opt.signalType); % default signal (can be compatible with the number of ROIs, can be improved later)
+        [opt.signalArray, opt.signalFF, opt.signalsf]= ESSim.Simulate.ModelSeedSignal('signalType',opt.signalType); % default signal (can be compatible with the number of ROIs, can be improved later)
     else 
-        [opt.signalArray, opt.signalFF, opt.signalsf]= mrC.Simulate.ModelSeedSignal('signalType',opt.signalType,'signalFreq',round(rand(length(FullroiNames),1)*3+3));
+        [opt.signalArray, opt.signalFF, opt.signalsf]= ESSim.Simulate.ModelSeedSignal('signalType',opt.signalType,'signalFreq',round(rand(length(FullroiNames),1)*3+3));
     end
 end
 
@@ -237,7 +237,7 @@ for s = 1:length(projectPath)
     end
     
     % check if the ROIs and Wang atlas (used for alpha noise) exist for this subject
-    alphaRoi = mrC.ROIs([],anatDir);alphaRoi = alphaRoi.loadROIs(subIDs{s},anatDir);
+    alphaRoi = ESSim.ROIs([],anatDir);alphaRoi = alphaRoi.loadROIs(subIDs{s},anatDir);
     alphaRoi = alphaRoi.getAtlasROIs('wang');
     
     if sum(strcmp(subIDs{s},RSubID)) || (alphaRoi.ROINum ==0)
@@ -307,9 +307,9 @@ for s = 1:length(projectPath)
         mixDir = fullfile(anatDir,subIDs{s},'Standard','meshes',['noise_mixing_data_' Noise.distanceType '.mat']);
         
         if ~exist(mixDir,'file') || opt.RedoMixingMatrices% if the mixing data is not calculated already
-            spat_dists = mrC.Simulate.CalculateSourceDistance(surfData,Noise.distanceType);
+            spat_dists = ESSim.Simulate.CalculateSourceDistance(surfData,Noise.distanceType);
             disp(['Calculating mixing matrix for coherent pink noise ...'])
-            noise_mixing_data = mrC.Simulate.GenerateMixingData(spat_dists);
+            noise_mixing_data = ESSim.Simulate.GenerateMixingData(spat_dists);
             save(mixDir,'noise_mixing_data','-v7.3');
         else
             disp(['Reading mixing matrix for coherent pink noise ...'])
@@ -344,12 +344,12 @@ for s = 1:length(projectPath)
     %noise = zeros(NS, size(fwdMatrix,1), opt.nTrials) ;
     for trial_id =1:opt.nTrials 
         disp(['Trial # ' num2str(trial_id)])
-        [PinkNoise(:,:,trial_id),AlphaNoise(:,:,trial_id),SensorNoise(:,:,trial_id),noiset] = mrC.Simulate.GenerateNoise(opt.signalsf, NS, nSources, Noise, noise_mixing_data,Noise.spatial_normalization_type,fwdMatrix,opt.doFwdProjectNoise);   
+        [PinkNoise(:,:,trial_id),AlphaNoise(:,:,trial_id),SensorNoise(:,:,trial_id),noiset] = ESSim.Simulate.GenerateNoise(opt.signalsf, NS, nSources, Noise, noise_mixing_data,Noise.spatial_normalization_type,fwdMatrix,opt.doFwdProjectNoise);   
         Times.noiset{trial_id} = noiset;
     end
 %-----------------------Fit noise params to REC and REO----------------------
         tfit1 = clock;
-    [noise_sig,Noise,SensorNoise] = mrC.Simulate.FitNoise(opt.signalsf, NS, Noise, PinkNoise,AlphaNoise, SensorNoise,fwdMatrix,opt.doFwdProjectNoise,opt.OptimizeNoiseParam);   
+    [noise_sig,Noise,SensorNoise] = ESSim.Simulate.FitNoise(opt.signalsf, NS, Noise, PinkNoise,AlphaNoise, SensorNoise,fwdMatrix,opt.doFwdProjectNoise,opt.OptimizeNoiseParam);   
         tfit2 = clock;
     Times.FitNoise= etime(tfit2,tfit1);
     
@@ -359,7 +359,7 @@ for s = 1:length(projectPath)
         tproj1= clock;
     subInd = strcmp(cellfun(@(x) x.subID,opt.rois,'UniformOutput',false),subIDs{s});
     allSubjRois{s} = opt.rois{find(subInd)} ;
-    [EEGData{s},EEGData_signal{s},sourceData] = mrC.Simulate.SrcSigMtx(opt.rois{find(subInd)},fwdMatrix,surfData,opt,noise_sig,SensorNoise,Noise.lambda,'active_nodes');%Noise.spatial_normalization_type);% ROIsig % NoiseParams
+    [EEGData{s},EEGData_signal{s},sourceData] = ESSim.Simulate.SrcSigMtx(opt.rois{find(subInd)},fwdMatrix,surfData,opt,noise_sig,SensorNoise,Noise.lambda,'active_nodes');%Noise.spatial_normalization_type);% ROIsig % NoiseParams
         tproj2 = clock; 
     Times.Projection = etime(tproj2,tproj1);
     
@@ -373,8 +373,8 @@ for s = 1:length(projectPath)
     %% convert EEG to axx format
     tAxx1 = clock;
     if strcmp(opt.signalType,'SSEP')
-        EEGAxx{s}= mrC.Simulate.CreateAxx(EEGData{s},opt);% Converts the simulated signal to Axx format  
-        EEGAxx_signal{s}= mrC.Simulate.CreateAxx(EEGData_signal{s},opt);% Converts the simulated signal to Axx format  
+        EEGAxx{s}= ESSim.Simulate.CreateAxx(EEGData{s},opt);% Converts the simulated signal to Axx format  
+        EEGAxx_signal{s}= ESSim.Simulate.CreateAxx(EEGData_signal{s},opt);% Converts the simulated signal to Axx format  
     end
     tAxx2 = clock;
     Times.Axx = etime(tAxx2,tAxx1);
@@ -382,7 +382,7 @@ for s = 1:length(projectPath)
     
     if (opt.Save)
         SavePath = projectPathfold;
-        % prepare mrC simulation project
+        % prepare ESSim simulation project
         if ~exist(fullfile(SavePath,subIDs{s}),'dir')
             mkdir(fullfile(SavePath,subIDs{s}));
         end

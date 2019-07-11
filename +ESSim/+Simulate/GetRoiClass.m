@@ -4,7 +4,7 @@ function [Roi,subIDs] = GetRoiClass(ProjectPath,anatDir,subSelect)
 %           all ROIs in that atlas, and the list of subjects with this altas ROIs in
 %           the project
 % INPUT: 
-%       ProjectPath:    A link to mrC project
+%       ProjectPath:    A link to forward project
 %       anatDir:        The link to the anatomy forlder
 %       subSelect (optional): 1 x N array of strings each elements indicates the subject IDs to be
 %                            selected
@@ -45,7 +45,7 @@ for s = 1: len
         subIDs{s} = subIDs{s}(1:SI-2);% -2 because there is a _ before session number
     end
     
-    Roi{s} = mrC.ROIs([],anatDir);
+    Roi{s} = ESSim.ROIs([],anatDir);
     Roi{s} = Roi{s}.loadROIs(subIDs{s},anatDir);
 end
 
