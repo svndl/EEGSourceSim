@@ -1,17 +1,14 @@
 function [EEGData,EEGAxx,EEGData_signal,EEGAxx_signal,sourceDataOrigin,masterList,subIDs,allSubjFwdMatrices,allSubjRois,Times] = SimulateProject(projectPath,varargin)
     
-    % Syntax: [EEGData,EEGAxx,sourceDataOrigin,masterList,subIDs] = SimulateProject(projectPath,varargin)
-    % Description:	This function gets the path for a mrc project and simulate
+    % Syntax: [EEGData,EEGAxx,EEGData_signal,EEGAxx_signal,sourceDataOrigin,masterList,subIDs,allSubjFwdMatrices,allSubjRois,Times] = SimulateProject(projectPath,varargin)
+    % Description:	This function gets the path for a forward folder and simulate
     % EEG with activity (seed signal as input) in specific ROIs (input),
-    % and pink and alpha noises (noise parameters can be set as input)
+    % and pink, alpha and white noises (noise parameters can be set as
+    % input): For more information refer to https://osf.io/fmuae/wiki/Main%20Simulation%20Function%20%28SimulateProject.m%29/
     %
-    % Syntax:	[EEGData,EEGAxx,sourceDataOrigin,masterList,subIDs] = mrC.RoiDemo(projectPath,varargin)
-    % 
 %--------------------------------------------------------------------------    
 % INPUT:
-  % projectPath: a cell string, indicating a  path to mrCurrent project
-  % folder with individual subjects in subfolders
-    %             
+  % projectPath: a cell string, indicating a  path to forward project folder: folder with individual subjects in subfolders          
     % 
     %
   %   <options>:
@@ -395,9 +392,6 @@ for s = 1:length(projectPath)
             mkdir(fullfile(SavePath,subIDs{s},'Exp_MATL_HCN_128_Avg'))
         end
         EEGAxx{s}.writetofile(fullfile(SavePath,subIDs{s},'Exp_MATL_HCN_128_Avg',sprintf('Axx_c0%02d.mat',opt.cndNum)));
-        
-        % Copy Inverse files
-        % copyfile(fullfile(projectPath{s},'Inverses'),fullfile(SavePath,subIDs{s},'Inverses'));
         
         % Write Original source Data
         if ~exist(fullfile(SavePath,subIDs{s},'Orig_Source_Simul'),'dir')
