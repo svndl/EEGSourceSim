@@ -45,7 +45,7 @@ Noise.lambda = 0 ; % noise only
 for r = 1:10
     disp(['Run #' num2str(r)])
     T1 = clock;
-    [EEGData_noise,EEGAxx_noise,EEGData_signal,EEGAxx_signal,~,masterList,subIDs,allSubjFwdMatrices,allSubjRois,Times] = ESSim.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,...
+    [EEGData_noise,EEGAxx_noise,EEGData_signal,EEGAxx_signal,~,masterList,subIDs,allSubjFwdMatrices,allSubjRois,Times] = ESSim.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,...
         'subSelect',subIDs,'signalArray',outSignal,'signalFF',FundFreq,'signalsf',SF,'NoiseParams',Noise,'rois',RoisI,'Save',false,'cndNum',1,'nTrials',n_trials,'RedoMixingMatrices',true);
     T2 = clock;
     Times.overal = etime(T2,T1);
@@ -60,7 +60,7 @@ end
 for r = 1:10
     disp(['Run #' num2str(r)])
     T1 = clock;
-    [EEGData_noise,EEGAxx_noise,EEGData_signal,EEGAxx_signal,~,masterList,subIDs,allSubjFwdMatrices,allSubjRois,Times] = ESSim.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,...
+    [EEGData_noise,EEGAxx_noise,EEGData_signal,EEGAxx_signal,~,masterList,subIDs,allSubjFwdMatrices,allSubjRois,Times] = ESSim.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,...
         'subSelect',subIDs,'signalArray',outSignal,'signalFF',FundFreq,'signalsf',SF,'NoiseParams',Noise,'rois',RoisI,'Save',false,'cndNum',1,'nTrials',n_trials);%,'RedoMixingMatrices',true);
     T2 = clock;
     Times.overal = etime(T2,T1);

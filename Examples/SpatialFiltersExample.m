@@ -52,7 +52,7 @@ if ~exist(generated_date_filename,'file') || do_new_data_generation
     n_trials = 200;
     Noise.lambda = 0 ; % noise only
     [outSignal, FundFreq, SF]= ESSim.Simulate.ModelSeedSignal('signalType','SSVEP','ns',200,'signalFreq',[2 2],'harmonicAmps',{[2,0,1.5,0],[1,0, 1,0]},'harmonicPhases',{[0,0,0,0],[pi/2,0,pi/2,0]},'reliableAmps',[1,0],'nTrials',n_trials);
-    [EEGData_noise,EEGAxx_noise,EEGData_signal,EEGAxx_signal,~,masterList,subIDs,allSubjFwdMatrices,allSubjRois] = ESSim.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,...
+    [EEGData_noise,EEGAxx_noise,EEGData_signal,EEGAxx_signal,~,masterList,subIDs,allSubjFwdMatrices,allSubjRois] = ESSim.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,...
         'subSelect',subIDs,'signalArray',outSignal,'signalFF',FundFreq,'signalsf',SF,'NoiseParams',Noise,'rois',RoisI,'Save',false,'cndNum',1,'nTrials',n_trials);%,'RedoMixingMatrices',true);
     save(fullfile(ResultPath,generated_date_filename),'-v7.3');
 else

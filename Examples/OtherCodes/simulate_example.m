@@ -59,21 +59,21 @@ Noise.lambda = 1/length(outSignal);
 Rois1 = cellfun(@(x) x.searchROIs('V2d','wang','R'),RoiList,'UniformOutput',false);% % wang ROI
 Rois2 = cellfun(@(x) x.searchROIs('V3d','wang','L'),RoiList,'UniformOutput',false);% % wang ROI
 RoisI = cellfun(@(x,y) x.mergROIs(y),Rois1,Rois2,'UniformOutput',false);
-[EEGData1,EEGAxx1,~,masterList1,subIDs1] = ESSim.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,'signalArray',outSignal,'signalFF',FundFreq,'signalsf',SF,'NoiseParams',Noise,'rois',RoisI,'Save',true,'cndNum',1);
+[EEGData1,EEGAxx1,~,masterList1,subIDs1] = ESSim.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,'signalArray',outSignal,'signalFF',FundFreq,'signalsf',SF,'NoiseParams',Noise,'rois',RoisI,'Save',true,'cndNum',1);
 close all;
 
 %--------------------------Cond2: V1d_L, V2d_L-----------------------------
 Rois1 = cellfun(@(x) x.searchROIs('V1d','wang','L'),RoiList,'UniformOutput',false);% % wang ROI
 Rois2 = cellfun(@(x) x.searchROIs('V2d','wang','L'),RoiList,'UniformOutput',false);% % wang ROI
 RoisI = cellfun(@(x,y) x.mergROIs(y),Rois1,Rois2,'UniformOutput',false);
-[EEGData2,EEGAxx2,~,masterList2,subIDs2] = ESSim.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,'signalArray',outSignal,'signalFF',FundFreq,'signalsf',SF,'NoiseParams',Noise,'rois',RoisI,'Save',true,'cndNum',2);
+[EEGData2,EEGAxx2,~,masterList2,subIDs2] = ESSim.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,'signalArray',outSignal,'signalFF',FundFreq,'signalsf',SF,'NoiseParams',Noise,'rois',RoisI,'Save',true,'cndNum',2);
 close all;
 
 %--------------------------Cond4: V1v_R, hV4_R-----------------------------
 Rois1 = cellfun(@(x) x.searchROIs('V1v','wang','R'),RoiList,'UniformOutput',false);% % wang ROI
 Rois2 = cellfun(@(x) x.searchROIs('hV4','wang','R'),RoiList,'UniformOutput',false);% % wang ROI
 RoisI = cellfun(@(x,y) x.mergROIs(y),Rois1,Rois2,'UniformOutput',false);
-[EEGData4,EEGAxx4,~,masterList4,subIDs4] = ESSim.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,'signalArray',outSignal,'signalFF',FundFreq,'signalsf',SF,'NoiseParams',Noise,'rois',RoisI,'Save',true,'cndNum',4);
+[EEGData4,EEGAxx4,~,masterList4,subIDs4] = ESSim.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,'signalArray',outSignal,'signalFF',FundFreq,'signalsf',SF,'NoiseParams',Noise,'rois',RoisI,'Save',true,'cndNum',4);
 close all;
 
 %--------------------------Cond3: V1d_L, V2d_L, LO1_L----------------------
@@ -83,7 +83,7 @@ Rois2 = cellfun(@(x) x.searchROIs('V2d','wang','L'),RoiList,'UniformOutput',fals
 Rois3 = cellfun(@(x) x.searchROIs('LO1','wang','L'),RoiList,'UniformOutput',false);% % wang ROI
 RoisI = cellfun(@(x,y) x.mergROIs(y),Rois1,Rois2,'UniformOutput',false);
 RoisI = cellfun(@(x,y) x.mergROIs(y),RoisI,Rois3,'UniformOutput',false);
-[EEGData3,EEGAxx3,~,masterList3,subIDs3] = ESSim.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,'signalArray',outSignal,'signalFF',FundFreq,'signalsf',SF,'NoiseParams',Noise,'rois',RoisI,'Save',true,'cndNum',3);
+[EEGData3,EEGAxx3,~,masterList3,subIDs3] = ESSim.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,'signalArray',outSignal,'signalFF',FundFreq,'signalsf',SF,'NoiseParams',Noise,'rois',RoisI,'Save',true,'cndNum',3);
 close all;
 
 %% simulating EEGs with different ROIs as different conditions
@@ -95,19 +95,19 @@ RoisI = cellfun(@(x,y) x.mergROIs(y),Rois1,Rois2,'UniformOutput',false);
 
 %--------------------------Cond11: V2d_R, V3d_L,labda = 1/500--------------
 Noise.lambda = 1/length(outSignal)*2;
-[EEGData11,EEGAxx11,~,masterList11,subIDs11] = ESSim.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,'signalArray',outSignal,'signalFF',FundFreq,'signalsf',SF,'NoiseParams',Noise,'rois',RoisI,'Save',true,'cndNum',11);
+[EEGData11,EEGAxx11,~,masterList11,subIDs11] = ESSim.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,'signalArray',outSignal,'signalFF',FundFreq,'signalsf',SF,'NoiseParams',Noise,'rois',RoisI,'Save',true,'cndNum',11);
 close all;
 %--------------------------Cond12: V2d_R, V3d_L,labda = 1/750--------------
 Noise.lambda = 1/length(outSignal)*(4/3);
-[EEGData12,EEGAxx12,~,masterList12,subIDs12] = ESSim.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,'signalArray',outSignal,'signalFF',FundFreq,'signalsf',SF,'NoiseParams',Noise,'rois',RoisI,'Save',true,'cndNum',12);
+[EEGData12,EEGAxx12,~,masterList12,subIDs12] = ESSim.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,'signalArray',outSignal,'signalFF',FundFreq,'signalsf',SF,'NoiseParams',Noise,'rois',RoisI,'Save',true,'cndNum',12);
 close all;
 %--------------------------Cond13: V2d_R, V3d_L,labda = 1/1000--------------
 Noise.lambda = 1/length(outSignal);
-[EEGData13,EEGAxx13,~,masterList13,subIDs13] = ESSim.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,'signalArray',outSignal,'signalFF',FundFreq,'signalsf',SF,'NoiseParams',Noise,'rois',RoisI,'Save',true,'cndNum',13);
+[EEGData13,EEGAxx13,~,masterList13,subIDs13] = ESSim.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,'signalArray',outSignal,'signalFF',FundFreq,'signalsf',SF,'NoiseParams',Noise,'rois',RoisI,'Save',true,'cndNum',13);
 close all;
 %--------------------------Cond14: V2d_R, V3d_L,labda = 1/2000--------------
 Noise.lambda = 1/length(outSignal)/2;
-[EEGData14,EEGAxx14,~,masterList14,subIDs14] = ESSim.Simulate.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,'signalArray',outSignal,'signalFF',FundFreq,'signalsf',SF,'NoiseParams',Noise,'rois',RoisI,'Save',true,'cndNum',14);
+[EEGData14,EEGAxx14,~,masterList14,subIDs14] = ESSim.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,'signalArray',outSignal,'signalFF',FundFreq,'signalsf',SF,'NoiseParams',Noise,'rois',RoisI,'Save',true,'cndNum',14);
 close all;
 %% visualize the results
 
