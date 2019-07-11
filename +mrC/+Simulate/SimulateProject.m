@@ -19,7 +19,7 @@ function [EEGData,EEGAxx,EEGData_signal,EEGAxx_signal,sourceDataOrigin,masterLis
   % (Source Signal Parameters)
     %       signalArray:    a NS x nTrials x seedNum matrix, where NS is the number of
     %                       time samples and seedNum is the number of seed sources
-    %                       [NS x 1 x 2 SSVEP sources]
+    %                       [NS x 1 x 2 SSEP sources]
     %
     %       signalsf:       sampling frequency of the input source signal
     %
@@ -92,12 +92,6 @@ function [EEGData,EEGAxx,EEGData_signal,EEGAxx_signal,sourceDataOrigin,masterLis
     %
     %       cndNum:         The condition number for simulated EEG
   
-  % (Inverse Parameters) .... should be corrected
-    %       inverse:        a string specifying the inverse name to use
-    %                       [latest inverse]
-    %       doSource:       logical indicating whether to use the inverse to push
-    %                       the simulated ROI data back into source space
-    %                       true/[false]
     %
 % OUTPUT:
     %       EEGData:        a NS x e matrix, containing simulated EEG,
@@ -107,7 +101,7 @@ function [EEGData,EEGAxx,EEGData_signal,EEGAxx_signal,sourceDataOrigin,masterLis
     %
     %       EEGAxx:         A cell array containing Axx structure of each
     %                       subject's simulated EEG. This output is
-    %                       available if the signal type is SSVEP
+    %                       available if the signal type is SSEP
     %
     %       EEGData_signal: a NS x e matrix, containing simulated EEG
     %                       signal without the noise components,
@@ -118,7 +112,7 @@ function [EEGData,EEGAxx,EEGData_signal,EEGAxx_signal,sourceDataOrigin,masterLis
     %       EEGAxx_signal:  A cell array containing Axx structure of each
     %                       subject's simulated EEG signal without the
     %                       noise components. This output is
-    %                       available if the signal type is SSVEP
+    %                       available if the signal type is SSEP
     %
     %       sourceDataOrigin: a NS x srcNum matrix, containing simulated
     %                           EEG in source space before converting to
@@ -148,7 +142,7 @@ opt	= ParseArgs(varargin,...
     'roiSize'       , 200,...
     'signalArray'   , [],...
     'signalsf'      , 100 ,... 
-    'signalType'    , 'SSVEP',...
+    'signalType'    , 'SSEP',...
     'signalFF'      , [],...
     'signalSNRFreqBand' ,[],...
     'NoiseParams'   , struct,...
@@ -381,7 +375,7 @@ for s = 1:length(projectPath)
     %visualizeSource(sourceDataOrigin{s}, surfData,opt.signalsf,0)
     %% convert EEG to axx format
     tAxx1 = clock;
-    if strcmp(opt.signalType,'SSVEP')
+    if strcmp(opt.signalType,'SSEP')
         EEGAxx{s}= mrC.Simulate.CreateAxx(EEGData{s},opt);% Converts the simulated signal to Axx format  
         EEGAxx_signal{s}= mrC.Simulate.CreateAxx(EEGData_signal{s},opt);% Converts the simulated signal to Axx format  
     end

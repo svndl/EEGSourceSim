@@ -3,7 +3,7 @@ function [signalOut, FundFreq, SF] = ModelSeedSignal(varargin)
 
 % INPUTS:
     % <options>:
-        % signalType: - the model for source signal: [Simple], SSVEP,
+        % signalType: - the model for source signal: [Simple], SSEP,
         % signalFreq: seedNum x 1 vector - fundamental frequencies of the sources, where srcNum is number of seed sources with different signals
         % HarmonicAmp: - cell array of seedNum x 1, each of cell arrays should be a vector indicating amplitude for harmonics in one source 
         % HarmonicPhase: - cell array of seedNum x 1, each of cell arrays should be a vector indicating phase for harmonics in one source
@@ -26,7 +26,7 @@ function [signalOut, FundFreq, SF] = ModelSeedSignal(varargin)
 %% Set up default values for signal parameters
 
 opt	= ParseArgs(varargin,...
-    'signalType'		, 'SSVEP', ...
+    'signalType'		, 'SSEP', ...
     'signalFreq'       , [],...
     'HarmonicAmp'   , [],...
     'HarmonicPhase'      , [],...
@@ -47,7 +47,7 @@ if strcmp(opt.signalType,'Simple')% just for test, sinusoidal signal
     
    NH = ones(seedNum,1) ; 
    
-elseif strcmp(opt.signalType,'SSVEP')% number of harmonics for SSVEP sources, default: 6
+elseif strcmp(opt.signalType,'SSEP')% number of harmonics for SSEP sources, default: 6
     
    if ~(isempty(opt.HarmonicAmp)) 
        NH = cellfun('length',opt.HarmonicAmp);
@@ -85,7 +85,7 @@ for h = 1: numel(opt.HarmonicAmp)
     end
 end
 
-%% Generate SSVEP signal
+%% Generate SSEP signal
 signalOut = zeros(opt.ns,opt.nTrials,seedNum);
 t = (0:opt.ns-1)/opt.sf ;
 
