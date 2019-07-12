@@ -47,6 +47,7 @@ for s = 1: len
     
     Roi{s} = ESSim.ROIs([],anatDir);
     Roi{s} = Roi{s}.loadROIs(subIDs{s},anatDir);
+    %Roi{s}.saveROIs();
 end
 
 end

@@ -1,19 +1,19 @@
 classdef ROIs
-    % This class defines a data type for storing and retrieving ROIs. 
+    % This class defines a data type for searching, storing and retrieving ROIs. This class is a part of EEGSourceSim toolbox 
     
     %----------------------------------------------------------------------
     % Author: Elham Barzegaran, 06/14/2018
+    % Last modified: 12/7/2019
     %======================================================================
        
     properties
-        ROIList % a cell array of roi structure that keeps all the information about ROIs
-        % roi structure includes roi.Type, roi.Name, roi.Hemi, roi.meshIndices, roi.Date, roi.Comment 
-        subID
+        ROIList % a cell array of roi structure that keeps all the information about ROIs roi structure includes roi.Type, roi.Name, roi.Hemi, roi.meshIndices, roi.Date, roi.Comment 
+        subID % Subject ID
     end
     
     properties (Dependent)
-        Atlases   % How Many atlases are there
-        ROINum  % how ROIs in general
+        Atlases   % Name of atlases in the calss
+        ROINum  % How many ROIs
     end
     
     methods
@@ -35,7 +35,7 @@ classdef ROIs
             obj.subID = subID;
             if exist('subID','var')
                 if ~exist('anatDir','var') || isempty(anatDir) || ~exist(anatDir,'dir')
-                    anatDir = getpref('mrCurrent','AnatomyFolder');
+                    anatDir = getpref('EEGSim','AnatomyPath');
                     if ~exist(anatDir,'dir')
                         warning('No anatomy folder is found');
                         obj.ROIList = ROIList;
@@ -327,7 +327,7 @@ classdef ROIs
         %-------------------save ROIs class object----------------
         function saveROIs(obj,anatDir)
             if ~exist('anatDir','var') || isempty(anatDir) || ~exist(anatDir,'dir')
-                anatDir = getpref('mrCurrent','AnatomyFolder');
+                anatDir = getpref('EEGSSim','AnatomyPath');
                 if ~exist(anatDir,'dir')
                     warning('No anatomy folder is found');
                     return
@@ -344,7 +344,7 @@ classdef ROIs
         function obj = loadROIs(obj,subID,anatDir)
             % make an empty object and load ROIs into it?
             if ~exist('anatDir','var') || isempty(anatDir) || ~exist(anatDir,'dir')
-                anatDir = getpref('mrCurrent','AnatomyFolder');
+                anatDir = getpref('EEGSim','AnatomyPath');
                 if ~exist(anatDir,'dir')
                     warning('No anatomy folder is found');
                     return
