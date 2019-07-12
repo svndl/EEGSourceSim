@@ -324,7 +324,7 @@ classdef ROIs
             [NameList] = getFullNames(obj);
         end
         
-        %-------------------save and load ROIs class object----------------
+        %-------------------save ROIs class object----------------
         function saveROIs(obj,anatDir)
             if ~exist('anatDir','var') || isempty(anatDir) || ~exist(anatDir,'dir')
                 anatDir = getpref('mrCurrent','AnatomyFolder');
@@ -340,7 +340,7 @@ classdef ROIs
             roiDir = fullfile(anatDir,obj.subID,'Standard','meshes');
             save(fullfile(roiDir,'ROIsClass'),'obj');            
         end
-        
+        %------------------------------load ROIs----------------
         function obj = loadROIs(obj,subID,anatDir)
             % make an empty object and load ROIs into it?
             if ~exist('anatDir','var') || isempty(anatDir) || ~exist(anatDir,'dir')
@@ -356,16 +356,27 @@ classdef ROIs
             end
             roiDir = fullfile(anatDir,subID,'Standard','meshes');
             if exist(fullfile(roiDir,'ROIsClass.mat'),'file')
+                obj_or = obj;
                 load(fullfile(roiDir,'ROIsClass.mat'),'obj');
+                obj_or = obj_or.ROIs2ROIs(obj);
+                obj = obj_or;
             else
                 obj = ESSim.ROIs(subID,anatDir);
                 obj.saveROIs(anatDir);
             end
         end
+        
         function s = saveobj(obj)
             s.ROIList = obj.ROIList ;
             s.subID = obj.subID ;
         end
+        
+        %-----------------conv ROi in case of name change-----------------
+        function obj = ROIs2ROIs(obj,tempobj)
+            obj.subID = tempobj.subID;
+            obj.ROIList = tempobj.ROIList;
+        end
+        
     end
          
     methods(Static)

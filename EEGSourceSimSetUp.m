@@ -7,15 +7,25 @@ function EEGSourceSimSetUp(varargin)
 opt	= ParseArgs(varargin,...
     'EEGSourceSim'   , true,...   
     'Dataset'        ,true,...
-    'FieldTrip'		, false ...
+    'FieldTrip'		, false, ...
+    'Reset'         ,false ...
     );
 
-    setpref('EEGSourceSim','Version',1.0)
     
+    
+    %% if reset the paths
+    
+    if opt.Reset
+        if ispref('EEGSSim')
+            rmpref('EEGSSim');
+        end
+    end
+    
+    setpref('EEGSSim','Version',1.0)
     
     %% EEGSourceSim, path
     if opt.EEGSourceSim
-        if ~exist('+ESSim','dir') || isempty(getpref('EEGSSim','EEGSSimPath'))
+        if ~exist('+ESSim','dir') || ~ispref('EEGSSim','EEGSSimPath') || isempty(getpref('EEGSSim','EEGSSimPath'))
             disp('Pick the EEGSourceSim directory');
             EEGSourceSimPath = uigetdir(fileparts(mfilename('fullpath')),'Pick the EEGSourceSim directory');
             if EEGSourceSimPath~=0

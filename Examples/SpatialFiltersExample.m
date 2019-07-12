@@ -43,15 +43,13 @@ Wangnums = cellfun(@(x) x.ROINum,Wangs)>0;
 Rois1 = cellfun(@(x) x.searchROIs('V2d','wang','R'),RoiList,'UniformOutput',false);% % wang ROI
 Rois2 = cellfun(@(x) x.searchROIs('LO1','wang','L'),RoiList,'UniformOutput',false);
 RoisI = cellfun(@(x,y) x.mergROIs(y),Rois1,Rois2,'UniformOutput',false);
-do_new_data_generation = false;
+do_new_data_generation = true;
 % generate or read from disk
 generated_date_filename = 'data_for_spatial_filter_test2_2source_allSubj.mat';
-%generated_date_filename = 'data_for_spatial_filter_test_2source_all_subjects.mat';
-%if ~exist('data_for_spatial_filter_test_2source.mat','file') || do_new_data_generation
 if ~exist(generated_date_filename,'file') || do_new_data_generation
     n_trials = 200;
     Noise.lambda = 0 ; % noise only
-    [outSignal, FundFreq, SF]= ESSim.Simulate.ModelSeedSignal('signalType','SSVEP','ns',200,'signalFreq',[2 2],'harmonicAmps',{[2,0,1.5,0],[1,0, 1,0]},'harmonicPhases',{[0,0,0,0],[pi/2,0,pi/2,0]},'reliableAmps',[1,0],'nTrials',n_trials);
+    [outSignal, FundFreq, SF]= ESSim.Simulate.ModelSeedSignal('signalType','SSVEP','ns',200,'signalFreq',[2 2],'HarmonicAmp',{[2,0,1.5,0],[1,0, 1,0]},'HarmonicPhase',{[0,0,0,0],[pi/2,0,pi/2,0]},'reliableAmp',[1,0],'nTrials',n_trials);
     [EEGData_noise,EEGAxx_noise,EEGData_signal,EEGAxx_signal,~,masterList,subIDs,allSubjFwdMatrices,allSubjRois] = ESSim.SimulateProject(ProjectPath,'anatomyPath',AnatomyPath,...
         'subSelect',subIDs,'signalArray',outSignal,'signalFF',FundFreq,'signalsf',SF,'NoiseParams',Noise,'rois',RoisI,'Save',false,'cndNum',1,'nTrials',n_trials);%,'RedoMixingMatrices',true);
     save(fullfile(ResultPath,generated_date_filename),'-v7.3');
