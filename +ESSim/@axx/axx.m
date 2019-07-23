@@ -176,7 +176,17 @@ classdef axx
         outAxx.Sin = cat(3,obj1.Sin,obj2.Sin);
         outAxx.Wave = cat(3,obj1.Wave,obj2.Wave);
 
-    end
+      end
+    
+      function outAxx = AverageTrials(obj)
+        outAxx = obj;
+        outAxx.nTrl = 1;        
+        outAxx.Cos = mean(obj.Cos,3);
+        outAxx.Sin = mean(obj.Sin,3);
+        outAxx.Amp = sqrt((outAxx.Cos).^2+(outAxx.Sin).^2);
+        outAxx.Wave = mean(obj.Wave,3);
+          
+      end
     end
     
       
