@@ -5,7 +5,7 @@ function [Fhandler,RoiList] = VisualizeSourceRoi2(subID,anatDir,RoiType,RoiIdx,d
 %% default variables
 
 if ~exist('anatDir','var')||isempty(anatDir)
-    anatDir = getpref('mrCurrent','AnatomyFolder');
+    anatDir = getpref('EEGSSim','AnatomyPath');
 end
 
 if ~exist('direction','var')||isempty(direction)
