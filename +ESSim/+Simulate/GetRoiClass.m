@@ -16,7 +16,7 @@ function [Roi,subIDs] = GetRoiClass(ProjectPath,anatDir,subSelect)
 %% Set defaults
 
 if ~exist('anatDir','var') || isempty(anatDir)
-    anatDir = getpref('mrCurrent','AnatomyFolder');
+    anatDir = getpref('EEGSSim','AnatomyPath');
 end
 
 %% Extract the name of all ROI lists
@@ -47,7 +47,7 @@ for s = 1: len
     
     Roi{s} = ESSim.ROIs([],anatDir);
     Roi{s} = Roi{s}.loadROIs(subIDs{s},anatDir);
-    %Roi{s}.saveROIs();
+    Roi{s}.saveROIs();
 end
 
 end
