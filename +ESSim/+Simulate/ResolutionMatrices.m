@@ -68,12 +68,7 @@ end
 
 %------------------set anatomy data path if not defined ---------------------
 if isempty(opt.anatomyPath)
-    anatDir = getpref('mrCurrent','AnatomyFolder');
-    if contains(upper(anatDir),'HEADLESS') || isempty(anatDir) %~isempty(strfind(upper(anatDir),'HEADLESS'))
-        anatDir = '/Volumes/svndl/anatomy';
-        setpref('mrCurrent','AnatomyFolder',anatDir);
-    else
-    end
+    anatDir = getpref('EEGSSim','AnatomyPath');
 else
     anatDir = opt.anatomyPath;
 end
@@ -124,9 +119,12 @@ for s = 1:length(projectPath)
     else
         fwdStrct = mne_read_forward_solution([fwdPath '-fwd.fif']); % Read forward structure
         % Checks if freesurfer folder path exist
-        if ~ispref('freesurfer','SUBJECTS_DIR') || ~exist(getpref('freesurfer','SUBJECTS_DIR'),'dir')
+        if ~ispref('freesurfer','SUBJECTS_DIR') || (sum(getpref('freesurfer','SUBJECTS_DIR'))==0) || ~exist(getpref('freesurfer','SUBJECTS_DIR'),'dir')
             %temporary set this pref for the example subject
-            setpref('freesurfer','SUBJECTS_DIR',fullfile(anatDir,'FREESURFER_SUBS'));% check
+            selpath = uigetdir(anatDir,'Select FreeSurfer folder');
+            if ~isempty(selpath) || selpath==0
+                setpref('freesurfer','SUBJECTS_DIR',selpath);% check
+            end
         end
         srcStrct = readDefaultSourceSpace(subIDs{s}); % Read source structure from freesurfer
         fwdMatrix = makeForwardMatrixFromMne(fwdStrct ,srcStrct); % Generate Forward matrix
