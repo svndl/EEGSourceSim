@@ -7,13 +7,13 @@ classdef ROIs
     %======================================================================
        
     properties
-        ROIList % a cell array of roi structure that keeps all the information about ROIs roi structure includes roi.Type, roi.Name, roi.Hemi, roi.meshIndices, roi.Date, roi.Comment 
-        subID % Subject ID
+        ROIList     % a cell array of roi structure that keeps all the information about ROIs roi structure includes roi.Type, roi.Name, roi.Hemi, roi.meshIndices, roi.Date, roi.Comment 
+        subID       % Subject ID
     end
     
     properties (Dependent)
-        Atlases   % Name of atlases in the calss
-        ROINum  % How many ROIs
+        Atlases     % Name of atlases in the calss
+        ROINum      % How many ROIs
     end
     
     methods
@@ -192,10 +192,8 @@ classdef ROIs
             obj.ROIList= List;
         end
         
-%         function obj = addAtlas(obj,atlaslist)
-%             % adds or replace atlases to the current object
-%         end
-        
+
+        %---------------------Merge lists of two ROIs----------------------
         function obj = mergROIs(obj,obj2)
             
             if obj.ROINum==0 || obj2.ROINum==0
@@ -228,7 +226,62 @@ classdef ROIs
             obj.ROIList = [obj.ROIList obj2.ROIList(aind)];
         end
         
-        
+        %-------------------Merge specific ROIs together in a list---------
+        function obj2 = mergeIndROIs(obj,ROIInds,Name)
+            % removes the rois selected to be merged and adds the merged
+            % roi to the begining of the list
+            % INPUT: Ind is a list of arrays, each array indicates the ROIs
+            % that should be merged together
+            
+            
+            obj2 = obj;
+            obj2.ROIList(2:end)=[];
+            for I = 1:numel(ROIInds)
+                Ind = ROIInds{I};
+                 if (obj.ROINum~=0) && (obj.ROINum >=max(Ind))
+
+                      rois = obj.ROIList(Ind);
+                      roi_new = rois(1);
+                      % Merge the indices and the eccentricities
+                      for i = 2:numel(Ind)
+                        [roi_new.meshIndices,ia,ib] = union(roi_new.meshIndices,rois(i).meshIndices);
+                        if ~isempty(roi_new.eccData) && ~isempty(rois(i).eccData)
+                            roi_new.eccData = [roi_new.eccData(ia) rois(i).eccData(ib)];
+                        end
+                      end
+
+                      % Assign the name and hemi and etc
+                      roi_new.Name = Name{I};
+                      if numel(unique({rois.Hemi}))==1
+                      else
+                          roi_new.Hemi = 'Both';
+                      end
+
+                      if numel(unique({rois.Type}))==1
+                      else
+                          roi_new.Type= 'Mixed';
+                      end
+
+                      roi_new.Date = datetime;
+                      roi_new.Comment = 'Created by mergeIndROIs funtion';
+                 else
+                    error('ROI not found');
+                 end
+                
+                obj2.ROIList(I) = roi_new;
+            end
+            try
+                allind = cat(2,ROIInds{:});
+            catch
+                allind = cat(1,ROIInds{:});
+            end
+            
+            obj.ROIList(allind) = [];
+            if obj.ROINum ~=0
+                obj2.ROIList(end+1:end+obj.ROINum) = obj.ROIList;% add the unmerged ROIs
+            end
+        end
+       
         %--------------------------Search ROIs-----------------------------
         function [obj, ROIInd, ROIinfo] = searchROIs(obj,ROIname,Atlas,Hemi)
             % Syntax:  [obj, ROIInd, ROIinfo] = obj.searchROIs(ROIname,Atlas,Hemi)
@@ -240,7 +293,7 @@ classdef ROIs
             %       R (for right) and B (for both)
             %-----------------------------------
             List = obj.ROIList;
-            if isempty(List),% if the ROI class is empty
+            if isempty(List)% if the ROI class is empty
                 ROIInd = [];
                 ROIinfo = [];
                 return;
@@ -287,12 +340,13 @@ classdef ROIs
             
         end
         
-        
+        %------------------------SELECT ROIS Based on indices--------------
         function [obj] = selectROIs(obj,ROIInd)
             % this function might not be necessary
             obj.ROIList = obj.ROIList(ROIInd);
         end
         
+        %--------------------Get the name of ROIs as a list----------------
         function [NameList] = getFullNames(obj,mode)
             
             if (obj.ROINum==0), % if the ROI class is empty
